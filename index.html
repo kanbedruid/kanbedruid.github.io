@@ -171,14 +171,16 @@
     </div>
 
     <script>
-        // 星空粒子核心配置（优化：波纹排斥、超慢复原）
+        // 星空粒子核心配置（优化：圆周运动、1秒消失尾迹）
         const config = {
             particleCount: 2000, // 大量粒子，营造浓密星空
             particleSize: 1.2,   // 粒子大小（星星散点，不突兀）
             repelDistance: 80,   // 鼠标排斥范围（波纹影响半径）
             repelStrength: 15,   // 排斥力度（波纹效果强度）
-            moveSpeed: 0.02,     // 超缓慢移动/复原速度，保持柔和节奏
-            avoidMouseDistance: 10 // 粒子与鼠标的最小安全距离
+            moveSpeed: 0.02,     // 超缓慢移动/复原/圆周运动速度
+            avoidMouseDistance: 10, // 粒子与鼠标的最小安全距离
+            circleSpeed: 0.005,  // 圆周运动角速度（控制旋转快慢）
+            trailFadeTime: 1000  // 尾迹消失时间（1000毫秒=1秒）
         };
 
         // 获取画布与上下文
@@ -199,7 +201,14 @@
             isActive: false // 标记鼠标是否在画布内
         };
 
-        // 粒子类定义（星星粒子，波纹排斥+自动复原）
+        // 计算尾迹清屏透明度（基于1秒消失时间）
+        // 核心逻辑：根据动画帧率动态计算，确保1秒后尾迹完全消失，无残留
+        let frameRate = 60; // 预估默认帧率
+        let trailClearAlpha = 1 - (frameRate * config.trailFadeTime) / 100000;
+        // 校准清屏透明度，避免过亮或过暗
+        trailClearAlpha = Math.max(0.985, Math.min(0.995, trailClearAlpha));
+
+        // 粒子类定义（核心：圆周运动 + 无杂乱尾迹）
         class StarParticle {
             constructor() {
                 // 初始化粒子初始位置（全屏随机分布，形成星空）
@@ -212,41 +221,54 @@
                 this.brightness = Math.random() * 0.7 + 0.3;
                 // 粒子颜色（暖白+淡金+浅红，匹配情侣氛围与哥特风格）
                 this.color = `rgba(255, ${Math.floor(Math.random() * 50 + 205)}, ${Math.floor(Math.random() * 100 + 155)}, ${this.brightness})`;
+                // 圆周运动相关参数（每个粒子独立初始角度，避免旋转重合）
+                this.circleAngle = Math.random() * Math.PI * 2; // 初始圆周角度（0~360°）
+                this.circleRadius = 0; // 圆周运动半径（随排斥力度动态变化）
             }
 
-            // 更新粒子位置（核心：波纹式排斥 + 鼠标离开自动复原）
+            // 更新粒子位置（核心：波纹排斥 + 缓缓圆周运动 + 自动复原）
             update() {
                 if (mouse.isActive) {
                     // 1. 计算粒子与鼠标的距离和角度
                     const dx = this.x - mouse.x;
                     const dy = this.y - mouse.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    const angle = Math.atan2(dy, dx);
+                    const mouseAngle = Math.atan2(dy, dx);
 
-                    // 2. 波纹式排斥效果（近大远小，符合视觉逻辑）
+                    // 2. 波纹式排斥 + 圆周运动初始化
                     if (distance < config.repelDistance && distance > config.avoidMouseDistance) {
-                        // 计算排斥比例（0~1）：离鼠标越近，排斥力越大，波纹效果越明显
+                        // 计算排斥比例（0~1）：离鼠标越近，排斥/圆周效果越明显
                         const repelRatio = 1 - (distance / config.repelDistance);
-                        // 计算排斥偏移量（基于角度和排斥比例，形成圆形波纹）
-                        const repelX = Math.cos(angle) * config.repelStrength * repelRatio;
-                        const repelY = Math.sin(angle) * config.repelStrength * repelRatio;
-                        // 应用排斥偏移（超缓慢移动，保持柔和）
-                        this.x += repelX * config.moveSpeed * 10;
-                        this.y += repelY * config.moveSpeed * 10;
+                        // 设定圆周运动半径（基于排斥比例，近大远小）
+                        this.circleRadius = config.repelStrength * repelRatio;
+                        
+                        // 3. 缓缓圆周运动（更新角度，保持超慢节奏）
+                        this.circleAngle += config.circleSpeed;
+                        
+                        // 4. 计算圆周运动目标位置（围绕鼠标旋转，不偏离排斥范围）
+                        const targetX = mouse.x + Math.cos(mouseAngle + this.circleAngle) * (this.circleRadius + config.avoidMouseDistance);
+                        const targetY = mouse.y + Math.sin(mouseAngle + this.circleAngle) * (this.circleRadius + config.avoidMouseDistance);
+                        
+                        // 5. 超缓慢移动到圆周目标位置，避免突兀
+                        this.x += (targetX - this.x) * config.moveSpeed * 8;
+                        this.y += (targetY - this.y) * config.moveSpeed * 8;
                     }
 
-                    // 3. 防止粒子紧贴鼠标（保持最小安全距离）
+                    // 6. 防止粒子紧贴鼠标（保持最小安全距离）
                     if (distance <= config.avoidMouseDistance) {
-                        this.x = mouse.x + Math.cos(angle) * config.avoidMouseDistance;
-                        this.y = mouse.y + Math.sin(angle) * config.avoidMouseDistance;
+                        this.x = mouse.x + Math.cos(mouseAngle) * config.avoidMouseDistance;
+                        this.y = mouse.y + Math.sin(mouseAngle) * config.avoidMouseDistance;
                     }
                 } else {
-                    // 4. 鼠标离开画布：粒子超缓慢自动复原到原始星空位置
+                    // 7. 鼠标离开画布：粒子超缓慢自动复原到原始星空位置
                     this.x += (this.originalX - this.x) * config.moveSpeed;
                     this.y += (this.originalY - this.y) * config.moveSpeed;
+                    // 复原时重置圆周运动参数，避免下次排斥异常
+                    this.circleRadius = 0;
+                    this.circleAngle = Math.random() * Math.PI * 2;
                 }
 
-                // 5. 确保粒子始终在画布内（避免溢出，保持星空完整性）
+                // 8. 确保粒子始终在画布内（避免溢出，保持星空完整性）
                 this.x = Math.max(0, Math.min(canvasWidth, this.x));
                 this.y = Math.max(0, Math.min(canvasHeight, this.y));
             }
@@ -269,10 +291,11 @@
             }
         }
 
-        // 动画循环（更新+绘制粒子，保持流畅）
+        // 动画循环（核心：精准控制尾迹1秒消失，无杂乱残留）
         function animate() {
-            // 半透明清屏，营造极轻微拖影（匹配慢移动节奏，无重影残留）
-            ctx.fillStyle = 'rgba(10, 10, 16, 0.05)';
+            // 关键优化：纯色半透明清屏，精准控制尾迹消失时间（1秒）
+            // 原理：每次绘制前用低透明度背景覆盖，累积1秒后尾迹完全被覆盖，无杂乱
+            ctx.fillStyle = `rgba(10, 10, 16, ${1 - trailClearAlpha})`;
             ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
             // 更新并绘制所有粒子
@@ -284,14 +307,14 @@
             requestAnimationFrame(animate);
         }
 
-        // 监听鼠标移动（获取鼠标位置，标记鼠标活跃，触发排斥效果）
+        // 监听鼠标移动（获取鼠标位置，标记鼠标活跃，触发排斥+圆周运动）
         document.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
             mouse.isActive = true;
         });
 
-        // 监听鼠标离开画布（停止排斥，触发粒子自动复原）
+        // 监听鼠标离开画布（停止排斥+圆周运动，触发粒子自动复原）
         document.addEventListener('mouseleave', () => {
             mouse.isActive = false;
         });
