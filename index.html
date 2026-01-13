@@ -67,11 +67,12 @@
       margin-bottom: 72px;
     }
 
-    .buttons {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 36px;
-    }
+ .buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 36px;
+}
+
 
     .btn {
       position: relative;
@@ -163,6 +164,15 @@
     味觉 · 选择 · 记忆
   </div>
 </div>
+
+<div class="btn" onclick="location.href='https://kanbedruid.github.io/list'">
+  <div class="btn-title">愿望清单</div>
+  <div class="btn-desc">
+    计划 · 目标 · 未来
+  </div>
+</div>
+
+      
     </div>
   </div>
 </main>
@@ -251,6 +261,7 @@
 
 </body>
 </html>
+
 
 
 
