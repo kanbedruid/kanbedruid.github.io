@@ -333,7 +333,7 @@ render();
   
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, addDoc, getDocs, query, orderBy } 
+  import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc }
     from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -348,23 +348,37 @@ render();
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // 后续所有「保存 / 读取」都基于 db
-  const saveBtn = document.getElementById("saveBtn");
+  /* ===== 核心：保存真实 data ===== */
+  window.saveToCloud = async function () {
+    const data = JSON.parse(localStorage.getItem("diet_records_v3") || "[]");
 
-saveBtn.addEventListener("click", async () => {
-  await addDoc(collection(db, "records"), {
-    date: "2025-11-14",
-    person: "千代",
-    weight: 60,
-    score: 3,
-    timestamp: Date.now()
-  });
+    if (!data.length) {
+      alert("没有可保存的数据");
+      return;
+    }
 
-  alert("已成功保存到 Firebase");
-});
+    // 简单策略：每次全量追加（后期可优化）
+    for (const r of data) {
+      await addDoc(collection(db, "records"), {
+        date: r.date,
+        name: r.name,
+        weight: r.weight === "" ? null : Number(r.weight),
+        diff: r.diff,
+        checkin: r.checkin,
+        sleepEarly: r.sleepEarly,
+        sleepLate: r.sleepLate,
+        exercise: r.exercise,
+        extra: Number(r.extra || 0),
+        score: r ? null : null, // 分数可云端再算
+        createdAt: Date.now()
+      });
+    }
 
+    alert("已将当前所有真实记录保存到云端");
+  };
 </script>
-<button id="saveBtn">保存今日记录</button>
+
+<button id="saveBtn">保存修改</button>
 
 
   
