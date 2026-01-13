@@ -171,14 +171,14 @@
     </div>
 
     <script>
-        // 星空粒子核心配置（优化后：慢移动、小范围、波纹受力）
+        // 星空粒子核心配置（优化：波纹排斥、超慢复原）
         const config = {
             particleCount: 2000, // 大量粒子，营造浓密星空
             particleSize: 1.2,   // 粒子大小（星星散点，不突兀）
-            maxDistance: 60,     // 缩小鼠标影响范围（从120→60，更精准）
-            moveSpeed: 0.02,     // 超缓慢移动速度（从0.08→0.02，动静极小）
-            heartFactor: 1.2,    // 增强爱心形状凸显度（从0.6→1.2）
-            avoidMouseDistance: 20 // 粒子与鼠标的安全距离（不碰到鼠标）
+            repelDistance: 80,   // 鼠标排斥范围（波纹影响半径）
+            repelStrength: 15,   // 排斥力度（波纹效果强度）
+            moveSpeed: 0.02,     // 超缓慢移动/复原速度，保持柔和节奏
+            avoidMouseDistance: 10 // 粒子与鼠标的最小安全距离
         };
 
         // 获取画布与上下文
@@ -199,7 +199,7 @@
             isActive: false // 标记鼠标是否在画布内
         };
 
-        // 粒子类定义（星星粒子，慢移动、波纹式受力）
+        // 粒子类定义（星星粒子，波纹排斥+自动复原）
         class StarParticle {
             constructor() {
                 // 初始化粒子初始位置（全屏随机分布，形成星空）
@@ -214,59 +214,39 @@
                 this.color = `rgba(255, ${Math.floor(Math.random() * 50 + 205)}, ${Math.floor(Math.random() * 100 + 155)}, ${this.brightness})`;
             }
 
-            // 纯正爱心形状坐标计算（基于标准爱心数学公式，确保形状准确）
-            getHeartTargetPosition(mouseX, mouseY, distanceRatio) {
-                // 标准爱心公式：(x/a)² + (y/b)² - 1 = 0 变体（更圆润的爱心）
-                // 基于粒子相对原始位置的偏移，生成专属爱心点位（避免重合）
-                const relX = (this.originalX - canvasWidth / 2) / 150 * distanceRatio;
-                const relY = (this.originalY - canvasHeight / 2) / 150 * distanceRatio * -1; // 翻转Y轴，爱心正向展示
-
-                // 标准爱心数学公式：(x² + y² - 1)³ - x²y³ = 0
-                const heartValue = Math.pow(relX * relX + relY * relY - 1, 3) - Math.pow(relX, 2) * Math.pow(relY, 3);
-                
-                // 计算爱心目标点位（基于鼠标位置，放大爱心形状）
-                const targetX = mouseX + (heartValue * 80 * config.heartFactor) + (Math.random() - 0.5) * 1;
-                const targetY = mouseY - (heartValue * 60 * config.heartFactor) + (Math.random() - 0.5) * 1;
-
-                return { x: targetX, y: targetY };
-            }
-
-            // 更新粒子位置（优化：超慢移动、波纹式受力、纯正爱心汇聚）
+            // 更新粒子位置（核心：波纹式排斥 + 鼠标离开自动复原）
             update() {
                 if (mouse.isActive) {
-                    // 1. 计算粒子与鼠标的距离
+                    // 1. 计算粒子与鼠标的距离和角度
                     const dx = this.x - mouse.x;
                     const dy = this.y - mouse.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
+                    const angle = Math.atan2(dy, dx);
 
-                    // 2. 确保粒子不碰到鼠标（保持安全距离）
-                    if (distance < config.avoidMouseDistance) {
-                        const angle = Math.atan2(dy, dx);
+                    // 2. 波纹式排斥效果（近大远小，符合视觉逻辑）
+                    if (distance < config.repelDistance && distance > config.avoidMouseDistance) {
+                        // 计算排斥比例（0~1）：离鼠标越近，排斥力越大，波纹效果越明显
+                        const repelRatio = 1 - (distance / config.repelDistance);
+                        // 计算排斥偏移量（基于角度和排斥比例，形成圆形波纹）
+                        const repelX = Math.cos(angle) * config.repelStrength * repelRatio;
+                        const repelY = Math.sin(angle) * config.repelStrength * repelRatio;
+                        // 应用排斥偏移（超缓慢移动，保持柔和）
+                        this.x += repelX * config.moveSpeed * 10;
+                        this.y += repelY * config.moveSpeed * 10;
+                    }
+
+                    // 3. 防止粒子紧贴鼠标（保持最小安全距离）
+                    if (distance <= config.avoidMouseDistance) {
                         this.x = mouse.x + Math.cos(angle) * config.avoidMouseDistance;
                         this.y = mouse.y + Math.sin(angle) * config.avoidMouseDistance;
                     }
-
-                    // 3. 鼠标影响范围内（小范围60px），实现波纹式受力（近大远小）
-                    if (distance < config.maxDistance) {
-                        // 计算距离比例（0~1），实现波纹式受力：离鼠标越近，比例越接近1，受力越大
-                        const distanceRatio = 1 - (distance / config.maxDistance); // 近=1（大力），远=0（小力）
-                        const heartTarget = this.getHeartTargetPosition(mouse.x, mouse.y, distanceRatio);
-
-                        // 超缓慢移动到爱心目标位置（波纹式受力：distanceRatio 放大移动幅度，近快远慢）
-                        this.x += (heartTarget.x - this.x) * config.moveSpeed * distanceRatio * 5;
-                        this.y += (heartTarget.y - this.y) * config.moveSpeed * distanceRatio * 5;
-                    } else {
-                        // 4. 超出影响范围，粒子超缓慢归位到原始星空位置
-                        this.x += (this.originalX - this.x) * config.moveSpeed;
-                        this.y += (this.originalY - this.y) * config.moveSpeed;
-                    }
                 } else {
-                    // 无鼠标活动，粒子超缓慢归位
+                    // 4. 鼠标离开画布：粒子超缓慢自动复原到原始星空位置
                     this.x += (this.originalX - this.x) * config.moveSpeed;
                     this.y += (this.originalY - this.y) * config.moveSpeed;
                 }
 
-                // 确保粒子始终在画布内（避免溢出）
+                // 5. 确保粒子始终在画布内（避免溢出，保持星空完整性）
                 this.x = Math.max(0, Math.min(canvasWidth, this.x));
                 this.y = Math.max(0, Math.min(canvasHeight, this.y));
             }
@@ -289,7 +269,7 @@
             }
         }
 
-        // 动画循环（更新+绘制粒子）
+        // 动画循环（更新+绘制粒子，保持流畅）
         function animate() {
             // 半透明清屏，营造极轻微拖影（匹配慢移动节奏，无重影残留）
             ctx.fillStyle = 'rgba(10, 10, 16, 0.05)';
@@ -304,14 +284,14 @@
             requestAnimationFrame(animate);
         }
 
-        // 监听鼠标移动（获取鼠标位置，标记鼠标活跃）
+        // 监听鼠标移动（获取鼠标位置，标记鼠标活跃，触发排斥效果）
         document.addEventListener('mousemove', (e) => {
             mouse.x = e.clientX;
             mouse.y = e.clientY;
             mouse.isActive = true;
         });
 
-        // 监听鼠标离开画布（粒子停止汇聚，开始超缓慢归位）
+        // 监听鼠标离开画布（停止排斥，触发粒子自动复原）
         document.addEventListener('mouseleave', () => {
             mouse.isActive = false;
         });
@@ -331,3 +311,4 @@
     </script>
 </body>
 </html>
+
