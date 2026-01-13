@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>千代 & 小德的愿望清单</title>
+    <style>
+        :root {
+            /* 全局样式变量 */
+            --color-yellow-light: #FFF9C4; /* 未实现愿望（淡黄色） */
+            --color-yellow-border: #FDD835;
+            --color-green-light: #E8F5E9; /* 已实现愿望（绿色） */
+            --color-green-border: #4CAF50;
+            --color-gray-light: #F5F5F5; /* 背景/分栏 */
+            --color-gray-border: #E0E0E0;
+            --color-trash: #EF5350; /* 垃圾桶颜色 */
+            --color-trash-hover: #E53935;
+            --color-text-main: #212121;
+            --color-text-sub: #757575;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--color-gray-light);
+            color: var(--color-text-main);
+            padding: 24px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 32px;
+            font-weight: 600;
+            font-size: 2.2rem;
+            color: var(--color-text-main);
+        }
+
+        /* 整体分栏容器 */
+        .wish-container {
+            display: flex;
+            gap: 24px;
+            width: 100%;
+            margin-bottom: 32px;
+        }
+
+        /* 个人愿望面板（左右各一个） */
+        .person-panel {
+            flex: 1;
+            background-color: #FFFFFF;
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 20px;
+        }
+
+        .person-title {
+            font-size: 1.5rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--color-gray-border);
+        }
+
+        /* 愿望分类容器（清单/已实现） */
+        .wish-sections {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .wish-section {
+            flex: 1;
+            min-height: 300px;
+            background-color: var(--color-gray-light);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            position: relative;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: var(--color-text-sub);
+            text-align: center;
+        }
+
+        /* 愿望贴纸样式 */
+        .wish-sticker {
+            background-color: var(--color-yellow-light);
+            border: 1px solid var(--color-yellow-border);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
+            cursor: grab;
+            user-select: none;
+            transition: all 0.2s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .wish-sticker:active {
+            cursor: grabbing;
+            box-shadow: var(--shadow-md);
+            transform: scale(1.02);
+            z-index: 10;
+        }
+
+        .wish-sticker.fulfilled {
+            background-color: var(--color-green-light);
+            border-color: var(--color-green-border);
+        }
+
+        /* 输入框容器 */
+        .wish-input-container {
+            display: flex;
+            gap: 8px;
+            width: 100%;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 10px 16px;
+            border: 1px solid var(--color-gray-border);
+            border-radius: var(--radius-sm);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--color-yellow-border);
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: var(--radius-sm);
+            background-color: var(--color-yellow-border);
+            color: #FFFFFF;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: #FBC02D;
+        }
+
+        /* 垃圾桶样式 */
+        .trash-bin {
+            position: fixed;
+            left: 50%;
+            bottom: 32px;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 80px;
+            background-color: var(--color-trash);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-size: 2rem;
+            box-shadow: var(--shadow-md);
+            opacity: 0.7;
+            transition: all 0.3s ease;
+            z-index: 20;
+        }
+
+        .trash-bin.active {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.1);
+            background-color: var(--color-trash-hover);
+        }
+
+        /* 保存/读取按钮 */
+        .cloud-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .cloud-buttons button {
+            background-color: #2196F3;
+        }
+
+        .cloud-buttons button:hover {
+            background-color: #1976D2;
+        }
+
+        /* 拖拽占位符 */
+        .placeholder {
+            background-color: rgba(255, 249, 196, 0.5);
+            border: 1px dashed var(--color-yellow-border);
+            border-radius: var(--radius-sm);
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            height: 48px;
+        }
+
+        .placeholder.fulfilled-placeholder {
+            background-color: rgba(232, 245, 233, 0.5);
+            border-color: var(--color-green-border);
+        }
+    </style>
+    <!-- 引入 Font Awesome 用于垃圾桶图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <h1>千代 & 小德的愿望清单</h1>
+
+    <!-- 云端保存/读取按钮 -->
+    <div class="cloud-buttons">
+        <button onclick="saveToCloud()">保存愿望到云端</button>
+        <button onclick="loadFromCloud()">从云端读取愿望</button>
+    </div>
+
+    <!-- 愿望清单主容器 -->
+    <div class="wish-container">
+        <!-- 千代的愿望面板 -->
+        <div class="person-panel">
+            <h2 class="person-title">千代</h2>
+            <div class="wish-sections">
+                <div class="wish-section" id="chiyo-wish-list" data-section="unfulfilled" data-person="chiyo">
+                    <h3 class="section-title">愿望清单</h3>
+                </div>
+                <div class="wish-section" id="chiyo-fulfilled" data-section="fulfilled" data-person="chiyo">
+                    <h3 class="section-title">已实现</h3>
+                </div>
+            </div>
+            <div class="wish-input-container">
+                <input type="text" id="chiyo-input" placeholder="输入新愿望...">
+                <button onclick="addWish('chiyo')">添加</button>
+            </div>
+        </div>
+
+        <!-- 小德的愿望面板 -->
+        <div class="person-panel">
+            <h2 class="person-title">小德</h2>
+            <div class="wish-sections">
+                <div class="wish-section" id="xiaode-wish-list" data-section="unfulfilled" data-person="xiaode">
+                    <h3 class="section-title">愿望清单</h3>
+                </div>
+                <div class="wish-section" id="xiaode-fulfilled" data-section="fulfilled" data-person="xiaode">
+                    <h3 class="section-title">已实现</h3>
+                </div>
+            </div>
+            <div class="wish-input-container">
+                <input type="text" id="xiaode-input" placeholder="输入新愿望...">
+                <button onclick="addWish('xiaode')">添加</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 垃圾桶 -->
+    <div class="trash-bin" id="trash-bin">
+        <i class="fas fa-trash"></i>
+    </div>
+
+    <!-- Firebase 配置与核心逻辑 -->
+    <script type="module">
+        // 导入 Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            writeBatch,
+            getDocs,
+            doc
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase 配置（沿用你的原有项目配置）
+        const firebaseConfig = {
+            apiKey: "AIzaSyAhZtgaE8mL3GkxsIj17g1ha-Y5HG02C_A",
+            authDomain: "weight-zqy.firebaseapp.com",
+            projectId: "weight-zqy",
+            storageBucket: "weight-zqy.firebasestorage.app",
+            messagingSenderId: "710580530798",
+            appId: "1:710580530798:web:30e48f089452364c02c07f"
+        };
+
+        // 初始化 Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const WISH_KEY = "wish_list_v1"; // 本地存储键
+        let wishData = JSON.parse(localStorage.getItem(WISH_KEY) || '{"chiyo":[],"xiaode":[]}');
+
+        // 全局拖拽相关变量
+        let draggingSticker = null;
+        let placeholder = null;
+        let currentSection = null;
+
+        // ========== 本地数据操作 ==========
+        // 保存到本地 localStorage
+        function saveToLocal() {
+            localStorage.setItem(WISH_KEY, JSON.stringify(wishData));
+        }
+
+        // 渲染所有愿望
+        function renderWishes() {
+            // 清空两个面板的所有内容
+            document.getElementById("chiyo-wish-list").innerHTML = '<h3 class="section-title">愿望清单</h3>';
+            document.getElementById("chiyo-fulfilled").innerHTML = '<h3 class="section-title">已实现</h3>';
+            document.getElementById("xiaode-wish-list").innerHTML = '<h3 class="section-title">愿望清单</h3>';
+            document.getElementById("xiaode-fulfilled").innerHTML = '<h3 class="section-title">已实现</h3>';
+
+            // 渲染千代的愿望
+            wishData.chiyo.forEach((wish, index) => {
+                const sticker = createWishSticker("chiyo", index, wish);
+                const targetSection = wish.fulfilled 
+                    ? document.getElementById("chiyo-fulfilled")
+                    : document.getElementById("chiyo-wish-list");
+                targetSection.appendChild(sticker);
+            });
+
+            // 渲染小德的愿望
+            wishData.xiaode.forEach((wish, index) => {
+                const sticker = createWishSticker("xiaode", index, wish);
+                const targetSection = wish.fulfilled 
+                    ? document.getElementById("xiaode-fulfilled")
+                    : document.getElementById("xiaode-wish-list");
+                targetSection.appendChild(sticker);
+            });
+        }
+
+        // 创建愿望贴纸元素
+        function createWishSticker(person, index, wish) {
+            const sticker = document.createElement("div");
+            sticker.className = `wish-sticker ${wish.fulfilled ? 'fulfilled' : ''}`;
+            sticker.dataset.person = person;
+            sticker.dataset.index = index;
+            sticker.innerText = wish.content;
+
+            // 绑定拖拽事件
+            sticker.addEventListener("mousedown", startDrag);
+            sticker.addEventListener("touchstart", startDrag, { passive: true });
+
+            return sticker;
+        }
+
+        // 添加新愿望
+        function addWish(person) {
+            const input = document.getElementById(`${person}-input`);
+            const content = input.value.trim();
+            if (!content) return;
+
+            // 添加到本地数据
+            wishData[person].push({
+                content: content,
+                fulfilled: false,
+                createTime: Date.now()
+            });
+
+            // 保存并重新渲染
+            saveToLocal();
+            renderWishes();
+
+            // 清空输入框
+            input.value = "";
+        }
+
+        // 删除愿望
+        function deleteWish(person, index) {
+            wishData[person].splice(index, 1);
+            saveToLocal();
+            renderWishes();
+        }
+
+        // 更新愿望状态（已实现/未实现）
+        function updateWishStatus(person, index, fulfilled) {
+            wishData[person][index].fulfilled = fulfilled;
+            saveToLocal();
+            renderWishes();
+        }
+
+        // ========== 拖拽功能实现 ==========
+        // 开始拖拽
+        function startDrag(e) {
+            draggingSticker = this;
+            currentSection = draggingSticker.parentElement;
+
+            // 创建占位符
+            placeholder = document.createElement("div");
+            placeholder.className = `placeholder ${currentSection.dataset.section === 'fulfilled' ? 'fulfilled-placeholder' : ''}`;
+            draggingSticker.parentNode.insertBefore(placeholder, draggingSticker);
+
+            // 隐藏原贴纸（通过透明度，保持布局）
+            draggingSticker.style.opacity = "0.5";
+
+            // 绑定移动和结束事件
+            document.addEventListener("mousemove", dragMove);
+            document.addEventListener("mouseup", endDrag);
+            document.addEventListener("touchmove", dragMove, { passive: true });
+            document.addEventListener("touchend", endDrag);
+        }
+
+        // 拖拽移动
+        function dragMove(e) {
+            if (!draggingSticker) return;
+
+            // 兼容鼠标和触摸事件
+            let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            let clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+            // 设置贴纸跟随鼠标/触摸点
+            draggingSticker.style.position = "absolute";
+            draggingSticker.style.left = `${clientX - draggingSticker.offsetWidth / 2}px`;
+            draggingSticker.style.top = `${clientY - draggingSticker.offsetHeight / 2}px`;
+
+            // 检测是否进入垃圾桶
+            const trashBin = document.getElementById("trash-bin");
+            const trashRect = trashBin.getBoundingClientRect();
+            const isOverTrash = clientX >= trashRect.left && clientX <= trashRect.right &&
+                                clientY >= trashRect.top && clientY <= trashRect.bottom;
+
+            // 切换垃圾桶激活状态
+            if (isOverTrash) {
+                trashBin.classList.add("active");
+            } else {
+                trashBin.classList.remove("active");
+            }
+
+            // 检测是否进入其他愿望区域（实现排序/状态切换）
+            const wishSections = document.querySelectorAll(".wish-section");
+            wishSections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+                    // 找到插入位置（简化版：直接替换占位符到当前区域）
+                    if (section !== currentSection) {
+                        currentSection = section;
+                        section.appendChild(placeholder);
+                    }
+                }
+            });
+        }
+
+        // 结束拖拽
+        function endDrag(e) {
+            if (!draggingSticker) return;
+
+            // 恢复贴纸样式
+            draggingSticker.style.opacity = "1";
+            draggingSticker.style.position = "";
+            draggingSticker.style.left = "";
+            draggingSticker.style.top = "";
+
+            // 检测是否删除（放入垃圾桶）
+            const trashBin = document.getElementById("trash-bin");
+            const trashRect = trashBin.getBoundingClientRect();
+            let clientX = e.clientX || (e.changedTouches && e.changedTouches[0].clientX);
+            let clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
+            const isOverTrash = clientX >= trashRect.left && clientX <= trashRect.right &&
+                                clientY >= trashRect.top && clientY <= trashRect.bottom;
+
+            if (isOverTrash) {
+                // 删除愿望
+                const person = draggingSticker.dataset.person;
+                const index = parseInt(draggingSticker.dataset.index);
+                deleteWish(person, index);
+            } else {
+                // 切换愿望状态（根据目标区域）
+                const person = draggingSticker.dataset.person;
+                const index = parseInt(draggingSticker.dataset.index);
+                const isFulfilledSection = currentSection.dataset.section === "fulfilled";
+                
+                // 更新状态并插入到目标区域
+                updateWishStatus(person, index, isFulfilledSection);
+                currentSection.replaceChild(draggingSticker, placeholder);
+            }
+
+            // 清空拖拽变量
+            draggingSticker = null;
+            placeholder = null;
+            currentSection = null;
+            trashBin.classList.remove("active");
+
+            // 解绑事件
+            document.removeEventListener("mousemove", dragMove);
+            document.removeEventListener("mouseup", endDrag);
+            document.removeEventListener("touchmove", dragMove);
+            document.removeEventListener("touchend", endDrag);
+        }
+
+        // ========== 云端数据同步 ==========
+        // 保存到 Firebase 云端
+        async function saveToCloudImpl() {
+            try {
+                const wishesRef = collection(db, "wishes");
+
+                // 步骤1：删除云端旧数据
+                const oldSnap = await getDocs(wishesRef);
+                const batch = writeBatch(db);
+                oldSnap.docs.forEach(docItem => {
+                    batch.delete(docItem.ref);
+                });
+                await batch.commit();
+
+                // 步骤2：批量上传最新愿望数据
+                const newBatch = writeBatch(db);
+                const docRef = doc(wishesRef); // 生成唯一文档
+                newBatch.set(docRef, {
+                    chiyo: wishData.chiyo,
+                    xiaode: wishData.xiaode,
+                    updateTime: Date.now()
+                });
+                await newBatch.commit();
+
+                alert("愿望数据已成功保存到云端！");
+            } catch (e) {
+                alert(`保存失败：${e.message || JSON.stringify(e)}`);
+                console.error("云端保存错误：", e);
+            }
+        }
+
+        // 从 Firebase 云端读取
+        async function loadFromCloudImpl() {
+            try {
+                const wishesRef = collection(db, "wishes");
+                const snap = await getDocs(wishesRef);
+
+                if (snap.empty) {
+                    alert("云端暂无愿望数据！");
+                    return;
+                }
+
+                // 提取最新数据
+                const cloudData = snap.docs[0].data();
+                wishData.chiyo = cloudData.chiyo || [];
+                wishData.xiaode = cloudData.xiaode || [];
+
+                // 保存到本地并渲染
+                saveToLocal();
+                renderWishes();
+                alert("愿望数据已从云端成功读取！");
+            } catch (e) {
+                alert(`读取失败：${e.message || JSON.stringify(e)}`);
+                console.error("云端读取错误：", e);
+            }
+        }
+
+        // ========== 全局函数挂载（解决模块作用域问题） ==========
+        window.addWish = addWish;
+        window.saveToCloud = saveToCloudImpl;
+        window.loadFromCloud = loadFromCloudImpl;
+
+        // ========== 页面初始化 ==========
+        renderWishes();
+    </script>
+</body>
+</html>
