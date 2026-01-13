@@ -333,8 +333,14 @@ render();
   
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import { getFirestore, collection, addDoc }
-    from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
     apiKey: "AIzaSyAhZtgaE8mL3GkxsIj17g1ha-Y5HG02C_A",
@@ -348,62 +354,12 @@ render();
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  // ⚠️ 关键：明确挂到 window
+  /* ===== 保存到云端 ===== */
   window.saveToCloud = async function () {
-    console.log("开始保存到云端");
-import { getDocs, collection, query, orderBy } 
-  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-/* ===== 从云端恢复数据 ===== */
-window.loadFromCloud = async function () {
-  try {
-    const q = query(
-      collection(db, "records"),
-      orderBy("createdAt", "asc")
-    );
-
-    const snap = await getDocs(q);
-
-    if (snap.empty) {
-      console.log("云端没有数据");
-      return;
-    }
-
-    const data = snap.docs.map(d => d.data());
-
-    // 转换成你本地 data 的结构
-    const normalized = data.map(r => ({
-      date: r.date,
-      name: r.name,
-      checkin: r.checkin,
-      weight: r.weight ?? "",
-      diff: r.diff,
-      sleepEarly: r.sleepEarly,
-      sleepLate: r.sleepLate,
-      exercise: r.exercise,
-      extra: r.extra ?? 0
-    }));
-
-    localStorage.setItem(
-      "diet_records_v3",
-      JSON.stringify(normalized)
-    );
-
-    console.log("已从云端恢复", normalized.length, "条记录");
-
-    // 🔴 核心：通知本地脚本重新渲染
-    location.reload();
-
-  } catch (e) {
-    console.error("云端恢复失败", e);
-    alert("云端恢复失败，查看控制台");
-  }
-};
-
     try {
       const raw = localStorage.getItem("diet_records_v3");
       if (!raw) {
-        alert("本地没有任何数据");
+        alert("本地没有数据");
         return;
       }
 
@@ -419,30 +375,72 @@ window.loadFromCloud = async function () {
         await addDoc(collection(db, "records"), {
           date: r.date,
           name: r.name,
+          checkin: r.checkin,
           weight: r.weight === "" ? null : Number(r.weight),
           diff: r.diff,
-          checkin: r.checkin,
           sleepEarly: r.sleepEarly,
           sleepLate: r.sleepLate,
           exercise: r.exercise,
           extra: Number(r.extra || 0),
-          score: null,
           createdAt: Date.now()
         });
         count++;
       }
 
-      alert(`成功保存 ${count} 条真实记录到云端`);
+      alert(`成功保存 ${count} 条记录到云端`);
     } catch (e) {
-      console.error("保存失败：", e);
-      alert("保存失败，请打开控制台查看错误");
+      console.error(e);
+      alert("保存失败，查看控制台");
+    }
+  };
+
+  /* ===== 从云端恢复 ===== */
+  window.loadFromCloud = async function () {
+    try {
+      const q = query(
+        collection(db, "records"),
+        orderBy("createdAt", "asc")
+      );
+
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        alert("云端没有数据");
+        return;
+      }
+
+      const normalized = snap.docs.map(d => {
+        const r = d.data();
+        return {
+          date: r.date,
+          name: r.name,
+          checkin: r.checkin,
+          weight: r.weight ?? "",
+          diff: r.diff,
+          sleepEarly: r.sleepEarly,
+          sleepLate: r.sleepLate,
+          exercise: r.exercise,
+          extra: r.extra ?? 0
+        };
+      });
+
+      localStorage.setItem(
+        "diet_records_v3",
+        JSON.stringify(normalized)
+      );
+
+      alert(`已从云端恢复 ${normalized.length} 条记录`);
+      location.reload();
+    } catch (e) {
+      console.error(e);
+      alert("恢复失败，查看控制台");
     }
   };
 </script>
 
 
 <button onclick="saveToCloud()">保存修改</button>
-<button onclick="loadFromCloud()">从云端恢复</button>
+<button onclick="loadFromCloud()">读取</button>
 
 
   
