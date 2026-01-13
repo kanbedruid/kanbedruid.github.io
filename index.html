@@ -1,363 +1,248 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小德 & 千代 </title>
-    <style>
-        /* 全局样式重置与基础配置 */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: "Times New Roman", Georgia, serif; /* 哥特风格基础字体 */
-        }
+  <meta charset="UTF-8" />
+  <title>Xiaode & Chiyo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        /* 页面容器 - 实现全屏星空背景 */
-        body {
-            width: 100vw;
-            height: 100vh;
-            overflow: hidden;
-            position: relative;
-            background: #0a0a10; /* 深邃夜空底色，凸显星空粒子 */
-        }
+  <!-- 字体：冷静 + 哥特感 -->
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
-        /* 星空粒子画布 - 全屏覆盖，层级最低 */
-        #star-canvas {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 1;
-        }
+  <style>
+    :root {
+      --bg: #0e0e11;
+      --fg: #e6e6eb;
+      --muted: #9a9aa3;
+      --accent: #b9a7ff;
+      --accent-dark: #6f63d9;
+    }
 
-        /* 核心内容容器 - 居中布局，层级高于星空 */
-        .content-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 2;
-            text-align: center;
-            width: 100%;
-            padding: 0 20px;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        /* 情侣标题 - 哥特风格装饰，简约不浮夸 */
-        .couple-title {
-            font-size: 3.5rem;
-            color: #f2f2f2;
-            margin-bottom: 60px;
-            letter-spacing: 8px; /* 哥特风格字符间距 */
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 215, 0, 0.5), 0 0 25px rgba(195, 7, 63, 0.4); /* 星光/哥特红阴影，匹配星空 */
-            position: relative;
-        }
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      background: var(--bg);
+      color: var(--fg);
+      font-family: Inter, sans-serif;
+      overflow: hidden;
+    }
 
-        /* 标题哥特风格装饰线 */
-        .couple-title::before,
-        .couple-title::after {
-            content: "";
-            position: absolute;
-            width: 150px;
-            height: 2px;
-            background: linear-gradient(to right, transparent, #c3073f, transparent);
-            top: 50%;
-            transform: translateY(-50%);
-        }
+    /* 背景动态层 */
+    canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
 
-        .couple-title::before {
-            left: -180px;
-        }
+    main {
+      position: relative;
+      z-index: 1;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
 
-        .couple-title::after {
-            right: -180px;
-        }
+    .container {
+      text-align: center;
+      max-width: 720px;
+      padding: 40px;
+    }
 
-        /* 按钮容器 - 横向排列，响应式 */
-        .btn-container {
-            display: flex;
-            justify-content: center;
-            gap: 80px;
-            flex-wrap: wrap;
-        }
+    h1 {
+      font-family: "Playfair Display", serif;
+      font-size: 48px;
+      letter-spacing: 2px;
+      margin-bottom: 16px;
+    }
 
-        /* 核心按钮样式 - 简约平面，哥特+星空风格 */
-        .couple-btn {
-            padding: 18px 45px;
-            font-size: 1.2rem;
-            color: #f2f2f2;
-            background: rgba(15, 15, 25, 0.8);
-            border: 2px solid #c3073f;
-            border-radius: 2px; /* 平面风格，拒绝大圆角 */
-            cursor: pointer;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.4s ease; /* 悬停/点击动效过渡 */
-            letter-spacing: 3px; /* 哥特风格间距 */
-            text-decoration: none; /* 去除链接下划线 */
-        }
+    .subtitle {
+      font-size: 14px;
+      letter-spacing: 4px;
+      color: var(--muted);
+      margin-bottom: 64px;
+    }
 
-        /* 按钮悬停动效 - 星空暗调提亮，哥特色边框强化 */
-        .couple-btn:hover {
-            background: rgba(195, 7, 63, 0.9);
-            border-color: #f2f2f2;
-            transform: translateY(-5px); /* 轻微上移，增强交互感 */
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3); /* 星光阴影 */
-        }
+    .buttons {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+    }
 
-        /* 按钮点击/激活动效 - 内部浅色遮罩 */
-        .couple-btn::after {
-            content: "";
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateX(-100%);
-            transition: transform 0.6s ease;
-        }
+    .btn {
+      position: relative;
+      padding: 32px 24px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.02);
+      backdrop-filter: blur(6px);
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
 
-        .couple-btn:active::after {
-            transform: translateX(0); /* 点击时填充浅色遮罩 */
-        }
+    .btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        circle at var(--x, 50%) var(--y, 50%),
+        rgba(185,167,255,0.25),
+        transparent 60%
+      );
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
 
-        /* 响应式适配 - 移动端优化 */
-        @media (max-width: 768px) {
-            .couple-title {
-                font-size: 2rem;
-                letter-spacing: 5px;
-            }
+    .btn:hover::before {
+      opacity: 1;
+    }
 
-            .couple-title::before,
-            .couple-title::after {
-                width: 80px;
-            }
+    .btn:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+    }
 
-            .couple-title::before {
-                left: -110px;
-            }
+    .btn:active {
+      transform: translateY(0) scale(0.98);
+    }
 
-            .couple-title::after {
-                right: -110px;
-            }
+    .btn-title {
+      font-family: "Playfair Display", serif;
+      font-size: 22px;
+      margin-bottom: 8px;
+    }
 
-            .btn-container {
-                gap: 40px;
-                flex-direction: column;
-                align-items: center;
-            }
+    .btn-desc {
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.6;
+    }
 
-            .couple-btn {
-                width: 250px;
-            }
-        }
-    </style>
+    footer {
+      position: fixed;
+      bottom: 24px;
+      width: 100%;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+      letter-spacing: 2px;
+      z-index: 1;
+    }
+
+    @media (max-width: 640px) {
+      h1 {
+        font-size: 36px;
+      }
+      .buttons {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
 </head>
+
 <body>
-    <!-- 星空粒子画布（JS动态生成粒子） -->
-    <canvas id="star-canvas"></canvas>
 
-    <!-- 核心内容区域 -->
-    <div class="content-container">
-        <h1 class="couple-title">小德 & 千代</h1>
-        <div class="btn-container">
-            <!-- 减肥记录按钮 - 跳转至减肥记录页面（可修改href为实际地址） -->
-            <a href="weight-loss.html" class="couple-btn">减肥记录</a>
-            <!-- 美食榜单按钮 - 跳转至美食榜单页面（可修改href为实际地址） -->
-            <a href="food-ranking.html" class="couple-btn">美食榜单</a>
+<canvas id="bg"></canvas>
+
+<main>
+  <div class="container">
+    <h1>XIAODE × CHIYO</h1>
+    <div class="subtitle">TWO BODIES · ONE LIFE</div>
+
+    <div class="buttons">
+      <!-- 减肥记录页面 -->
+      <div class="btn" onclick="location.href='diet/index.html'">
+        <div class="btn-title">身体记录</div>
+        <div class="btn-desc">
+          体重 · 习惯 · 坚持<br/>
+          一起对抗时间
         </div>
+      </div>
+
+      <!-- 美食榜单页面 -->
+      <div class="btn" onclick="location.href='food/index.html'">
+        <div class="btn-title">食物排名</div>
+        <div class="btn-desc">
+          味觉 · 选择 · 记忆<br/>
+          爱的另一种形式
+        </div>
+      </div>
     </div>
+  </div>
+</main>
 
-    <script>
-        // 星空粒子核心配置（优化：超慢运动、大圆圈、实时归位）
-        const config = {
-            particleCount: 2000, // 大量粒子，营造浓密星空
-            particleSize: 1.2,   // 粒子大小（星星散点，不突兀）
-            repelDistance: 200,  // 放大鼠标排斥/圆周范围（从80→200，大圆圈效果）
-            repelStrength: 40,   // 对应放大圆周半径强度（从15→40）
-            moveSpeed: 0.008,    // 超缓慢运动速度（从0.02→0.008，更柔和）
-            avoidMouseDistance: 15, // 粒子与鼠标的最小安全距离
-            circleSpeed: 0.001,  // 超缓慢圆周角速度（从0.005→0.001，极致缓慢旋转）
-            trailFadeTime: 1000, // 尾迹消失时间（1000毫秒=1秒）
-            realtimeReturnDistance: 50 // 实时归位阈值：鼠标移动超过此距离，远离的粒子开始归位
-        };
+<footer>
+  ARCHIVE OF A SHARED LIFE
+</footer>
 
-        // 获取画布与上下文
-        const canvas = document.getElementById('star-canvas');
-        const ctx = canvas.getContext('2d');
-        let canvasWidth = window.innerWidth;
-        let canvasHeight = window.innerHeight;
-        canvas.width = canvasWidth;
-        canvas.height = canvasHeight;
+<script>
+  /* ===== 背景：哥特感抽象几何漂浮 ===== */
+  const canvas = document.getElementById("bg");
+  const ctx = canvas.getContext("2d");
 
-        // 存储所有粒子对象
-        let particles = [];
+  let w, h;
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
 
-        // 鼠标位置变量（新增：上一帧鼠标位置，用于计算移动距离，实现实时归位）
-        let mouse = {
-            x: null,
-            y: null,
-            prevX: null,
-            prevY: null,
-            isActive: false
-        };
+  const shapes = Array.from({ length: 60 }, () => ({
+    x: Math.random() * w,
+    y: Math.random() * h,
+    r: Math.random() * 1.5 + 0.5,
+    vx: (Math.random() - 0.5) * 0.2,
+    vy: (Math.random() - 0.5) * 0.2
+  }));
 
-        // 计算尾迹清屏透明度（基于1秒消失时间）
-        let frameRate = 60;
-        let trailClearAlpha = 1 - (frameRate * config.trailFadeTime) / 100000;
-        trailClearAlpha = Math.max(0.985, Math.min(0.995, trailClearAlpha));
+  let mouse = { x: w / 2, y: h / 2 };
 
-        // 粒子类定义（核心：超慢大圈圆周 + 实时归位）
-        class StarParticle {
-            constructor() {
-                // 初始化粒子初始位置（全屏随机分布，形成星空）
-                this.originalX = Math.random() * canvasWidth;
-                this.originalY = Math.random() * canvasHeight;
-                // 当前位置（初始与原始位置一致）
-                this.x = this.originalX;
-                this.y = this.originalY;
-                // 粒子亮度（营造星空层次感，明暗不一）
-                this.brightness = Math.random() * 0.7 + 0.3;
-                // 粒子颜色（暖白+淡金+浅红，匹配情侣氛围与哥特风格）
-                this.color = `rgba(255, ${Math.floor(Math.random() * 50 + 205)}, ${Math.floor(Math.random() * 100 + 155)}, ${this.brightness})`;
-                // 圆周运动相关参数（每个粒子独立初始角度，避免旋转重合）
-                this.circleAngle = Math.random() * Math.PI * 2; // 初始圆周角度（0~360°）
-                this.circleRadius = 0; // 圆周运动半径（随排斥力度动态变化）
-                // 标记：粒子是否处于"跟随鼠标圆周"状态（用于实时归位判断）
-                this.isFollowing = false;
-            }
+  window.addEventListener("mousemove", e => {
+    mouse.x = e.clientX;
+    mouse.y = e.clientY;
+  });
 
-            // 更新粒子位置（核心：超慢大圈圆周 + 鼠标移动时实时归位）
-            update() {
-                if (mouse.isActive && mouse.prevX !== null && mouse.prevY !== null) {
-                    // 1. 计算当前鼠标与上一帧鼠标的移动距离（判断是否触发实时归位）
-                    const mouseMoveDx = mouse.x - mouse.prevX;
-                    const mouseMoveDy = mouse.y - mouse.prevY;
-                    const mouseMoveDistance = Math.sqrt(mouseMoveDx * mouseMoveDx + mouseMoveDy * mouseMoveDy);
+  function draw() {
+    ctx.clearRect(0, 0, w, h);
 
-                    // 2. 计算粒子与**当前鼠标**的距离（判断是否继续圆周运动）
-                    const dx = this.x - mouse.x;
-                    const dy = this.y - mouse.y;
-                    const distanceToCurrentMouse = Math.sqrt(dx * dx + dy * dy);
-                    const mouseAngle = Math.atan2(dy, dx);
+    for (const p of shapes) {
+      p.x += p.vx;
+      p.y += p.vy;
 
-                    // 3. 分情况处理：实时归位 OR 超慢大圈圆周运动
-                    if (distanceToCurrentMouse < config.repelDistance && distanceToCurrentMouse > config.avoidMouseDistance) {
-                        // 3.1 处于当前鼠标排斥范围内：保持超慢大圈圆周运动
-                        this.isFollowing = true;
-                        const repelRatio = 1 - (distanceToCurrentMouse / config.repelDistance);
-                        
-                        // 大圆圈半径：基于排斥比例放大，实现大范围圆周
-                        this.circleRadius = config.repelStrength * repelRatio;
-                        
-                        // 超缓慢更新圆周角度（极致柔和，无急促感）
-                        this.circleAngle += config.circleSpeed;
-                        
-                        // 计算大圆圈圆周目标位置
-                        const targetX = mouse.x + Math.cos(mouseAngle + this.circleAngle) * (this.circleRadius + config.avoidMouseDistance);
-                        const targetY = mouse.y + Math.sin(mouseAngle + this.circleAngle) * (this.circleRadius + config.avoidMouseDistance);
-                        
-                        // 超缓慢移动到圆周目标位置
-                        this.x += (targetX - this.x) * config.moveSpeed * 5;
-                        this.y += (targetY - this.y) * config.moveSpeed * 5;
-                    } else {
-                        // 3.2 超出当前鼠标排斥范围 或 鼠标移动触发阈值：实时归位（每时每刻进行）
-                        this.isFollowing = false;
-                        // 鼠标每移动一段距离，远离的粒子就超缓慢归位，实时发生
-                        if (mouseMoveDistance > 0 || distanceToCurrentMouse >= config.repelDistance) {
-                            this.x += (this.originalX - this.x) * config.moveSpeed;
-                            this.y += (this.originalY - this.y) * config.moveSpeed;
-                        }
-                    }
+      if (p.x < 0 || p.x > w) p.vx *= -1;
+      if (p.y < 0 || p.y > h) p.vy *= -1;
 
-                    // 4. 防止粒子紧贴鼠标
-                    if (distanceToCurrentMouse <= config.avoidMouseDistance) {
-                        this.x = mouse.x + Math.cos(mouseAngle) * config.avoidMouseDistance;
-                        this.y = mouse.y + Math.sin(mouseAngle) * config.avoidMouseDistance;
-                    }
-                } else {
-                    // 5. 鼠标无活动：所有粒子超缓慢归位
-                    this.x += (this.originalX - this.x) * config.moveSpeed;
-                    this.y += (this.originalY - this.y) * config.moveSpeed;
-                    this.isFollowing = false;
-                    this.circleRadius = 0;
-                    this.circleAngle = Math.random() * Math.PI * 2;
-                }
+      const dx = p.x - mouse.x;
+      const dy = p.y - mouse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
 
-                // 6. 确保粒子始终在画布内
-                this.x = Math.max(0, Math.min(canvasWidth, this.x));
-                this.y = Math.max(0, Math.min(canvasHeight, this.y));
-            }
+      const alpha = Math.max(0, 0.6 - dist / 400);
 
-            // 绘制粒子（星星散点，不重合，平面简约）
-            draw() {
-                ctx.beginPath();
-                ctx.arc(this.x, this.y, config.particleSize, 0, Math.PI * 2);
-                ctx.fillStyle = this.color;
-                ctx.fill();
-                ctx.closePath();
-            }
-        }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.r + alpha * 2, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(185,167,255,${alpha})`;
+      ctx.fill();
+    }
 
-        // 初始化粒子数组（生成大量星空粒子）
-        function initParticles() {
-            particles = [];
-            for (let i = 0; i < config.particleCount; i++) {
-                particles.push(new StarParticle());
-            }
-        }
+    requestAnimationFrame(draw);
+  }
 
-        // 动画循环（核心：精准控制尾迹1秒消失 + 实时更新鼠标上一帧位置）
-        function animate() {
-            // 纯色半透明清屏，精准控制尾迹1秒消失，无杂乱残留
-            ctx.fillStyle = `rgba(10, 10, 16, ${1 - trailClearAlpha})`;
-            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+  draw();
 
-            // 更新并绘制所有粒子（每时每刻都有粒子归位，实时发生）
-            particles.forEach(particle => {
-                particle.update();
-                particle.draw();
-            });
+  /* 按钮光斑跟随鼠标 */
+  document.querySelectorAll(".btn").forEach(btn => {
+    btn.addEventListener("mousemove", e => {
+      const rect = btn.getBoundingClientRect();
+      btn.style.setProperty("--x", `${e.clientX - rect.left}px`);
+      btn.style.setProperty("--y", `${e.clientY - rect.top}px`);
+    });
+  });
+</script>
 
-            requestAnimationFrame(animate);
-        }
-
-        // 监听鼠标移动（获取当前位置 + 记录上一帧位置，实现实时归位）
-        document.addEventListener('mousemove', (e) => {
-            // 先记录上一帧鼠标位置（用于计算移动距离）
-            mouse.prevX = mouse.x;
-            mouse.prevY = mouse.y;
-            // 再更新当前鼠标位置
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-            mouse.isActive = true;
-
-            // 鼠标每移动一段距离，就触发远离粒子的实时归位（每时每刻进行）
-            // 无需等待鼠标移出屏幕，移动过程中持续有粒子归位
-        });
-
-        // 监听鼠标离开画布（所有粒子超缓慢归位）
-        document.addEventListener('mouseleave', () => {
-            mouse.isActive = false;
-            mouse.prevX = null;
-            mouse.prevY = null;
-        });
-
-        // 监听窗口大小变化（重置画布尺寸，重新初始化粒子）
-        window.addEventListener('resize', () => {
-            canvasWidth = window.innerWidth;
-            canvasHeight = window.innerHeight;
-            canvas.width = canvasWidth;
-            canvas.height = canvasHeight;
-            initParticles();
-        });
-
-        // 初始化并启动动画
-        initParticles();
-        animate();
-    </script>
 </body>
 </html>
-
