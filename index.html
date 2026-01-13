@@ -3,203 +3,153 @@
 <head>
 <meta charset="UTF-8">
 <title>Kanbedruid</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <style>
-:root {
-    --bg: #0e0f13;
-    --card: rgba(255,255,255,0.06);
-    --border: rgba(255,255,255,0.12);
-    --text: #e6e6eb;
-    --sub: #9aa0aa;
-    --accent: #7c9cff;
-}
-
-* { box-sizing: border-box; }
-
-body {
+html, body {
     margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-    background: var(--bg);
-    color: var(--text);
-    overflow-x: hidden;
+    color: white;
 }
 
-/* 粒子画布 */
 canvas {
     position: fixed;
-    inset: 0;
+    top: 0;
+    left: 0;
     z-index: -1;
 }
 
-/* 布局 */
-main {
-    max-width: 1100px;
-    margin: auto;
-    padding: 80px 40px;
-}
-
-h1 {
-    font-size: 48px;
-    margin: 0 0 10px;
-}
-
-.subtitle {
-    color: var(--sub);
-    font-size: 18px;
-    margin-bottom: 60px;
-}
-
-/* 卡片 */
-.grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-    gap: 24px;
+.center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
 }
 
 .card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 18px;
-    padding: 26px;
+    background: rgba(20, 20, 40, 0.6);
     backdrop-filter: blur(12px);
-    transition: transform .3s, border-color .3s;
+    border-radius: 18px;
+    padding: 36px 48px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
 }
 
-.card:hover {
-    transform: translateY(-6px);
-    border-color: var(--accent);
+h1 {
+    margin: 0 0 10px 0;
+    font-weight: 600;
+    letter-spacing: 1px;
 }
 
-.card h2 {
-    margin: 0 0 12px;
-    font-size: 20px;
+p {
+    margin: 0 0 30px 0;
+    opacity: 0.8;
 }
 
-.card p {
-    margin: 0 0 20px;
-    color: var(--sub);
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-.button {
+a.button {
     display: inline-block;
-    padding: 10px 16px;
-    border-radius: 8px;
-    background: var(--accent);
+    padding: 12px 26px;
+    border-radius: 999px;
+    background: linear-gradient(135deg, #8faaff, #b18cff);
     color: #000;
     text-decoration: none;
-    font-size: 14px;
+    font-weight: 500;
+    transition: transform 0.2s ease;
 }
 
-/* 页脚 */
-footer {
-    margin-top: 80px;
-    color: #666;
-    font-size: 13px;
+a.button:hover {
+    transform: scale(1.05);
 }
 </style>
 </head>
-
 <body>
 
-<canvas id="bg"></canvas>
+<canvas id="starfield"></canvas>
 
-<main>
-    <h1>Kanbedruid</h1>
-    <div class="subtitle">
-        Design · Tools · Experiments
+<div class="center">
+    <div class="card">
+        <h1>Kanbedruid</h1>
+        <p>Design · Tools · Notes</p>
+        <a class="button" href="./calculator/">进入计算器</a>
     </div>
-
-    <div class="grid">
-        <div class="card">
-            <h2>Calculator</h2>
-            <p>
-                一个功能性计算器页面，用于特定需求计算。
-            </p>
-            <a class="button" href="./calculator/">Open</a>
-        </div>
-
-        <div class="card">
-            <h2>Notes</h2>
-            <p>
-                用于记录设计想法、结构草稿与杂项。
-            </p>
-        </div>
-
-        <div class="card">
-            <h2>Experiments</h2>
-            <p>
-                一些小实验页面与交互测试。
-            </p>
-        </div>
-    </div>
-
-    <footer>
-        © Kanbedruid
-    </footer>
-</main>
+</div>
 
 <script>
-const canvas = document.getElementById('bg');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("starfield");
+const ctx = canvas.getContext("2d");
 
 let w, h;
 function resize() {
     w = canvas.width = window.innerWidth;
     h = canvas.height = window.innerHeight;
 }
-window.addEventListener('resize', resize);
+window.addEventListener("resize", resize);
 resize();
 
-const dots = Array.from({ length: 120 }, () => ({
-    x: Math.random() * w,
-    y: Math.random() * h,
-    vx: 0,
-    vy: 0
-}));
-
-let mouse = { x: w / 2, y: h / 2 };
-
-window.addEventListener('mousemove', e => {
+const mouse = { x: null, y: null };
+window.addEventListener("mousemove", e => {
     mouse.x = e.clientX;
     mouse.y = e.clientY;
 });
+window.addEventListener("mouseleave", () => {
+    mouse.x = null;
+    mouse.y = null;
+});
 
-function draw() {
+const STAR_COUNT = 200;
+const stars = [];
+
+for (let i = 0; i < STAR_COUNT; i++) {
+    const x = Math.random() * w;
+    const y = Math.random() * h;
+    stars.push({
+        x, y,
+        ox: x, oy: y,
+        vx: 0, vy: 0
+    });
+}
+
+function animate() {
     ctx.clearRect(0, 0, w, h);
 
-    for (const d of dots) {
-        const dx = mouse.x - d.x;
-        const dy = mouse.y - d.y;
-        const dist = Math.sqrt(dx*dx + dy*dy) || 1;
+    for (const s of stars) {
+        if (mouse.x !== null) {
+            const dx = s.x - mouse.x;
+            const dy = s.y - mouse.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            const radius = 120;
 
-        d.vx += dx / dist * 0.02;
-        d.vy += dy / dist * 0.02;
+            if (dist < radius) {
+                const force = (radius - dist) / radius;
+                s.vx += (dx / dist) * force * 2;
+                s.vy += (dy / dist) * force * 2;
+            }
+        }
 
-        d.vx *= 0.95;
-        d.vy *= 0.95;
+        // 回归原位（“水面复原”）
+        s.vx += (s.ox - s.x) * 0.002;
+        s.vy += (s.oy - s.y) * 0.002;
 
-        d.x += d.vx;
-        d.y += d.vy;
+        s.vx *= 0.92;
+        s.vy *= 0.92;
 
-        if (d.x < 0) d.x = w;
-        if (d.x > w) d.x = 0;
-        if (d.y < 0) d.y = h;
-        if (d.y > h) d.y = 0;
+        s.x += s.vx;
+        s.y += s.vy;
 
-        ctx.fillStyle = "rgba(255,255,255,0.35)";
         ctx.beginPath();
-        ctx.arc(d.x, d.y, 1.2, 0, Math.PI * 2);
+        ctx.arc(s.x, s.y, 1.2, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(255,255,255,0.8)";
         ctx.fill();
     }
 
-    requestAnimationFrame(draw);
+    requestAnimationFrame(animate);
 }
-draw();
+
+animate();
 </script>
 
 </body>
 </html>
+
 
