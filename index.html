@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>小德 & 千代 | 情侣专属页面</title>
+    <title>小德 & 千代 </title>
     <style>
         /* 全局样式重置与基础配置 */
         * {
@@ -171,16 +171,17 @@
     </div>
 
     <script>
-        // 星空粒子核心配置（优化：圆周运动、1秒消失尾迹）
+        // 星空粒子核心配置（优化：超慢运动、大圆圈、实时归位）
         const config = {
             particleCount: 2000, // 大量粒子，营造浓密星空
             particleSize: 1.2,   // 粒子大小（星星散点，不突兀）
-            repelDistance: 80,   // 鼠标排斥范围（波纹影响半径）
-            repelStrength: 15,   // 排斥力度（波纹效果强度）
-            moveSpeed: 0.02,     // 超缓慢移动/复原/圆周运动速度
-            avoidMouseDistance: 10, // 粒子与鼠标的最小安全距离
-            circleSpeed: 0.005,  // 圆周运动角速度（控制旋转快慢）
-            trailFadeTime: 1000  // 尾迹消失时间（1000毫秒=1秒）
+            repelDistance: 200,  // 放大鼠标排斥/圆周范围（从80→200，大圆圈效果）
+            repelStrength: 40,   // 对应放大圆周半径强度（从15→40）
+            moveSpeed: 0.008,    // 超缓慢运动速度（从0.02→0.008，更柔和）
+            avoidMouseDistance: 15, // 粒子与鼠标的最小安全距离
+            circleSpeed: 0.001,  // 超缓慢圆周角速度（从0.005→0.001，极致缓慢旋转）
+            trailFadeTime: 1000, // 尾迹消失时间（1000毫秒=1秒）
+            realtimeReturnDistance: 50 // 实时归位阈值：鼠标移动超过此距离，远离的粒子开始归位
         };
 
         // 获取画布与上下文
@@ -194,21 +195,21 @@
         // 存储所有粒子对象
         let particles = [];
 
-        // 鼠标位置变量
+        // 鼠标位置变量（新增：上一帧鼠标位置，用于计算移动距离，实现实时归位）
         let mouse = {
             x: null,
             y: null,
-            isActive: false // 标记鼠标是否在画布内
+            prevX: null,
+            prevY: null,
+            isActive: false
         };
 
         // 计算尾迹清屏透明度（基于1秒消失时间）
-        // 核心逻辑：根据动画帧率动态计算，确保1秒后尾迹完全消失，无残留
-        let frameRate = 60; // 预估默认帧率
+        let frameRate = 60;
         let trailClearAlpha = 1 - (frameRate * config.trailFadeTime) / 100000;
-        // 校准清屏透明度，避免过亮或过暗
         trailClearAlpha = Math.max(0.985, Math.min(0.995, trailClearAlpha));
 
-        // 粒子类定义（核心：圆周运动 + 无杂乱尾迹）
+        // 粒子类定义（核心：超慢大圈圆周 + 实时归位）
         class StarParticle {
             constructor() {
                 // 初始化粒子初始位置（全屏随机分布，形成星空）
@@ -224,51 +225,68 @@
                 // 圆周运动相关参数（每个粒子独立初始角度，避免旋转重合）
                 this.circleAngle = Math.random() * Math.PI * 2; // 初始圆周角度（0~360°）
                 this.circleRadius = 0; // 圆周运动半径（随排斥力度动态变化）
+                // 标记：粒子是否处于"跟随鼠标圆周"状态（用于实时归位判断）
+                this.isFollowing = false;
             }
 
-            // 更新粒子位置（核心：波纹排斥 + 缓缓圆周运动 + 自动复原）
+            // 更新粒子位置（核心：超慢大圈圆周 + 鼠标移动时实时归位）
             update() {
-                if (mouse.isActive) {
-                    // 1. 计算粒子与鼠标的距离和角度
+                if (mouse.isActive && mouse.prevX !== null && mouse.prevY !== null) {
+                    // 1. 计算当前鼠标与上一帧鼠标的移动距离（判断是否触发实时归位）
+                    const mouseMoveDx = mouse.x - mouse.prevX;
+                    const mouseMoveDy = mouse.y - mouse.prevY;
+                    const mouseMoveDistance = Math.sqrt(mouseMoveDx * mouseMoveDx + mouseMoveDy * mouseMoveDy);
+
+                    // 2. 计算粒子与**当前鼠标**的距离（判断是否继续圆周运动）
                     const dx = this.x - mouse.x;
                     const dy = this.y - mouse.y;
-                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const distanceToCurrentMouse = Math.sqrt(dx * dx + dy * dy);
                     const mouseAngle = Math.atan2(dy, dx);
 
-                    // 2. 波纹式排斥 + 圆周运动初始化
-                    if (distance < config.repelDistance && distance > config.avoidMouseDistance) {
-                        // 计算排斥比例（0~1）：离鼠标越近，排斥/圆周效果越明显
-                        const repelRatio = 1 - (distance / config.repelDistance);
-                        // 设定圆周运动半径（基于排斥比例，近大远小）
+                    // 3. 分情况处理：实时归位 OR 超慢大圈圆周运动
+                    if (distanceToCurrentMouse < config.repelDistance && distanceToCurrentMouse > config.avoidMouseDistance) {
+                        // 3.1 处于当前鼠标排斥范围内：保持超慢大圈圆周运动
+                        this.isFollowing = true;
+                        const repelRatio = 1 - (distanceToCurrentMouse / config.repelDistance);
+                        
+                        // 大圆圈半径：基于排斥比例放大，实现大范围圆周
                         this.circleRadius = config.repelStrength * repelRatio;
                         
-                        // 3. 缓缓圆周运动（更新角度，保持超慢节奏）
+                        // 超缓慢更新圆周角度（极致柔和，无急促感）
                         this.circleAngle += config.circleSpeed;
                         
-                        // 4. 计算圆周运动目标位置（围绕鼠标旋转，不偏离排斥范围）
+                        // 计算大圆圈圆周目标位置
                         const targetX = mouse.x + Math.cos(mouseAngle + this.circleAngle) * (this.circleRadius + config.avoidMouseDistance);
                         const targetY = mouse.y + Math.sin(mouseAngle + this.circleAngle) * (this.circleRadius + config.avoidMouseDistance);
                         
-                        // 5. 超缓慢移动到圆周目标位置，避免突兀
-                        this.x += (targetX - this.x) * config.moveSpeed * 8;
-                        this.y += (targetY - this.y) * config.moveSpeed * 8;
+                        // 超缓慢移动到圆周目标位置
+                        this.x += (targetX - this.x) * config.moveSpeed * 5;
+                        this.y += (targetY - this.y) * config.moveSpeed * 5;
+                    } else {
+                        // 3.2 超出当前鼠标排斥范围 或 鼠标移动触发阈值：实时归位（每时每刻进行）
+                        this.isFollowing = false;
+                        // 鼠标每移动一段距离，远离的粒子就超缓慢归位，实时发生
+                        if (mouseMoveDistance > 0 || distanceToCurrentMouse >= config.repelDistance) {
+                            this.x += (this.originalX - this.x) * config.moveSpeed;
+                            this.y += (this.originalY - this.y) * config.moveSpeed;
+                        }
                     }
 
-                    // 6. 防止粒子紧贴鼠标（保持最小安全距离）
-                    if (distance <= config.avoidMouseDistance) {
+                    // 4. 防止粒子紧贴鼠标
+                    if (distanceToCurrentMouse <= config.avoidMouseDistance) {
                         this.x = mouse.x + Math.cos(mouseAngle) * config.avoidMouseDistance;
                         this.y = mouse.y + Math.sin(mouseAngle) * config.avoidMouseDistance;
                     }
                 } else {
-                    // 7. 鼠标离开画布：粒子超缓慢自动复原到原始星空位置
+                    // 5. 鼠标无活动：所有粒子超缓慢归位
                     this.x += (this.originalX - this.x) * config.moveSpeed;
                     this.y += (this.originalY - this.y) * config.moveSpeed;
-                    // 复原时重置圆周运动参数，避免下次排斥异常
+                    this.isFollowing = false;
                     this.circleRadius = 0;
                     this.circleAngle = Math.random() * Math.PI * 2;
                 }
 
-                // 8. 确保粒子始终在画布内（避免溢出，保持星空完整性）
+                // 6. 确保粒子始终在画布内
                 this.x = Math.max(0, Math.min(canvasWidth, this.x));
                 this.y = Math.max(0, Math.min(canvasHeight, this.y));
             }
@@ -291,14 +309,13 @@
             }
         }
 
-        // 动画循环（核心：精准控制尾迹1秒消失，无杂乱残留）
+        // 动画循环（核心：精准控制尾迹1秒消失 + 实时更新鼠标上一帧位置）
         function animate() {
-            // 关键优化：纯色半透明清屏，精准控制尾迹消失时间（1秒）
-            // 原理：每次绘制前用低透明度背景覆盖，累积1秒后尾迹完全被覆盖，无杂乱
+            // 纯色半透明清屏，精准控制尾迹1秒消失，无杂乱残留
             ctx.fillStyle = `rgba(10, 10, 16, ${1 - trailClearAlpha})`;
             ctx.fillRect(0, 0, canvasWidth, canvasHeight);
 
-            // 更新并绘制所有粒子
+            // 更新并绘制所有粒子（每时每刻都有粒子归位，实时发生）
             particles.forEach(particle => {
                 particle.update();
                 particle.draw();
@@ -307,16 +324,25 @@
             requestAnimationFrame(animate);
         }
 
-        // 监听鼠标移动（获取鼠标位置，标记鼠标活跃，触发排斥+圆周运动）
+        // 监听鼠标移动（获取当前位置 + 记录上一帧位置，实现实时归位）
         document.addEventListener('mousemove', (e) => {
+            // 先记录上一帧鼠标位置（用于计算移动距离）
+            mouse.prevX = mouse.x;
+            mouse.prevY = mouse.y;
+            // 再更新当前鼠标位置
             mouse.x = e.clientX;
             mouse.y = e.clientY;
             mouse.isActive = true;
+
+            // 鼠标每移动一段距离，就触发远离粒子的实时归位（每时每刻进行）
+            // 无需等待鼠标移出屏幕，移动过程中持续有粒子归位
         });
 
-        // 监听鼠标离开画布（停止排斥+圆周运动，触发粒子自动复原）
+        // 监听鼠标离开画布（所有粒子超缓慢归位）
         document.addEventListener('mouseleave', () => {
             mouse.isActive = false;
+            mouse.prevX = null;
+            mouse.prevY = null;
         });
 
         // 监听窗口大小变化（重置画布尺寸，重新初始化粒子）
