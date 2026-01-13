@@ -330,6 +330,10 @@ function renderChart(){
   });
 }
 
+// 提前声明全局函数占位，确保 onclick 能找到
+window.saveToCloud = function() {};
+window.loadFromCloud = function() {};
+
 render();
 </script>
   
@@ -342,7 +346,6 @@ render();
     getDocs,
     query,
     orderBy,
-    deleteDocs,
     writeBatch
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -358,8 +361,8 @@ render();
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  /* ===== 保存到云端（修复重复上传问题，采用「清空旧数据+新增最新数据」） ===== */
-  window.saveToCloud = async function () {
+  /* ===== 保存到云端（修复重复上传问题） ===== */
+  async function saveToCloudImpl() {
     try {
       const raw = localStorage.getItem("diet_records_v3");
       if (!raw) {
@@ -387,11 +390,10 @@ render();
       }
 
       // 步骤2：批量上传本地最新数据
-      const batch = writeBatch(db);
-      let count = 0;
+      const newBatch = writeBatch(db);
       localData.forEach(r => {
-        const docRef = addDoc(recordsRef, {}).then(ref => ref); // 生成新文档引用
-        batch.set(docRef, {
+        const docRef = collection(recordsRef).doc(); // 生成唯一文档引用
+        newBatch.set(docRef, {
           date: r.date,
           name: r.name,
           checkin: r.checkin,
@@ -403,30 +405,23 @@ render();
           extra: Number(r.extra || 0),
           createdAt: Date.now()
         });
-        count++;
       });
 
-      await batch.commit();
-      alert(`成功保存 ${count} 条记录到云端（已清除旧数据，避免重复）`);
-      
-      // 同步刷新页面数据（可选，提升体验）
-      render();
+      await newBatch.commit();
+      alert(`成功保存 ${localData.length} 条记录到云端（已清除旧数据）`);
+      render(); // 刷新页面数据
     } catch (e) {
-      console.error("保存到云端失败：", e);
-      alert("保存失败，查看控制台获取详细信息");
+      alert("保存失败，错误详情：" + (e.message || JSON.stringify(e)));
+      console.error("云端保存错误：", e);
     }
-  };
+  }
 
   /* ===== 从云端恢复（修复排序+去重问题） ===== */
-  window.loadFromCloud = async function () {
+  async function loadFromCloudImpl() {
     try {
       const recordsRef = collection(db, "records");
-      // 修复：按实际记录日期 date 排序，而非上传时间 createdAt
-      const q = query(
-        recordsRef,
-        orderBy("date", "asc")
-      );
-
+      // 修复：按实际记录日期 date 排序
+      const q = query(recordsRef, orderBy("date", "asc"));
       const snap = await getDocs(q);
 
       if (snap.empty) {
@@ -434,7 +429,7 @@ render();
         return;
       }
 
-      // 步骤1：提取云端数据并做初步处理
+      // 步骤1：提取云端数据
       const cloudData = snap.docs.map(d => {
         const r = d.data();
         return {
@@ -450,33 +445,31 @@ render();
         };
       });
 
-      // 步骤2：基于「日期+姓名」去重（保留最新数据，此处因上传时已清空旧数据，主要防意外重复）
+      // 步骤2：基于「日期+姓名」去重
       const uniqueMap = new Map();
       cloudData.forEach(item => {
-        // 生成唯一标识：日期+姓名
         const uniqueKey = `${item.date}_${item.name}`;
-        // 覆盖式存储，确保相同key只保留最后一条（实际上传已去重，此处做双重保障）
         uniqueMap.set(uniqueKey, item);
       });
 
-      // 步骤3：转换为数组并保持排序
+      // 步骤3：转换为数组并保持日期排序
       const normalizedData = Array.from(uniqueMap.values()).sort((a, b) => {
         return new Date(a.date) - new Date(b.date);
       });
 
       // 步骤4：更新本地存储并刷新页面
-      localStorage.setItem(
-        "diet_records_v3",
-        JSON.stringify(normalizedData)
-      );
-
+      localStorage.setItem("diet_records_v3", JSON.stringify(normalizedData));
       alert(`已从云端恢复 ${normalizedData.length} 条唯一记录`);
       location.reload();
     } catch (e) {
-      console.error("从云端读取失败：", e);
-      alert("恢复失败，查看控制台获取详细信息");
+      alert("读取失败，错误详情：" + (e.message || JSON.stringify(e)));
+      console.error("云端读取错误：", e);
     }
-  };
+  }
+
+  // 关键：将模块内的函数挂载到全局 window 对象，解决 ReferenceError
+  window.saveToCloud = saveToCloudImpl;
+  window.loadFromCloud = loadFromCloudImpl;
 </script>
 
 </body>
