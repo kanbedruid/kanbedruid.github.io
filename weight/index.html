@@ -7,132 +7,19 @@
 
 <style>
 :root{
-  --bg-main:#f4f6fb;
-  --bg-grad1:#eef2ff;
-  --bg-grad2:#f7f4ff;
-  --card-bg:rgba(255,255,255,.75);
-  --border:rgba(30,30,60,.08);
-
-  --text-main:#1c1f2a;
-  --text-sub:#5a5f73;
-  --accent:#6b7cff;
-
   --plus:#e6f6ee;
   --minus:#fde8ec;
   --weekend:#fff6dc;
 }
-
-*{
-  box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,
-  "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-}
-
-body{
-  margin:0;
-  padding:40px 24px 80px;
-  background:
-    linear-gradient(120deg,var(--bg-grad1),var(--bg-grad2),var(--bg-main));
-  color:var(--text-main);
-}
-
-/* ===== 页面标题 ===== */
-h1{
-  font-size:40px;
-  letter-spacing:-.02em;
-  margin-bottom:32px;
-}
-
-h2{
-  font-size:20px;
-  margin-bottom:16px;
-}
-
-/* ===== 卡片区块 ===== */
-.section{
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:24px;
-  margin-bottom:28px;
-  backdrop-filter:blur(14px);
-}
-
-/* ===== 表格 ===== */
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:14px;
-}
-
-th,td{
-  padding:8px 6px;
-  text-align:center;
-}
-
-th{
-  color:var(--text-sub);
-  font-weight:500;
-  border-bottom:1px solid var(--border);
-}
-
-td{
-  border-bottom:1px solid rgba(0,0,0,.04);
-}
-
-tr:last-child td{
-  border-bottom:none;
-}
-
-/* ===== 状态色 ===== */
-.plus{ background:var(--plus); }
-.minus{ background:var(--minus); }
-.weekend{ background:var(--weekend); }
-
-/* ===== 输入控件 ===== */
-input[type="number"]{
-  width:64px;
-  border:1px solid var(--border);
-  border-radius:6px;
-  padding:4px;
-  background:rgba(255,255,255,.8);
-}
-
-input[type="checkbox"]{
-  transform:scale(1.1);
-  cursor:pointer;
-}
-
-/* ===== 按钮 ===== */
-button{
-  margin:24px 0;
-  padding:10px 18px;
-  border:none;
-  border-radius:10px;
-  background:var(--accent);
-  color:#fff;
-  font-size:14px;
-  cursor:pointer;
-}
-
-button:hover{
-  opacity:.9;
-}
-
-/* ===== 图表 ===== */
-canvas{
-  max-height:220px;
-}
-
-/* ===== 表格整体容器 ===== */
-.table-wrap{
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:16px;
-  backdrop-filter:blur(14px);
-  overflow-x:auto;
-}
+body{font-family:sans-serif;padding:24px;background:#f4f6fb}
+.section{background:#fff;padding:16px;border-radius:12px;margin-bottom:24px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{border-bottom:1px solid #ddd;padding:6px;text-align:center}
+.plus{background:var(--plus)}
+.minus{background:var(--minus)}
+.weekend{background:var(--weekend)}
+button{padding:8px 14px;border:none;border-radius:6px;background:#6b7cff;color:#fff;cursor:pointer}
+canvas{max-height:200px}
 </style>
 </head>
 
@@ -143,9 +30,7 @@ canvas{
 <div class="section">
   <h2>积分排行榜</h2>
   <table>
-    <thead>
-      <tr><th>姓名</th><th>本周</th><th>总计</th></tr>
-    </thead>
+    <thead><tr><th>姓名</th><th>本周</th><th>总计</th></tr></thead>
     <tbody id="rank"></tbody>
   </table>
 </div>
@@ -156,8 +41,9 @@ canvas{
 </div>
 
 <button onclick="addDay()">＋ 新增一天</button>
+<button onclick="saveToCloud()">保存到云端</button>
 
-<div class="table-wrap">
+<div class="section">
 <table>
 <thead>
 <tr>
@@ -171,279 +57,117 @@ canvas{
 </div>
 
 <script>
-const KEY = "diet_records_v3";
-const START_DATE = "2025-11-14";
-let data = JSON.parse(localStorage.getItem(KEY) || "[]");
+const START_DATE="2025-11-14";
+let data=[];
 let chart;
 
-function isWeekend(d){
-  d=new Date(d); return d.getDay()==0||d.getDay()==6;
-}
-function weekStart(d){
-  d=new Date(d); let day=d.getDay()||7;
-  d.setDate(d.getDate()-day+1);
-  return d.toISOString().slice(0,10);
-}
-function lastWeight(name, idx){
-  for(let i=idx-1;i>=0;i--){
-    if(data[i].name===name && data[i].weight!=="")
-      return Number(data[i].weight);
-  }
-  return null;
-}
+function isWeekend(d){d=new Date(d);return d.getDay()==0||d.getDay()==6}
+function weekStart(d){d=new Date(d);let day=d.getDay()||7;d.setDate(d.getDate()-day+1);return d.toISOString().slice(0,10)}
+function lastWeight(name,idx){for(let i=idx-1;i>=0;i--)if(data[i].name===name&&data[i].weight!=="")return Number(data[i].weight);return null}
+
 function score(r){
   let s=0;
-  if(r.checkin) s+=1;
-  if(r.weight!=="") s+=1;
-  if(r.diff===1) s+=2;
-  if(r.diff===-1) s-=2;
-  if(r.sleepEarly) s+=2;
-  if(r.sleepLate) s-=2;
-  if(r.exercise) s+=2;
-  if(isWeekend(r.date)) s*=2;
-  return s + Number(r.extra||0);
+  if(r.checkin)s++;
+  if(r.weight!=="")s++;
+  if(r.diff===1)s+=2;
+  if(r.diff===-1)s-=2;
+  if(r.sleepEarly)s+=2;
+  if(r.sleepLate)s-=2;
+  if(r.exercise)s+=2;
+  if(isWeekend(r.date))s*=2;
+  return s+Number(r.extra||0);
 }
 
 function addDay(){
-  let next;
-  if(data.length===0){
-    next = new Date(START_DATE);
-  }else{
-    next = new Date(data[data.length-1].date);
-    next.setDate(next.getDate()+1);
-  }
-  const d = next.toISOString().slice(0,10);
-  ["千代","小德"].forEach(n=>{
-    data.push({
-      date:d,name:n,checkin:true,weight:"",
-      diff:0,sleepEarly:false,sleepLate:false,
-      exercise:false,extra:0
-    });
-  });
-  save();
+  let next=data.length?new Date(data[data.length-1].date):new Date(START_DATE);
+  if(data.length)next.setDate(next.getDate()+1);
+  const d=next.toISOString().slice(0,10);
+  ["千代","小德"].forEach(n=>data.push({
+    date:d,name:n,checkin:true,weight:"",
+    diff:0,sleepEarly:false,sleepLate:false,exercise:false,extra:0
+  }));
+  render();
 }
 
 function update(i,k,v){
   data[i][k]=v;
   if(k==="weight"){
-    let prev=lastWeight(data[i].name,i);
-    if(prev!==null){
-      if(Number(v)<prev) data[i].diff=1;
-      else if(Number(v)>prev) data[i].diff=-1;
-      else data[i].diff=0;
-    }
+    const p=lastWeight(data[i].name,i);
+    if(p!==null)data[i].diff=Number(v)<p?1:Number(v)>p?-1:0;
   }
-  save();
-}
-
-function save(){
-  localStorage.setItem(KEY,JSON.stringify(data));
   render();
 }
 
 function render(){
-  renderTable();
-  renderRank();
-  renderChart();
+  renderTable();renderRank();renderChart();
 }
 
 function renderTable(){
-  const tb=document.getElementById("records");
-  tb.innerHTML="";
+  const tb=document.getElementById("records");tb.innerHTML="";
   data.forEach((r,i)=>{
     const tr=document.createElement("tr");
-    if(isWeekend(r.date)) tr.classList.add("weekend");
+    if(isWeekend(r.date))tr.classList.add("weekend");
     tr.innerHTML=`
-<td>${r.date}</td>
-<td>${r.name}</td>
-<td class="${r.checkin?'plus':''}">
-<input type="checkbox" ${r.checkin?'checked':''}
- onchange="update(${i},'checkin',this.checked)">
-</td>
-<td><input type="number" value="${r.weight}"
- onchange="update(${i},'weight',this.value)"></td>
-<td class="${r.diff===1?'plus':r.diff===-1?'minus':''}">
-${r.diff===1?'↓':r.diff===-1?'↑':''}
-</td>
-<td class="${r.sleepEarly?'plus':''}">
-<input type="checkbox" ${r.sleepEarly?'checked':''}
- onchange="update(${i},'sleepEarly',this.checked)">
-</td>
-<td class="${r.sleepLate?'minus':''}">
-<input type="checkbox" ${r.sleepLate?'checked':''}
- onchange="update(${i},'sleepLate',this.checked)">
-</td>
-<td class="${r.exercise?'plus':''}">
-<input type="checkbox" ${r.exercise?'checked':''}
- onchange="update(${i},'exercise',this.checked)">
-</td>
-<td><input type="number" value="${r.extra}"
- onchange="update(${i},'extra',this.value)"></td>
+<td>${r.date}</td><td>${r.name}</td>
+<td class="${r.checkin?'plus':''}"><input type=checkbox ${r.checkin?'checked':''} onchange="update(${i},'checkin',this.checked)"></td>
+<td><input type=number value="${r.weight}" onchange="update(${i},'weight',this.value)"></td>
+<td class="${r.diff===1?'plus':r.diff===-1?'minus':''}">${r.diff===1?'↓':r.diff===-1?'↑':''}</td>
+<td class="${r.sleepEarly?'plus':''}"><input type=checkbox ${r.sleepEarly?'checked':''} onchange="update(${i},'sleepEarly',this.checked)"></td>
+<td class="${r.sleepLate?'minus':''}"><input type=checkbox ${r.sleepLate?'checked':''} onchange="update(${i},'sleepLate',this.checked)"></td>
+<td class="${r.exercise?'plus':''}"><input type=checkbox ${r.exercise?'checked':''} onchange="update(${i},'exercise',this.checked)"></td>
+<td><input type=number value="${r.extra}" onchange="update(${i},'extra',this.value)"></td>
 <td>${score(r)}</td>`;
     tb.appendChild(tr);
   });
 }
 
 function renderRank(){
-  const ws=weekStart(new Date());
-  const sum={};
+  const ws=weekStart(new Date()),sum={};
   data.forEach(r=>{
-    if(!sum[r.name]) sum[r.name]={w:0,t:0};
-    const s=score(r);
-    sum[r.name].t+=s;
-    if(r.date>=ws) sum[r.name].w+=s;
+    sum[r.name]=sum[r.name]||{w:0,t:0};
+    const s=score(r);sum[r.name].t+=s;
+    if(r.date>=ws)sum[r.name].w+=s;
   });
-  const tb=document.getElementById("rank");
-  tb.innerHTML="";
-  Object.entries(sum).forEach(([n,v])=>{
-    tb.innerHTML+=`<tr><td>${n}</td><td>${v.w}</td><td>${v.t}</td></tr>`;
-  });
+  const tb=document.getElementById("rank");tb.innerHTML="";
+  Object.entries(sum).forEach(([n,v])=>tb.innerHTML+=`<tr><td>${n}</td><td>${v.w}</td><td>${v.t}</td></tr>`);
 }
 
 function renderChart(){
   const labels=[...new Set(data.map(r=>r.date))];
   const ds={};
-  data.forEach(r=>{
-    if(r.weight==="") return;
-    if(!ds[r.name]) ds[r.name]={};
-    ds[r.name][r.date]=Number(r.weight);
-  });
-
-  const datasets=Object.entries(ds).map(([name,map])=>({
-    label:name,
-    data:labels.map(d=>map[d]??null),
-    spanGaps:true,
-    borderWidth:2
-  }));
-
-  if(chart) chart.destroy();
-  chart=new Chart(document.getElementById("chart"),{
-    type:"line",
-    data:{labels,datasets},
-    options:{
-      responsive:true,
-      plugins:{legend:{position:"top"}},
-      scales:{y:{title:{display:true,text:"体重"}}}
-    }
-  });
+  data.forEach(r=>{if(r.weight==="")return;ds[r.name]=ds[r.name]||{};ds[r.name][r.date]=Number(r.weight)});
+  const sets=Object.entries(ds).map(([n,m])=>({label:n,data:labels.map(d=>m[d]??null),spanGaps:true}));
+  if(chart)chart.destroy();
+  chart=new Chart(document.getElementById("chart"),{type:"line",data:{labels,datasets:sets}});
 }
-
-render();
 </script>
-  
+
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-  import {
-    getFirestore,
-    collection,
-    addDoc,
-    getDocs,
-    query,
-    orderBy
-  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyAhZtgaE8mL3GkxsIj17g1ha-Y5HG02C_A",
-    authDomain: "weight-zqy.firebaseapp.com",
-    projectId: "weight-zqy",
-    storageBucket: "weight-zqy.firebasestorage.app",
-    messagingSenderId: "710580530798",
-    appId: "1:710580530798:web:30e48f089452364c02c07f"
-  };
+const app=initializeApp({
+  apiKey:"AIzaSyAhZtgaE8mL3GkxsIj17g1ha-Y5HG02C_A",
+  authDomain:"weight-zqy.firebaseapp.com",
+  projectId:"weight-zqy"
+});
+const db=getFirestore(app);
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+window.saveToCloud=async()=>{
+  for(const r of data){
+    await setDoc(doc(db,"records",`${r.date}_${r.name}`),r,{merge:true});
+  }
+  alert("已同步到云端");
+};
 
-  /* ===== 保存到云端 ===== */
-  window.saveToCloud = async function () {
-    try {
-      const raw = localStorage.getItem("diet_records_v3");
-      if (!raw) {
-        alert("本地没有数据");
-        return;
-      }
-
-      const data = JSON.parse(raw);
-      if (!data.length) {
-        alert("数据为空");
-        return;
-      }
-
-      let count = 0;
-
-      for (const r of data) {
-        await addDoc(collection(db, "records"), {
-          date: r.date,
-          name: r.name,
-          checkin: r.checkin,
-          weight: r.weight === "" ? null : Number(r.weight),
-          diff: r.diff,
-          sleepEarly: r.sleepEarly,
-          sleepLate: r.sleepLate,
-          exercise: r.exercise,
-          extra: Number(r.extra || 0),
-          createdAt: Date.now()
-        });
-        count++;
-      }
-
-      alert(`成功保存 ${count} 条记录到云端`);
-    } catch (e) {
-      console.error(e);
-      alert("保存失败，查看控制台");
-    }
-  };
-
-  /* ===== 从云端恢复 ===== */
-  window.loadFromCloud = async function () {
-    try {
-      const q = query(
-        collection(db, "records"),
-        orderBy("createdAt", "asc")
-      );
-
-      const snap = await getDocs(q);
-
-      if (snap.empty) {
-        alert("云端没有数据");
-        return;
-      }
-
-      const normalized = snap.docs.map(d => {
-        const r = d.data();
-        return {
-          date: r.date,
-          name: r.name,
-          checkin: r.checkin,
-          weight: r.weight ?? "",
-          diff: r.diff,
-          sleepEarly: r.sleepEarly,
-          sleepLate: r.sleepLate,
-          exercise: r.exercise,
-          extra: r.extra ?? 0
-        };
-      });
-
-      localStorage.setItem(
-        "diet_records_v3",
-        JSON.stringify(normalized)
-      );
-
-      alert(`已从云端恢复 ${normalized.length} 条记录`);
-      location.reload();
-    } catch (e) {
-      console.error(e);
-      alert("恢复失败，查看控制台");
-    }
-  };
+(async()=>{
+  const snap=await getDocs(collection(db,"records"));
+  data=snap.docs.map(d=>d.data()).sort((a,b)=>a.date.localeCompare(b.date));
+  render();
+})();
 </script>
 
-
-<button onclick="saveToCloud()">保存修改</button>
-<button onclick="loadFromCloud()">读取</button>
-
-
-  
 </body>
 </html>
+
 
