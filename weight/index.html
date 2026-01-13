@@ -173,9 +173,8 @@ canvas{
 <script>
 const KEY = "diet_records_v3";
 const START_DATE = "2025-11-14";
-let data = [];          // ← 关键：不从 localStorage 初始化
+let data = JSON.parse(localStorage.getItem(KEY) || "[]");
 let chart;
-
 
 function isWeekend(d){
   d=new Date(d); return d.getDay()==0||d.getDay()==6;
@@ -238,9 +237,9 @@ function update(i,k,v){
 }
 
 function save(){
+  localStorage.setItem(KEY,JSON.stringify(data));
   render();
 }
-
 
 function render(){
   renderTable();
@@ -329,7 +328,7 @@ function renderChart(){
   });
 }
 
-loadFromCloud();  
+render();
 </script>
   
 <script type="module">
@@ -356,16 +355,24 @@ loadFromCloud();
   const db = getFirestore(app);
 
   /* ===== 保存到云端 ===== */
-window.saveToCloud = async function () {
-  try {
-    let count = 0;
+  window.saveToCloud = async function () {
+    try {
+      const raw = localStorage.getItem("diet_records_v3");
+      if (!raw) {
+        alert("本地没有数据");
+        return;
+      }
 
-    for (const r of data) {
-      const id = `${r.date}_${r.name}`; // ⭐ 唯一ID：日期+姓名
+      const data = JSON.parse(raw);
+      if (!data.length) {
+        alert("数据为空");
+        return;
+      }
 
-      await setDoc(
-        doc(db, "records", id),
-        {
+      let count = 0;
+
+      for (const r of data) {
+        await addDoc(collection(db, "records"), {
           date: r.date,
           name: r.name,
           checkin: r.checkin,
@@ -375,43 +382,60 @@ window.saveToCloud = async function () {
           sleepLate: r.sleepLate,
           exercise: r.exercise,
           extra: Number(r.extra || 0),
-          updatedAt: Date.now()
-        },
-        { merge: true } // ⭐ 覆盖而不是新增
-      );
+          createdAt: Date.now()
+        });
+        count++;
+      }
 
-      count++;
+      alert(`成功保存 ${count} 条记录到云端`);
+    } catch (e) {
+      console.error(e);
+      alert("保存失败，查看控制台");
     }
-
-    alert(`云端已同步 ${count} 条记录（已去重）`);
-  } catch (e) {
-    console.error(e);
-    alert("保存失败，查看控制台");
-  }
-};
+  };
 
   /* ===== 从云端恢复 ===== */
- window.loadFromCloud = async function () {
-  try {
-    const snap = await getDocs(collection(db, "records"));
+  window.loadFromCloud = async function () {
+    try {
+      const q = query(
+        collection(db, "records"),
+        orderBy("createdAt", "asc")
+      );
 
-    if (snap.empty) {
-      data = [];
-      render();
-      return;
+      const snap = await getDocs(q);
+
+      if (snap.empty) {
+        alert("云端没有数据");
+        return;
+      }
+
+      const normalized = snap.docs.map(d => {
+        const r = d.data();
+        return {
+          date: r.date,
+          name: r.name,
+          checkin: r.checkin,
+          weight: r.weight ?? "",
+          diff: r.diff,
+          sleepEarly: r.sleepEarly,
+          sleepLate: r.sleepLate,
+          exercise: r.exercise,
+          extra: r.extra ?? 0
+        };
+      });
+
+      localStorage.setItem(
+        "diet_records_v3",
+        JSON.stringify(normalized)
+      );
+
+      alert(`已从云端恢复 ${normalized.length} 条记录`);
+      location.reload();
+    } catch (e) {
+      console.error(e);
+      alert("恢复失败，查看控制台");
     }
-
-    data = snap.docs
-      .map(d => d.data())
-      .sort((a,b)=>a.date.localeCompare(b.date));
-
-    render();
-  } catch (e) {
-    console.error(e);
-    alert("云端读取失败，查看控制台");
-  }
-};
-
+  };
 </script>
 
 
