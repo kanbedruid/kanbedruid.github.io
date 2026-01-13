@@ -1,318 +1,128 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>减肥积分系统</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<style>
-:root{
-  --bg-main:#f4f6fb;
-  --bg-grad1:#eef2ff;
-  --bg-grad2:#f7f4ff;
-  --card-bg:rgba(255,255,255,.75);
-  --border:rgba(30,30,60,.08);
-  --text-main:#1c1f2a;
-  --text-sub:#5a5f73;
-  --accent:#6b7cff;
-  --plus:#e6f6ee;
-  --minus:#fde8ec;
-  --weekend:#fff6dc;
-}
-
-*{
-  box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,
-  "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-}
-
-body{
-  margin:0;
-  padding:40px 24px 80px;
-  background:linear-gradient(120deg,var(--bg-grad1),var(--bg-grad2),var(--bg-main));
-  color:var(--text-main);
-}
-
-h1{ font-size:40px; margin-bottom:32px; }
-h2{ font-size:20px; margin-bottom:16px; }
-
-.section{
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:24px;
-  margin-bottom:28px;
-}
-
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:14px;
-}
-
-th,td{
-  padding:8px 6px;
-  text-align:center;
-}
-
-th{
-  color:var(--text-sub);
-  border-bottom:1px solid var(--border);
-}
-
-td{ border-bottom:1px solid rgba(0,0,0,.04); }
-tr:last-child td{ border-bottom:none; }
-
-.plus{ background:var(--plus); }
-.minus{ background:var(--minus); }
-.weekend{ background:var(--weekend); }
-
-input[type="number"]{
-  width:64px;
-  border:1px solid var(--border);
-  border-radius:6px;
-  padding:4px;
-}
-
-button{
-  margin:16px 8px 16px 0;
-  padding:10px 18px;
-  border:none;
-  border-radius:10px;
-  background:var(--accent);
-  color:#fff;
-  cursor:pointer;
-}
-
-canvas{ max-height:220px; }
-
-.table-wrap{
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:16px;
-}
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Weight Record</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      max-width: 500px;
+      margin: auto;
+    }
+    input, button {
+      width: 100%;
+      padding: 10px;
+      margin: 6px 0;
+      font-size: 16px;
+    }
+    ul {
+      padding-left: 20px;
+    }
+  </style>
 </head>
-
 <body>
 
-<h1>减肥积分看板</h1>
+  <h2>体重记录</h2>
 
-<div class="section">
-  <h2>积分排行榜</h2>
-  <table>
-    <thead><tr><th>姓名</th><th>本周</th><th>总计</th></tr></thead>
-    <tbody id="rank"></tbody>
-  </table>
-</div>
+  <input id="weightInput" type="number" step="0.1" placeholder="输入体重（kg）" />
+  <button id="saveBtn">保存到云端</button>
+  <button id="loadBtn">从云端恢复</button>
 
-<div class="section">
-  <h2>体重趋势</h2>
-  <canvas id="chart"></canvas>
-</div>
+  <ul id="recordList"></ul>
 
-<button onclick="addDay()">＋ 新增一天</button>
-<button onclick="saveToCloud()">保存到云端</button>
-<button onclick="loadFromCloud()">从云端恢复</button>
+  <!-- Firebase 必须放在 body 末尾，并且使用 type="module" -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import {
+      getFirestore,
+      collection,
+      addDoc,
+      getDocs,
+      query,
+      orderBy,
+      serverTimestamp
+    } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-<div class="table-wrap">
-<table>
-<thead>
-<tr>
-<th>日期</th><th>姓名</th><th>签到</th><th>体重</th>
-<th>变化</th><th>早睡</th><th>熬夜</th>
-<th>运动</th><th>额外</th><th>得分</th>
-</tr>
-</thead>
-<tbody id="records"></tbody>
-</table>
-</div>
+    /* ========= Firebase 配置 ========= */
+    const firebaseConfig = {
+      apiKey: "AIzaSyAhZtgaE8mL3GkxsIj17g1ha-Y5HG02C_A",
+      authDomain: "weight-zqy.firebaseapp.com",
+      projectId: "weight-zqy",
+      storageBucket: "weight-zqy.firebasestorage.app",
+      messagingSenderId: "710580530798",
+      appId: "1:710580530798:web:30e48f089452364c02c07f"
+    };
 
-<script>
-const KEY = "diet_records_v3";
-const START_DATE = "2025-11-14";
-let data = JSON.parse(localStorage.getItem(KEY) || "[]");
-let chart;
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
 
-function isWeekend(d){
-  d=new Date(d); return d.getDay()==0||d.getDay()==6;
-}
-function weekStart(d){
-  d=new Date(d); let day=d.getDay()||7;
-  d.setDate(d.getDate()-day+1);
-  return d.toISOString().slice(0,10);
-}
-function lastWeight(name, idx){
-  for(let i=idx-1;i>=0;i--){
-    if(data[i].name===name && data[i].weight!=="")
-      return Number(data[i].weight);
-  }
-  return null;
-}
-function score(r){
-  let s=0;
-  if(r.checkin) s+=1;
-  if(r.weight!=="") s+=1;
-  if(r.diff===1) s+=2;
-  if(r.diff===-1) s-=2;
-  if(r.sleepEarly) s+=2;
-  if(r.sleepLate) s-=2;
-  if(r.exercise) s+=2;
-  if(isWeekend(r.date)) s*=2;
-  return s + Number(r.extra||0);
-}
+    /* ========= DOM ========= */
+    const weightInput = document.getElementById("weightInput");
+    const saveBtn = document.getElementById("saveBtn");
+    const loadBtn = document.getElementById("loadBtn");
+    const recordList = document.getElementById("recordList");
 
-function addDay(){
-  let next = data.length===0 ? new Date(START_DATE)
-    : new Date(data[data.length-1].date);
-  if(data.length) next.setDate(next.getDate()+1);
-  const d = next.toISOString().slice(0,10);
-  ["千代","小德"].forEach(n=>{
-    data.push({
-      date:d,name:n,checkin:true,weight:"",
-      diff:0,sleepEarly:false,
-      sleepLate:false,exercise:false,extra:0
+    /* ========= 保存到云端 ========= */
+    saveBtn.addEventListener("click", async () => {
+      const weight = weightInput.value.trim();
+
+      if (!weight) {
+        alert("请输入体重");
+        return;
+      }
+
+      try {
+        await addDoc(collection(db, "weights"), {
+          value: Number(weight),
+          createdAt: serverTimestamp()
+        });
+
+        alert("已保存到云端");
+        weightInput.value = "";
+        await loadFromCloud(); // 保存后自动刷新列表
+      } catch (e) {
+        console.error(e);
+        alert("保存失败");
+      }
     });
-  });
-  save();
-}
 
-function update(i,k,v){
-  data[i][k]=v;
-  if(k==="weight"){
-    let prev=lastWeight(data[i].name,i);
-    if(prev!==null){
-      data[i].diff = Number(v)<prev ? 1 : Number(v)>prev ? -1 : 0;
+    /* ========= 从云端恢复 ========= */
+    loadBtn.addEventListener("click", async () => {
+      await loadFromCloud();
+    });
+
+    async function loadFromCloud() {
+      recordList.innerHTML = "";
+
+      try {
+        const q = query(
+          collection(db, "weights"),
+          orderBy("createdAt", "desc")
+        );
+        const snapshot = await getDocs(q);
+
+        if (snapshot.empty) {
+          alert("云端无记录");
+          return;
+        }
+
+        snapshot.forEach(doc => {
+          const li = document.createElement("li");
+          li.textContent = doc.data().value + " kg";
+          recordList.appendChild(li);
+        });
+
+      } catch (e) {
+        console.error(e);
+        alert("读取失败");
+      }
     }
-  }
-  save();
-}
-
-function save(){
-  localStorage.setItem(KEY,JSON.stringify(data));
-  render();
-}
-
-function render(){
-  renderTable();
-  renderRank();
-  renderChart();
-}
-
-function renderTable(){
-  const tb=document.getElementById("records");
-  tb.innerHTML="";
-  data.forEach((r,i)=>{
-    const tr=document.createElement("tr");
-    if(isWeekend(r.date)) tr.classList.add("weekend");
-    tr.innerHTML=`
-<td>${r.date}</td>
-<td>${r.name}</td>
-<td class="${r.checkin?'plus':''}">
-<input type="checkbox" ${r.checkin?'checked':''}
- onchange="update(${i},'checkin',this.checked)">
-</td>
-<td><input type="number" value="${r.weight}"
- onchange="update(${i},'weight',this.value)"></td>
-<td class="${r.diff===1?'plus':r.diff===-1?'minus':''}">
-${r.diff===1?'↓':r.diff===-1?'↑':''}
-</td>
-<td><input type="checkbox" ${r.sleepEarly?'checked':''}
- onchange="update(${i},'sleepEarly',this.checked)"></td>
-<td><input type="checkbox" ${r.sleepLate?'checked':''}
- onchange="update(${i},'sleepLate',this.checked)"></td>
-<td><input type="checkbox" ${r.exercise?'checked':''}
- onchange="update(${i},'exercise',this.checked)"></td>
-<td><input type="number" value="${r.extra}"
- onchange="update(${i},'extra',this.value)"></td>
-<td>${score(r)}</td>`;
-    tb.appendChild(tr);
-  });
-}
-
-function renderRank(){
-  const ws=weekStart(new Date());
-  const sum={};
-  data.forEach(r=>{
-    if(!sum[r.name]) sum[r.name]={w:0,t:0};
-    const s=score(r);
-    sum[r.name].t+=s;
-    if(r.date>=ws) sum[r.name].w+=s;
-  });
-  const tb=document.getElementById("rank");
-  tb.innerHTML="";
-  Object.entries(sum).forEach(([n,v])=>{
-    tb.innerHTML+=`<tr><td>${n}</td><td>${v.w}</td><td>${v.t}</td></tr>`;
-  });
-}
-
-function renderChart(){
-  const labels=[...new Set(data.map(r=>r.date))];
-  const ds={};
-  data.forEach(r=>{
-    if(r.weight==="") return;
-    ds[r.name]??={};
-    ds[r.name][r.date]=Number(r.weight);
-  });
-  const datasets=Object.entries(ds).map(([n,m])=>({
-    label:n,data:labels.map(d=>m[d]??null),
-    spanGaps:true,borderWidth:2
-  }));
-  if(chart) chart.destroy();
-  chart=new Chart(document.getElementById("chart"),{
-    type:"line",
-    data:{labels,datasets},
-    options:{responsive:true}
-  });
-}
-
-render();
-</script>
-
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import {
-  getFirestore, doc, setDoc, getDoc
-} from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyAhZtgaE8mL3GkxsIj17g1ha-Y5HG02C_A",
-  authDomain: "weight-zqy.firebaseapp.com",
-  projectId: "weight-zqy",
-  storageBucket: "weight-zqy.firebasestorage.app",
-  messagingSenderId: "710580530798",
-  appId: "1:710580530798:web:30e48f089452364c02c07f"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-window.saveToCloud = async function(){
-  const raw = localStorage.getItem("diet_records_v3");
-  if(!raw){ alert("本地无数据"); return; }
-  await setDoc(doc(db,"app","latest"),{
-    records: JSON.parse(raw),
-    updatedAt: Date.now()
-  });
-  alert("已保存到云端");
-};
-
-window.loadFromCloud = async function(){
-  const snap = await getDoc(doc(db,"app","latest"));
-  if(!snap.exists()){ alert("云端无数据"); return; }
-  localStorage.setItem("diet_records_v3",
-    JSON.stringify(snap.data().records));
-  location.reload();
-};
-
-// 首次打开自动同步
-if(!localStorage.getItem("diet_records_v3")){
-  setTimeout(loadFromCloud,300);
-}
-</script>
+  </script>
 
 </body>
 </html>
+
 
 
