@@ -351,6 +351,54 @@ render();
   // ⚠️ 关键：明确挂到 window
   window.saveToCloud = async function () {
     console.log("开始保存到云端");
+import { getDocs, collection, query, orderBy } 
+  from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+/* ===== 从云端恢复数据 ===== */
+window.loadFromCloud = async function () {
+  try {
+    const q = query(
+      collection(db, "records"),
+      orderBy("createdAt", "asc")
+    );
+
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      console.log("云端没有数据");
+      return;
+    }
+
+    const data = snap.docs.map(d => d.data());
+
+    // 转换成你本地 data 的结构
+    const normalized = data.map(r => ({
+      date: r.date,
+      name: r.name,
+      checkin: r.checkin,
+      weight: r.weight ?? "",
+      diff: r.diff,
+      sleepEarly: r.sleepEarly,
+      sleepLate: r.sleepLate,
+      exercise: r.exercise,
+      extra: r.extra ?? 0
+    }));
+
+    localStorage.setItem(
+      "diet_records_v3",
+      JSON.stringify(normalized)
+    );
+
+    console.log("已从云端恢复", normalized.length, "条记录");
+
+    // 🔴 核心：通知本地脚本重新渲染
+    location.reload();
+
+  } catch (e) {
+    console.error("云端恢复失败", e);
+    alert("云端恢复失败，查看控制台");
+  }
+};
 
     try {
       const raw = localStorage.getItem("diet_records_v3");
@@ -394,6 +442,7 @@ render();
 
 
 <button onclick="saveToCloud()">保存修改</button>
+<button onclick="loadFromCloud()">从云端恢复</button>
 
 
   
