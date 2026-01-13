@@ -342,11 +342,11 @@ render();
   import {
     getFirestore,
     collection,
-    addDoc,
     getDocs,
     query,
     orderBy,
-    writeBatch
+    writeBatch,
+    doc
   } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -361,7 +361,7 @@ render();
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  /* ===== 保存到云端（修复重复上传问题） ===== */
+  /* ===== 保存到云端（修复重复上传+语法错误） ===== */
   async function saveToCloudImpl() {
     try {
       const raw = localStorage.getItem("diet_records_v3");
@@ -377,22 +377,24 @@ render();
       }
 
       // 步骤1：获取云端旧数据并批量删除（避免重复）
-      const recordsRef = collection(db, "records");
+      const recordsRef = collection(db, "records"); // 正确获取集合引用（路径：records）
       const oldQuery = query(recordsRef);
       const oldSnap = await getDocs(oldQuery);
       
       if (!oldSnap.empty) {
         const batch = writeBatch(db);
-        oldSnap.docs.forEach(doc => {
-          batch.delete(doc.ref);
+        oldSnap.docs.forEach(docItem => {
+          batch.delete(docItem.ref);
         });
         await batch.commit();
       }
 
-      // 步骤2：批量上传本地最新数据
+      // 步骤2：批量上传本地最新数据（修复核心：正确生成文档引用）
       const newBatch = writeBatch(db);
       localData.forEach(r => {
-        const docRef = collection(recordsRef).doc(); // 生成唯一文档引用
+        // 正确语法：doc(集合引用) → 生成该集合下的唯一空白文档引用
+        // 错误原由：之前用了 collection(recordsRef).doc()，recordsRef 已是集合，再次调用 collection 导致路径为空
+        const docRef = doc(recordsRef); 
         newBatch.set(docRef, {
           date: r.date,
           name: r.name,
@@ -419,7 +421,7 @@ render();
   /* ===== 从云端恢复（修复排序+去重问题） ===== */
   async function loadFromCloudImpl() {
     try {
-      const recordsRef = collection(db, "records");
+      const recordsRef = collection(db, "records"); // 正确获取集合引用
       // 修复：按实际记录日期 date 排序
       const q = query(recordsRef, orderBy("date", "asc"));
       const snap = await getDocs(q);
@@ -444,7 +446,7 @@ render();
           extra: r.extra ?? 0
         };
       });
-      
+
       // 步骤2：基于「日期+姓名」去重
       const uniqueMap = new Map();
       cloudData.forEach(item => {
