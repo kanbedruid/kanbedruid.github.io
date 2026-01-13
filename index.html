@@ -13,62 +13,26 @@
             font-family: "Times New Roman", Georgia, serif; /* 哥特风格基础字体 */
         }
 
-        /* 页面容器 - 实现全屏背景与色块布局 */
+        /* 页面容器 - 实现全屏星空背景 */
         body {
             width: 100vw;
             height: 100vh;
             overflow: hidden;
             position: relative;
-            background: #1a1a1d; /* 深灰黑底色，凸显色块层次感 */
+            background: #0a0a10; /* 深邃夜空底色，凸显星空粒子 */
         }
 
-        /* 背景色块 - Jason Anderson 风格，不规则分布 */
-        .bg-shape {
+        /* 星空粒子画布 - 全屏覆盖，层级最低 */
+        #star-canvas {
             position: absolute;
-            border-radius: 2px; /* 平面简约圆角，拒绝圆润感 */
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 1;
-            opacity: 0.7;
-            transition: transform 0.5s ease, opacity 0.3s ease; /* 跟随动效过渡 */
         }
 
-        /* 不同颜色/大小的色块，营造当代艺术感 */
-        .bg-shape-1 {
-            width: 200px;
-            height: 300px;
-            background: #4e4e50;
-            top: 10%;
-            left: 5%;
-            transform: rotate(-15deg);
-        }
-
-        .bg-shape-2 {
-            width: 250px;
-            height: 180px;
-            background: #6f2232; /* 暗红哥特色调，不艳俗 */
-            top: 40%;
-            right: 8%;
-            transform: rotate(25deg);
-        }
-
-        .bg-shape-3 {
-            width: 120px;
-            height: 120px;
-            background: #950740; /* 深玫红，低饱和度不土气 */
-            bottom: 20%;
-            left: 20%;
-            transform: rotate(45deg);
-        }
-
-        .bg-shape-4 {
-            width: 300px;
-            height: 100px;
-            background: #c3073f; /* 猩红，哥特风格点睛色 */
-            bottom: 10%;
-            right: 25%;
-            transform: rotate(-8deg);
-        }
-
-        /* 核心内容容器 - 居中布局，层级高于背景 */
+        /* 核心内容容器 - 居中布局，层级高于星空 */
         .content-container {
             position: absolute;
             top: 50%;
@@ -86,7 +50,7 @@
             color: #f2f2f2;
             margin-bottom: 60px;
             letter-spacing: 8px; /* 哥特风格字符间距 */
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(195, 7, 63, 0.4); /* 哥特暗调阴影 */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 15px rgba(255, 215, 0, 0.5), 0 0 25px rgba(195, 7, 63, 0.4); /* 新增星光/哥特红阴影，匹配星空 */
             position: relative;
         }
 
@@ -118,12 +82,12 @@
             flex-wrap: wrap;
         }
 
-        /* 核心按钮样式 - 简约平面，哥特+色块风格 */
+        /* 核心按钮样式 - 简约平面，哥特+星空风格 */
         .couple-btn {
             padding: 18px 45px;
             font-size: 1.2rem;
             color: #f2f2f2;
-            background: rgba(78, 78, 80, 0.8);
+            background: rgba(15, 15, 25, 0.8);
             border: 2px solid #c3073f;
             border-radius: 2px; /* 平面风格，拒绝大圆角 */
             cursor: pointer;
@@ -134,15 +98,15 @@
             text-decoration: none; /* 去除链接下划线 */
         }
 
-        /* 按钮悬停动效 - 色块提亮，哥特色边框强化 */
+        /* 按钮悬停动效 - 星空暗调提亮，哥特色边框强化 */
         .couple-btn:hover {
             background: rgba(195, 7, 63, 0.9);
             border-color: #f2f2f2;
             transform: translateY(-5px); /* 轻微上移，增强交互感 */
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5), 0 0 20px rgba(255, 215, 0, 0.3); /* 新增星光阴影 */
         }
 
-        /* 按钮点击/激活动效 - 内部色块填充 */
+        /* 按钮点击/激活动效 - 内部浅色遮罩 */
         .couple-btn::after {
             content: "";
             position: absolute;
@@ -192,11 +156,8 @@
     </style>
 </head>
 <body>
-    <!-- Jason Anderson 风格背景色块 -->
-    <div class="bg-shape bg-shape-1"></div>
-    <div class="bg-shape bg-shape-2"></div>
-    <div class="bg-shape bg-shape-3"></div>
-    <div class="bg-shape bg-shape-4"></div>
+    <!-- 星空粒子画布（JS动态生成粒子） -->
+    <canvas id="star-canvas"></canvas>
 
     <!-- 核心内容区域 -->
     <div class="content-container">
@@ -210,25 +171,158 @@
     </div>
 
     <script>
-        // 鼠标跟随背景动效 - 实现色块随鼠标移动轻微偏移，增强交互感
-        document.addEventListener('mousemove', function(e) {
-            // 获取所有背景色块
-            const bgShapes = document.querySelectorAll('.bg-shape');
-            // 获取窗口宽高
-            const winWidth = window.innerWidth;
-            const winHeight = window.innerHeight;
+        // 星空粒子核心配置
+        const config = {
+            particleCount: 2000, // 大量粒子，营造浓密星空
+            particleSize: 1.2,   // 粒子大小（星星散点，不突兀）
+            maxDistance: 120,    // 鼠标影响范围（粒子开始汇聚的距离）
+            moveSpeed: 0.08,     // 粒子移动速度（汇聚/归位平滑）
+            heartFactor: 0.6,    // 爱心形状汇聚强度
+            avoidMouseDistance: 20 // 粒子与鼠标的安全距离（不碰到鼠标）
+        };
 
-            // 遍历色块，添加跟随动效（每个色块偏移量不同，营造层次感）
-            bgShapes.forEach((shape, index) => {
-                // 计算偏移比例（index区分不同色块，避免动效一致）
-                const moveX = (e.clientX - winWidth / 2) * (0.03 + index * 0.01);
-                const moveY = (e.clientY - winHeight / 2) * (0.03 + index * 0.01);
+        // 获取画布与上下文
+        const canvas = document.getElementById('star-canvas');
+        const ctx = canvas.getContext('2d');
+        let canvasWidth = window.innerWidth;
+        let canvasHeight = window.innerHeight;
+        canvas.width = canvasWidth;
+        canvas.height = canvasHeight;
 
-                // 应用偏移变换（保留原有旋转角度，添加平移）
-                const originalTransform = shape.style.transform || getComputedStyle(shape).transform;
-                shape.style.transform = `${originalTransform} translate(${moveX}px, ${moveY}px)`;
+        // 存储所有粒子对象
+        let particles = [];
+
+        // 鼠标位置变量
+        let mouse = {
+            x: null,
+            y: null,
+            isActive: false // 标记鼠标是否在画布内
+        };
+
+        // 粒子类定义
+        class StarParticle {
+            constructor() {
+                // 初始化粒子初始位置（全屏随机分布，形成星空）
+                this.originalX = Math.random() * canvasWidth;
+                this.originalY = Math.random() * canvasHeight;
+                // 当前位置（初始与原始位置一致）
+                this.x = this.originalX;
+                this.y = this.originalY;
+                // 粒子亮度（营造星空层次感，明暗不一）
+                this.brightness = Math.random() * 0.7 + 0.3;
+                // 粒子颜色（暖白+淡金+浅红，匹配情侣+哥特风格）
+                this.color = `rgba(255, ${Math.floor(Math.random() * 50 + 205)}, ${Math.floor(Math.random() * 100 + 155)}, ${this.brightness})`;
+            }
+
+            // 计算爱心形状坐标（基于鼠标位置，散点组成爱心，不重合）
+            getHeartPosition(targetX, targetY) {
+                // 爱心公式：(x^2 + y^2 - 1)^3 - x^2 * y^3 = 0（归一化处理）
+                const offsetX = (this.originalX - canvasWidth / 2) / 300;
+                const offsetY = (this.originalY - canvasHeight / 2) / 300 * -1; // 翻转y轴，爱心正向
+                const heartX = (Math.pow(offsetX, 2) + Math.pow(offsetY, 2) - 1) ** 3 - Math.pow(offsetX, 2) * Math.pow(offsetY, 3);
+                // 基于爱心公式偏移，形成围绕鼠标的爱心散点
+                const heartOffsetX = heartX * 150 * config.heartFactor;
+                const heartOffsetY = -heartX * 120 * config.heartFactor;
+                return {
+                    x: targetX + heartOffsetX,
+                    y: targetY + heartOffsetY
+                };
+            }
+
+            // 更新粒子位置（汇聚爱心/归位，不碰到鼠标，不相互重合）
+            update() {
+                if (mouse.isActive) {
+                    // 1. 计算粒子与鼠标的距离
+                    const dx = this.x - mouse.x;
+                    const dy = this.y - mouse.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+
+                    // 2. 确保粒子不碰到鼠标（保持安全距离）
+                    if (distance < config.avoidMouseDistance) {
+                        const angle = Math.atan2(dy, dx);
+                        this.x = mouse.x + Math.cos(angle) * config.avoidMouseDistance;
+                        this.y = mouse.y + Math.sin(angle) * config.avoidMouseDistance;
+                    }
+
+                    // 3. 鼠标影响范围内，粒子汇聚成爱心形状（散点，不重合）
+                    if (distance < config.maxDistance) {
+                        const heartPos = this.getHeartPosition(mouse.x, mouse.y);
+                        // 平滑移动到爱心对应位置（保留自身随机性，避免重合）
+                        this.x += (heartPos.x - this.x) * config.moveSpeed + (Math.random() - 0.5) * 0.5;
+                        this.y += (heartPos.y - this.y) * config.moveSpeed + (Math.random() - 0.5) * 0.5;
+                    } else {
+                        // 4. 超出影响范围，粒子归位到原始星空位置
+                        this.x += (this.originalX - this.x) * config.moveSpeed;
+                        this.y += (this.originalY - this.y) * config.moveSpeed;
+                    }
+                } else {
+                    // 无鼠标活动，粒子归位
+                    this.x += (this.originalX - this.x) * config.moveSpeed;
+                    this.y += (this.originalY - this.y) * config.moveSpeed;
+                }
+
+                // 确保粒子始终在画布内（避免溢出）
+                this.x = Math.max(0, Math.min(canvasWidth, this.x));
+                this.y = Math.max(0, Math.min(canvasHeight, this.y));
+            }
+
+            // 绘制粒子（星星散点，不重合，平面简约）
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, config.particleSize, 0, Math.PI * 2);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+                ctx.closePath();
+            }
+        }
+
+        // 初始化粒子数组（生成大量星空粒子）
+        function initParticles() {
+            particles = [];
+            for (let i = 0; i < config.particleCount; i++) {
+                particles.push(new StarParticle());
+            }
+        }
+
+        // 动画循环（更新+绘制粒子）
+        function animate() {
+            // 半透明清屏，营造轻微拖影（星空更灵动，无重影残留）
+            ctx.fillStyle = 'rgba(10, 10, 16, 0.1)';
+            ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+
+            // 更新并绘制所有粒子
+            particles.forEach(particle => {
+                particle.update();
+                particle.draw();
             });
+
+            requestAnimationFrame(animate);
+        }
+
+        // 监听鼠标移动（获取鼠标位置，标记鼠标活跃）
+        document.addEventListener('mousemove', (e) => {
+            mouse.x = e.clientX;
+            mouse.y = e.clientY;
+            mouse.isActive = true;
         });
+
+        // 监听鼠标离开画布（粒子停止汇聚，开始归位）
+        document.addEventListener('mouseleave', () => {
+            mouse.isActive = false;
+        });
+
+        // 监听窗口大小变化（重置画布尺寸，重新初始化粒子）
+        window.addEventListener('resize', () => {
+            canvasWidth = window.innerWidth;
+            canvasHeight = window.innerHeight;
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            initParticles();
+        });
+
+        // 初始化并启动动画
+        initParticles();
+        animate();
     </script>
 </body>
 </html>
