@@ -2,19 +2,17 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>Xiaode & Chiyo</title>
+  <title>小德 × 千代</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-  <!-- 字体：冷静 + 哥特感 -->
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+  <!-- 中文 + 冷静艺术感字体 -->
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
   <style>
     :root {
-      --bg: #0e0e11;
-      --fg: #e6e6eb;
-      --muted: #9a9aa3;
-      --accent: #b9a7ff;
-      --accent-dark: #6f63d9;
+      --fg: #e8e8f0;
+      --muted: #a0a0b8;
+      --accent: #b7a8ff;
     }
 
     * {
@@ -25,13 +23,15 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      background: var(--bg);
+      overflow: hidden;
       color: var(--fg);
       font-family: Inter, sans-serif;
-      overflow: hidden;
+      background:
+        radial-gradient(1200px 800px at 20% 10%, #1b1f3b 0%, transparent 60%),
+        radial-gradient(1000px 700px at 80% 20%, #2a174a 0%, transparent 65%),
+        linear-gradient(180deg, #090b16, #05060c);
     }
 
-    /* 背景动态层 */
     canvas {
       position: fixed;
       inset: 0;
@@ -49,36 +49,36 @@
 
     .container {
       text-align: center;
-      max-width: 720px;
+      max-width: 760px;
       padding: 40px;
     }
 
     h1 {
-      font-family: "Playfair Display", serif;
-      font-size: 48px;
-      letter-spacing: 2px;
-      margin-bottom: 16px;
+      font-family: "Noto Serif SC", serif;
+      font-size: 46px;
+      letter-spacing: 4px;
+      margin-bottom: 12px;
     }
 
     .subtitle {
       font-size: 14px;
-      letter-spacing: 4px;
+      letter-spacing: 6px;
       color: var(--muted);
-      margin-bottom: 64px;
+      margin-bottom: 72px;
     }
 
     .buttons {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 32px;
+      gap: 36px;
     }
 
     .btn {
       position: relative;
-      padding: 32px 24px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.02);
-      backdrop-filter: blur(6px);
+      padding: 34px 26px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(8px);
       cursor: pointer;
       overflow: hidden;
       transition: transform 0.3s ease, border-color 0.3s ease;
@@ -90,8 +90,8 @@
       inset: 0;
       background: radial-gradient(
         circle at var(--x, 50%) var(--y, 50%),
-        rgba(185,167,255,0.25),
-        transparent 60%
+        rgba(183,168,255,0.35),
+        transparent 65%
       );
       opacity: 0;
       transition: opacity 0.3s;
@@ -102,44 +102,40 @@
     }
 
     .btn:hover {
-      transform: translateY(-4px);
+      transform: translateY(-5px);
       border-color: var(--accent);
     }
 
     .btn:active {
-      transform: translateY(0) scale(0.98);
+      transform: scale(0.97);
     }
 
     .btn-title {
-      font-family: "Playfair Display", serif;
+      font-family: "Noto Serif SC", serif;
       font-size: 22px;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
     }
 
     .btn-desc {
       font-size: 13px;
       color: var(--muted);
-      line-height: 1.6;
+      line-height: 1.7;
     }
 
     footer {
       position: fixed;
-      bottom: 24px;
+      bottom: 22px;
       width: 100%;
       text-align: center;
       font-size: 12px;
       color: var(--muted);
-      letter-spacing: 2px;
+      letter-spacing: 3px;
       z-index: 1;
     }
 
     @media (max-width: 640px) {
-      h1 {
-        font-size: 36px;
-      }
-      .buttons {
-        grid-template-columns: 1fr;
-      }
+      h1 { font-size: 34px; }
+      .buttons { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -150,25 +146,23 @@
 
 <main>
   <div class="container">
-    <h1>XIAODE × CHIYO</h1>
-    <div class="subtitle">TWO BODIES · ONE LIFE</div>
+    <h1>小德 × 千代</h1>
+    <div class="subtitle">共同生活的记录</div>
 
     <div class="buttons">
-      <!-- 减肥记录页面 -->
       <div class="btn" onclick="location.href='diet/index.html'">
-        <div class="btn-title">身体记录</div>
+        <div class="btn-title">身体与时间</div>
         <div class="btn-desc">
-          体重 · 习惯 · 坚持<br/>
-          一起对抗时间
+          体重 · 作息 · 习惯<br/>
+          两个人的长期实验
         </div>
       </div>
 
-      <!-- 美食榜单页面 -->
       <div class="btn" onclick="location.href='food/index.html'">
-        <div class="btn-title">食物排名</div>
+        <div class="btn-title">食物排行榜</div>
         <div class="btn-desc">
           味觉 · 选择 · 记忆<br/>
-          爱的另一种形式
+          生活偏好的痕迹
         </div>
       </div>
     </div>
@@ -176,11 +170,10 @@
 </main>
 
 <footer>
-  ARCHIVE OF A SHARED LIFE
+  一个正在发生的关系
 </footer>
 
 <script>
-  /* ===== 背景：哥特感抽象几何漂浮 ===== */
   const canvas = document.getElementById("bg");
   const ctx = canvas.getContext("2d");
 
@@ -192,41 +185,55 @@
   window.addEventListener("resize", resize);
   resize();
 
-  const shapes = Array.from({ length: 60 }, () => ({
+  /* ===== 浮动星点（数量增加） ===== */
+  const points = Array.from({ length: 140 }, () => ({
     x: Math.random() * w,
     y: Math.random() * h,
-    r: Math.random() * 1.5 + 0.5,
-    vx: (Math.random() - 0.5) * 0.2,
-    vy: (Math.random() - 0.5) * 0.2
+    r: Math.random() * 1.8 + 0.6,
+    vx: (Math.random() - 0.5) * 0.25,
+    vy: (Math.random() - 0.5) * 0.25
   }));
 
-  let mouse = { x: w / 2, y: h / 2 };
+  /* ===== 极光尾迹 ===== */
+  const trails = [];
 
   window.addEventListener("mousemove", e => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
+    trails.push({
+      x: e.clientX,
+      y: e.clientY,
+      life: 60
+    });
   });
 
   function draw() {
     ctx.clearRect(0, 0, w, h);
 
-    for (const p of shapes) {
+    // 星点
+    for (const p of points) {
       p.x += p.vx;
       p.y += p.vy;
 
       if (p.x < 0 || p.x > w) p.vx *= -1;
       if (p.y < 0 || p.y > h) p.vy *= -1;
 
-      const dx = p.x - mouse.x;
-      const dy = p.y - mouse.y;
-      const dist = Math.sqrt(dx * dx + dy * dy);
-
-      const alpha = Math.max(0, 0.6 - dist / 400);
-
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r + alpha * 2, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(185,167,255,${alpha})`;
+      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+      ctx.fillStyle = "rgba(200,190,255,0.5)";
       ctx.fill();
+    }
+
+    // 极光尾迹
+    for (let i = trails.length - 1; i >= 0; i--) {
+      const t = trails[i];
+      t.life--;
+
+      const alpha = t.life / 60;
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 18 * alpha, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(150,200,255,${alpha * 0.35})`;
+      ctx.fill();
+
+      if (t.life <= 0) trails.splice(i, 1);
     }
 
     requestAnimationFrame(draw);
@@ -234,7 +241,7 @@
 
   draw();
 
-  /* 按钮光斑跟随鼠标 */
+  /* 按钮光斑跟随 */
   document.querySelectorAll(".btn").forEach(btn => {
     btn.addEventListener("mousemove", e => {
       const rect = btn.getBoundingClientRect();
@@ -246,3 +253,5 @@
 
 </body>
 </html>
+
+
