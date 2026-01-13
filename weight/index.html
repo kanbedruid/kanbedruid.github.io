@@ -349,7 +349,23 @@ render();
   const db = getFirestore(app);
 
   // 后续所有「保存 / 读取」都基于 db
+  const saveBtn = document.getElementById("saveBtn");
+
+saveBtn.addEventListener("click", async () => {
+  await addDoc(collection(db, "records"), {
+    date: "2025-11-14",
+    person: "千代",
+    weight: 60,
+    score: 3,
+    timestamp: Date.now()
+  });
+
+  alert("已成功保存到 Firebase");
+});
+
 </script>
+<button id="saveBtn">保存今日记录</button>
+
 
   
 </body>
