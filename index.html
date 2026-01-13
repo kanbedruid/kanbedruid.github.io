@@ -1,154 +1,163 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>Kanbedruid</title>
-<style>
-html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    overflow: hidden;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto;
-    color: white;
-}
+  <meta charset="UTF-8" />
+  <title>Zhong / Notes</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: -1;
-}
-
-.center {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    text-align: center;
-}
-
-.card {
-    background: rgba(20, 20, 40, 0.6);
-    backdrop-filter: blur(12px);
-    border-radius: 18px;
-    padding: 36px 48px;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
-}
-
-h1 {
-    margin: 0 0 10px 0;
-    font-weight: 600;
-    letter-spacing: 1px;
-}
-
-p {
-    margin: 0 0 30px 0;
-    opacity: 0.8;
-}
-
-a.button {
-    display: inline-block;
-    padding: 12px 26px;
-    border-radius: 999px;
-    background: linear-gradient(135deg, #8faaff, #b18cff);
-    color: #000;
-    text-decoration: none;
-    font-weight: 500;
-    transition: transform 0.2s ease;
-}
-
-a.button:hover {
-    transform: scale(1.05);
-}
-</style>
-</head>
-<body>
-
-<canvas id="starfield"></canvas>
-
-<div class="center">
-    <div class="card">
-        <h1>Kanbedruid</h1>
-        <p>Design · Tools · Notes</p>
-        <a class="button" href="./calculator/">进入计算器</a>
-    </div>
-</div>
-
-<script>
-const canvas = document.getElementById("starfield");
-const ctx = canvas.getContext("2d");
-
-let w, h;
-function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-}
-window.addEventListener("resize", resize);
-resize();
-
-const mouse = { x: null, y: null };
-window.addEventListener("mousemove", e => {
-    mouse.x = e.clientX;
-    mouse.y = e.clientY;
-});
-window.addEventListener("mouseleave", () => {
-    mouse.x = null;
-    mouse.y = null;
-});
-
-const STAR_COUNT = 200;
-const stars = [];
-
-for (let i = 0; i < STAR_COUNT; i++) {
-    const x = Math.random() * w;
-    const y = Math.random() * h;
-    stars.push({
-        x, y,
-        ox: x, oy: y,
-        vx: 0, vy: 0
-    });
-}
-
-function animate() {
-    ctx.clearRect(0, 0, w, h);
-
-    for (const s of stars) {
-        if (mouse.x !== null) {
-            const dx = s.x - mouse.x;
-            const dy = s.y - mouse.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
-            const radius = 120;
-
-            if (dist < radius) {
-                const force = (radius - dist) / radius;
-                s.vx += (dx / dist) * force * 2;
-                s.vy += (dy / dist) * force * 2;
-            }
-        }
-
-        // 回归原位（“水面复原”）
-        s.vx += (s.ox - s.x) * 0.002;
-        s.vy += (s.oy - s.y) * 0.002;
-
-        s.vx *= 0.92;
-        s.vy *= 0.92;
-
-        s.x += s.vx;
-        s.y += s.vy;
-
-        ctx.beginPath();
-        ctx.arc(s.x, s.y, 1.2, 0, Math.PI * 2);
-        ctx.fillStyle = "rgba(255,255,255,0.8)";
-        ctx.fill();
+  <style>
+    :root {
+      --bg: #0f1115;
+      --card: rgba(255, 255, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.12);
+      --text-main: #ffffff;
+      --text-sub: rgba(255, 255, 255, 0.6);
+      --accent: #7aa2ff;
     }
 
-    requestAnimationFrame(animate);
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
 
-animate();
-</script>
+    body {
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text-main);
+      overflow-x: hidden;
+    }
 
+    /* ===== 动态背景 ===== */
+    .bg {
+      position: fixed;
+      inset: 0;
+      background:
+        radial-gradient(
+          600px circle at var(--x, 50%) var(--y, 50%),
+          rgba(122, 162, 255, 0.15),
+          transparent 40%
+        );
+      pointer-events: none;
+      transition: background 0.05s linear;
+    }
+
+    /* ===== 页面布局 ===== */
+    main {
+      max-width: 960px;
+      margin: 0 auto;
+      padding: 96px 24px 120px;
+    }
+
+    header {
+      margin-bottom: 72px;
+    }
+
+    header h1 {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    header p {
+      margin-top: 16px;
+      font-size: 18px;
+      color: var(--text-sub);
+      max-width: 520px;
+      line-height: 1.6;
+    }
+
+    /* ===== 分类卡片 ===== */
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 24px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 28px;
+      backdrop-filter: blur(10px);
+      transition: transform 0.25s ease, border-color 0.25s ease;
+      cursor: pointer;
+    }
+
+    .card:hover {
+      transform: translateY(-6px);
+      border-color: var(--accent);
+    }
+
+    .card h2 {
+      font-size: 20px;
+      margin-bottom: 12px;
+    }
+
+    .card p {
+      font-size: 14px;
+      color: var(--text-sub);
+      line-height: 1.6;
+    }
+
+    footer {
+      margin-top: 96px;
+      font-size: 14px;
+      color: var(--text-sub);
+      opacity: 0.6;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="bg"></div>
+
+  <main>
+    <header>
+      <h1>Zhong</h1>
+      <p>
+        个人记录站点。用于整理想法、游戏设计、实验项目与零散笔记。
+      </p>
+    </header>
+
+    <section class="grid">
+      <div class="card">
+        <h2>Game Design</h2>
+        <p>机制、系统拆解、原型想法与失败记录。</p>
+      </div>
+
+      <div class="card">
+        <h2>Projects</h2>
+        <p>个人项目、实验性作品与进行中的原型。</p>
+      </div>
+
+      <div class="card">
+        <h2>Notes</h2>
+        <p>随手记录的思考、阅读摘要与灵感。</p>
+      </div>
+
+      <div class="card">
+        <h2>About</h2>
+        <p>背景、联系方式以及一些无关紧要的信息。</p>
+      </div>
+    </section>
+
+    <footer>
+      © 2026 Zhong · GitHub Pages
+    </footer>
+  </main>
+
+  <script>
+    const bg = document.querySelector(".bg");
+
+    window.addEventListener("mousemove", (e) => {
+      const x = (e.clientX / window.innerWidth) * 100;
+      const y = (e.clientY / window.innerHeight) * 100;
+      bg.style.setProperty("--x", x + "%");
+      bg.style.setProperty("--y", y + "%");
+    });
+  </script>
 </body>
 </html>
-
