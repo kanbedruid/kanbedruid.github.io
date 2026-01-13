@@ -81,7 +81,7 @@ tr:hover td {
 <div id="table">加载中…</div>
 
 <script>
-fetch("data.xlsx")
+fetch("饭店评分.xlsx")
   .then(r => r.arrayBuffer())
   .then(buf => {
     const wb = XLSX.read(buf, { type: "array" });
