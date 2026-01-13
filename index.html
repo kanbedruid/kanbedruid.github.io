@@ -1,188 +1,272 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <title>神户小德 / Index</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8">
+<title>小德 × 千代</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <style>
-    :root {
-    
-      --bg-main: #f4f6fb;          /* 主背景：冷浅灰蓝 */
-      --bg-gradient-1: #eef2ff;    /* 渐变蓝 */
-      --bg-gradient-2: #f7f4ff;    /* 渐变紫 */
-      --card-bg: rgba(255, 255, 255, 0.75);
-      --border: rgba(20, 20, 40, 0.08);
+<style>
+:root{
+  --bg-dark:#15161a;
+  --bg-mid:#1e2028;
+  --bg-light:#2a2d3a;
 
-      --text-main: #1c1f2a;
-      --text-sub: #5a5f73;
-      --accent: #6b7cff;         
-    }
+  --accent-red:#b94a48;
+  --accent-blue:#4a6fb9;
+  --accent-gold:#c7a35a;
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont,
-        "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
-    }
+  --text-main:#f2f2f4;
+  --text-sub:rgba(255,255,255,.65);
+  --border:rgba(255,255,255,.12);
+}
 
-    body {
-      min-height: 100vh;
-      background:
-        linear-gradient(
-          120deg,
-          var(--bg-gradient-1),
-          var(--bg-gradient-2),
-          var(--bg-main)
-        );
-      color: var(--text-main);
-      overflow-x: hidden;
-    }
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  font-family:-apple-system,BlinkMacSystemFont,
+  "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+}
 
-    /* ===== 鼠标交互背景 ===== */
-    .bg {
-      position: fixed;
-      inset: 0;
-      background:
-        radial-gradient(
-          520px circle at var(--x, 50%) var(--y, 50%),
-          rgba(107, 124, 255, 0.25),
-          transparent 45%
-        );
-      pointer-events: none;
-      transition: background 0.06s linear;
-    }
+body{
+  min-height:100vh;
+  background:
+    linear-gradient(135deg,var(--bg-dark),var(--bg-mid),var(--bg-light));
+  color:var(--text-main);
+}
 
-    main {
-      max-width: 980px;
-      margin: 0 auto;
-      padding: 96px 24px 120px;
-    }
+/* ===== 抽象色块背景 ===== */
+.bg-art{
+  position:fixed;
+  inset:0;
+  background:
+    linear-gradient(120deg,
+      rgba(185,74,72,.25) 0%,
+      transparent 40%),
+    linear-gradient(300deg,
+      rgba(74,111,185,.25) 0%,
+      transparent 45%);
+  pointer-events:none;
+}
 
-    header {
-      margin-bottom: 72px;
-    }
+/* ===== 页面主体 ===== */
+main{
+  max-width:1100px;
+  margin:0 auto;
+  padding:80px 24px 120px;
+}
 
-    header h1 {
-      font-size: 52px;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-    }
+/* ===== 标题 ===== */
+header{
+  margin-bottom:72px;
+}
 
-    header p {
-      margin-top: 18px;
-      font-size: 18px;
-      color: var(--text-sub);
-      max-width: 560px;
-      line-height: 1.7;
-    }
+header h1{
+  font-size:52px;
+  letter-spacing:-.03em;
+  font-weight:700;
+}
 
-    /* ===== 卡片网格 ===== */
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-      gap: 24px;
-    }
+header p{
+  margin-top:16px;
+  font-size:18px;
+  color:var(--text-sub);
+  max-width:520px;
+}
 
-    /* 用 a 做按钮 */
-    .card {
-      display: block;
-      text-decoration: none;
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 18px;
-      padding: 30px;
-      backdrop-filter: blur(14px);
-      transition:
-        transform 0.25s ease,
-        box-shadow 0.25s ease,
-        border-color 0.25s ease;
-      color: inherit;
-    }
+/* ===== 区块容器 ===== */
+.section{
+  margin-bottom:72px;
+}
 
-    .card:hover {
-      transform: translateY(-6px);
-      border-color: var(--accent);
-      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
-    }
+.section-title{
+  font-size:22px;
+  margin-bottom:20px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
 
-    .card h2 {
-      font-size: 20px;
-      margin-bottom: 12px;
-    }
+.section-title::before{
+  content:"✠";
+  color:var(--accent-gold);
+  font-size:18px;
+}
 
-    .card p {
-      font-size: 14px;
-      color: var(--text-sub);
-      line-height: 1.6;
-    }
+/* ===== 相册 ===== */
+.album{
+  background:rgba(0,0,0,.35);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:20px;
+  backdrop-filter:blur(12px);
+}
 
-    footer {
-      margin-top: 96px;
-      font-size: 14px;
-      color: var(--text-sub);
-      opacity: 0.7;
-    }
-  </style>
+.album-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:16px;
+}
+
+.album-header h3{
+  font-size:18px;
+}
+
+.album-header input{
+  color:var(--text-sub);
+}
+
+.photos{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+  gap:14px;
+}
+
+.photos img{
+  width:100%;
+  height:140px;
+  object-fit:cover;
+  border-radius:12px;
+  border:1px solid var(--border);
+}
+
+/* ===== 跳转按钮 ===== */
+.links{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+  gap:24px;
+}
+
+.link-card{
+  text-decoration:none;
+  color:inherit;
+  background:
+    linear-gradient(135deg,
+      rgba(185,74,72,.25),
+      rgba(74,111,185,.25));
+  border:1px solid var(--border);
+  border-radius:22px;
+  padding:36px;
+  transition:transform .25s ease,border-color .25s ease;
+}
+
+.link-card:hover{
+  transform:translateY(-6px);
+  border-color:var(--accent-gold);
+}
+
+.link-card h3{
+  font-size:22px;
+  margin-bottom:12px;
+}
+
+.link-card p{
+  font-size:14px;
+  color:var(--text-sub);
+}
+
+/* ===== 哥特装饰线 ===== */
+.divider{
+  margin:80px 0;
+  height:1px;
+  background:
+    linear-gradient(to right,
+      transparent,
+      var(--accent-gold),
+      transparent);
+}
+</style>
 </head>
 
 <body>
-  <div class="bg"></div>
+<div class="bg-art"></div>
 
-  <main>
-    <header>
-      <h1>神户小德</h1>
-      <p>
-        个人主页
-      </p>
-    </header>
+<main>
+  <header>
+    <h1>小德 × 千代</h1>
+    <p>共同生活的记录页面。不是纪念册，而是持续发生的现实。</p>
+  </header>
 
-    <section class="grid">
-      <!-- 外链示例 -->
-      <a class="card" href="https://liferestart.syaro.io/public/" target="_blank">
-        <h2>人生重开模拟器</h2>
-        <p>网页游戏，随机生成你的新人生</p>
+  <!-- 情侣相册 -->
+  <div class="section">
+    <div class="section-title">情侣相册</div>
+
+    <div class="album" data-key="memory">
+      <div class="album-header">
+        <h3>记忆</h3>
+        <input type="file" multiple accept="image/*">
+      </div>
+      <div class="photos"></div>
+    </div>
+
+    <div style="height:24px"></div>
+
+    <div class="album" data-key="daily">
+      <div class="album-header">
+        <h3>日常</h3>
+        <input type="file" multiple accept="image/*">
+      </div>
+      <div class="photos"></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- 功能跳转 -->
+  <div class="section">
+    <div class="section-title">记录入口</div>
+
+    <div class="links">
+      <a class="link-card" href="./diet.html">
+        <h3>减肥记录</h3>
+        <p>体重、积分与阶段性变化。</p>
       </a>
 
-      <a class="card" href="https://kanbedruid.github.io/calculator/" target="_blank">
-        <h2>人群占比计算器</h2>
-        <p>小工具，看看你的条件能击败全国多少人</p>
+      <a class="link-card" href="./food.html">
+        <h3>美食榜单</h3>
+        <p>一起吃过、想再吃的、还没吃的。</p>
       </a>
+    </div>
+  </div>
+</main>
 
-   
-    </section>
-<section class="grid" style="margin-top:48px">
-  <a class="card" href="https://space.bilibili.com/7661811" target="_blank">
-    <h2>Bilibili</h2>
-  </a>
+<script>
+function loadAlbum(album){
+  const key = album.dataset.key;
+  const box = album.querySelector(".photos");
+  const input = album.querySelector("input");
+  let imgs = JSON.parse(localStorage.getItem("album_"+key) || "[]");
 
-  <a class="card" href="https://bgm.tv/user/soranomethod" target="_blank">
-    <h2>Bangumi</h2>
-  </a>
-
-  <a class="card" href="https://www.pixiv.net/users/13854136" target="_blank">
-    <h2>Pixiv</h2>
-  </a>
-</section>
-
-    
-    <footer>
-      © 2026 神户小德 · GitHub Pages
-    </footer>
-  </main>
-
-  <script>
-    const bg = document.querySelector(".bg");
-
-    window.addEventListener("mousemove", (e) => {
-      const x = (e.clientX / window.innerWidth) * 100;
-      const y = (e.clientY / window.innerHeight) * 100;
-      bg.style.setProperty("--x", x + "%");
-      bg.style.setProperty("--y", y + "%");
+  function render(){
+    box.innerHTML="";
+    imgs.forEach(src=>{
+      const img=document.createElement("img");
+      img.src=src;
+      box.appendChild(img);
     });
-  </script>
+  }
+
+  input.onchange=()=>{
+    [...input.files].forEach(file=>{
+      const reader=new FileReader();
+      reader.onload=e=>{
+        imgs.push(e.target.result);
+        localStorage.setItem("album_"+key,JSON.stringify(imgs));
+        render();
+      };
+      reader.readAsDataURL(file);
+    });
+    input.value="";
+  };
+
+  render();
+}
+
+document.querySelectorAll(".album").forEach(loadAlbum);
+</script>
 </body>
 </html>
+
 
 
