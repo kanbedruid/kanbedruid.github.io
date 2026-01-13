@@ -1,309 +1,234 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>小德 × 千代</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>小德 & 千代 | 情侣专属页面</title>
+    <style>
+        /* 全局样式重置与基础配置 */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: "Times New Roman", Georgia, serif; /* 哥特风格基础字体 */
+        }
 
-<style>
-:root{
-  --bg:#0f1116;
-  --panel:#171922;
-  --border:rgba(255,255,255,.14);
+        /* 页面容器 - 实现全屏背景与色块布局 */
+        body {
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
+            background: #1a1a1d; /* 深灰黑底色，凸显色块层次感 */
+        }
 
-  --red:#c24a4a;
-  --blue:#4a6fc2;
-  --gold:#c6a25e;
+        /* 背景色块 - Jason Anderson 风格，不规则分布 */
+        .bg-shape {
+            position: absolute;
+            border-radius: 2px; /* 平面简约圆角，拒绝圆润感 */
+            z-index: 1;
+            opacity: 0.7;
+            transition: transform 0.5s ease, opacity 0.3s ease; /* 跟随动效过渡 */
+        }
 
-  --text-main:#f3f3f4;
-  --text-sub:rgba(255,255,255,.65);
-}
+        /* 不同颜色/大小的色块，营造当代艺术感 */
+        .bg-shape-1 {
+            width: 200px;
+            height: 300px;
+            background: #4e4e50;
+            top: 10%;
+            left: 5%;
+            transform: rotate(-15deg);
+        }
 
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  font-family:-apple-system,BlinkMacSystemFont,
-  "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
-}
+        .bg-shape-2 {
+            width: 250px;
+            height: 180px;
+            background: #6f2232; /* 暗红哥特色调，不艳俗 */
+            top: 40%;
+            right: 8%;
+            transform: rotate(25deg);
+        }
 
-body{
-  background:var(--bg);
-  color:var(--text-main);
-  overflow-x:hidden;
-}
+        .bg-shape-3 {
+            width: 120px;
+            height: 120px;
+            background: #950740; /* 深玫红，低饱和度不土气 */
+            bottom: 20%;
+            left: 20%;
+            transform: rotate(45deg);
+        }
 
-/* ===== 抽象几何背景层 ===== */
-.art-bg{
-  position:fixed;
-  inset:0;
-  z-index:-1;
-}
+        .bg-shape-4 {
+            width: 300px;
+            height: 100px;
+            background: #c3073f; /* 猩红，哥特风格点睛色 */
+            bottom: 10%;
+            right: 25%;
+            transform: rotate(-8deg);
+        }
 
-.shape{
-  position:absolute;
-  opacity:.85;
-  mix-blend-mode:screen;
-}
+        /* 核心内容容器 - 居中布局，层级高于背景 */
+        .content-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            text-align: center;
+            width: 100%;
+            padding: 0 20px;
+        }
 
-.shape.red{
-  background:var(--red);
-  width:420px;height:420px;
-  transform:rotate(12deg);
-  top:-120px;left:-80px;
-}
+        /* 情侣标题 - 哥特风格装饰，简约不浮夸 */
+        .couple-title {
+            font-size: 3.5rem;
+            color: #f2f2f2;
+            margin-bottom: 60px;
+            letter-spacing: 8px; /* 哥特风格字符间距 */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8), 0 0 10px rgba(195, 7, 63, 0.4); /* 哥特暗调阴影 */
+            position: relative;
+        }
 
-.shape.blue{
-  background:var(--blue);
-  width:520px;height:320px;
-  transform:rotate(-18deg);
-  top:180px;right:-160px;
-}
+        /* 标题哥特风格装饰线 */
+        .couple-title::before,
+        .couple-title::after {
+            content: "";
+            position: absolute;
+            width: 150px;
+            height: 2px;
+            background: linear-gradient(to right, transparent, #c3073f, transparent);
+            top: 50%;
+            transform: translateY(-50%);
+        }
 
-.shape.gold{
-  background:var(--gold);
-  width:260px;height:680px;
-  transform:rotate(6deg);
-  bottom:-120px;left:45%;
-}
+        .couple-title::before {
+            left: -180px;
+        }
 
-/* 哥特十字 */
-.cross{
-  position:absolute;
-  inset:0;
-  pointer-events:none;
-}
-.cross::before,
-.cross::after{
-  content:"";
-  position:absolute;
-  background:rgba(255,255,255,.08);
-}
-.cross::before{
-  width:1px;height:100%;
-  left:50%;
-}
-.cross::after{
-  height:1px;width:100%;
-  top:50%;
-}
+        .couple-title::after {
+            right: -180px;
+        }
 
-/* ===== 页面结构 ===== */
-main{
-  max-width:1100px;
-  margin:0 auto;
-  padding:96px 24px 140px;
-}
+        /* 按钮容器 - 横向排列，响应式 */
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 80px;
+            flex-wrap: wrap;
+        }
 
-/* ===== 标题 ===== */
-header{
-  margin-bottom:96px;
-}
+        /* 核心按钮样式 - 简约平面，哥特+色块风格 */
+        .couple-btn {
+            padding: 18px 45px;
+            font-size: 1.2rem;
+            color: #f2f2f2;
+            background: rgba(78, 78, 80, 0.8);
+            border: 2px solid #c3073f;
+            border-radius: 2px; /* 平面风格，拒绝大圆角 */
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.4s ease; /* 悬停/点击动效过渡 */
+            letter-spacing: 3px; /* 哥特风格间距 */
+            text-decoration: none; /* 去除链接下划线 */
+        }
 
-header h1{
-  font-size:56px;
-  letter-spacing:-.04em;
-}
+        /* 按钮悬停动效 - 色块提亮，哥特色边框强化 */
+        .couple-btn:hover {
+            background: rgba(195, 7, 63, 0.9);
+            border-color: #f2f2f2;
+            transform: translateY(-5px); /* 轻微上移，增强交互感 */
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
+        }
 
-header p{
-  margin-top:18px;
-  max-width:520px;
-  color:var(--text-sub);
-  line-height:1.7;
-}
+        /* 按钮点击/激活动效 - 内部色块填充 */
+        .couple-btn::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.6s ease;
+        }
 
-/* ===== 相册模块 ===== */
-.albums{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
-  gap:48px;
-  margin-bottom:120px;
-}
+        .couple-btn:active::after {
+            transform: translateX(0); /* 点击时填充浅色遮罩 */
+        }
 
-.album{
-  position:relative;
-  background:var(--panel);
-  border:1px solid var(--border);
-  padding:28px;
-  min-height:360px;
-}
+        /* 响应式适配 - 移动端优化 */
+        @media (max-width: 768px) {
+            .couple-title {
+                font-size: 2rem;
+                letter-spacing: 5px;
+            }
 
-/* 哥特拱形切角 */
-.album::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  border:1px solid var(--gold);
-  clip-path:polygon(
-    0 0,100% 0,100% 92%,
-    60% 92%,50% 100%,40% 92%,
-    0 92%
-  );
-  pointer-events:none;
-}
+            .couple-title::before,
+            .couple-title::after {
+                width: 80px;
+            }
 
-.album-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
+            .couple-title::before {
+                left: -110px;
+            }
 
-.album-header h2{
-  font-size:22px;
-  letter-spacing:.08em;
-}
+            .couple-title::after {
+                right: -110px;
+            }
 
-.photos{
-  display:grid;
-  grid-template-columns:repeat(auto-fill,minmax(120px,1fr));
-  gap:12px;
-}
+            .btn-container {
+                gap: 40px;
+                flex-direction: column;
+                align-items: center;
+            }
 
-.photos img{
-  width:100%;
-  height:120px;
-  object-fit:cover;
-  filter:contrast(1.05);
-}
-
-input[type=file]{
-  color:var(--text-sub);
-}
-
-/* ===== 艺术按钮（不是普通按钮） ===== */
-.links{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
-  gap:48px;
-}
-
-.art-link{
-  position:relative;
-  text-decoration:none;
-  color:inherit;
-  padding:48px;
-  background:var(--panel);
-  border:1px solid var(--border);
-  overflow:hidden;
-}
-
-/* 内部几何 */
-.art-link::before{
-  content:"";
-  position:absolute;
-  width:180px;height:180px;
-  background:var(--red);
-  top:-40px;right:-40px;
-  transform:rotate(15deg);
-  opacity:.6;
-}
-
-.art-link::after{
-  content:"";
-  position:absolute;
-  width:1px;height:100%;
-  background:var(--gold);
-  left:32px;top:0;
-}
-
-.art-link:hover{
-  transform:translateY(-6px);
-}
-
-.art-link h3{
-  font-size:26px;
-  margin-bottom:14px;
-}
-
-.art-link p{
-  color:var(--text-sub);
-  max-width:260px;
-}
-</style>
+            .couple-btn {
+                width: 250px;
+            }
+        }
+    </style>
 </head>
-
 <body>
+    <!-- Jason Anderson 风格背景色块 -->
+    <div class="bg-shape bg-shape-1"></div>
+    <div class="bg-shape bg-shape-2"></div>
+    <div class="bg-shape bg-shape-3"></div>
+    <div class="bg-shape bg-shape-4"></div>
 
-<div class="art-bg">
-  <div class="shape red"></div>
-  <div class="shape blue"></div>
-  <div class="shape gold"></div>
-  <div class="cross"></div>
-</div>
-
-<main>
-<header>
-  <h1>小德 × 千代</h1>
-  <p>
-    不是纪念册。  
-    是两个个体在时间中的并置结构。
-  </p>
-</header>
-
-<section class="albums">
-  <div class="album" data-key="memory">
-    <div class="album-header">
-      <h2>记忆</h2>
-      <input type="file" multiple accept="image/*">
+    <!-- 核心内容区域 -->
+    <div class="content-container">
+        <h1 class="couple-title">小德 & 千代</h1>
+        <div class="btn-container">
+            <!-- 减肥记录按钮 - 跳转至减肥记录页面（可修改href为实际地址） -->
+            <a href="weight-loss.html" class="couple-btn">减肥记录</a>
+            <!-- 美食榜单按钮 - 跳转至美食榜单页面（可修改href为实际地址） -->
+            <a href="food-ranking.html" class="couple-btn">美食榜单</a>
+        </div>
     </div>
-    <div class="photos"></div>
-  </div>
 
-  <div class="album" data-key="daily">
-    <div class="album-header">
-      <h2>日常</h2>
-      <input type="file" multiple accept="image/*">
-    </div>
-    <div class="photos"></div>
-  </div>
-</section>
+    <script>
+        // 鼠标跟随背景动效 - 实现色块随鼠标移动轻微偏移，增强交互感
+        document.addEventListener('mousemove', function(e) {
+            // 获取所有背景色块
+            const bgShapes = document.querySelectorAll('.bg-shape');
+            // 获取窗口宽高
+            const winWidth = window.innerWidth;
+            const winHeight = window.innerHeight;
 
-<section class="links">
-  <a class="art-link" href="./diet.html">
-    <h3>减肥记录</h3>
-    <p>体重、行为、时间的可视化痕迹。</p>
-  </a>
+            // 遍历色块，添加跟随动效（每个色块偏移量不同，营造层次感）
+            bgShapes.forEach((shape, index) => {
+                // 计算偏移比例（index区分不同色块，避免动效一致）
+                const moveX = (e.clientX - winWidth / 2) * (0.03 + index * 0.01);
+                const moveY = (e.clientY - winHeight / 2) * (0.03 + index * 0.01);
 
-  <a class="art-link" href="./food.html">
-    <h3>美食榜单</h3>
-    <p>共同偏好形成的味觉地图。</p>
-  </a>
-</section>
-</main>
-
-<script>
-function loadAlbum(album){
-  const key=album.dataset.key;
-  const box=album.querySelector(".photos");
-  const input=album.querySelector("input");
-  let imgs=JSON.parse(localStorage.getItem("album_"+key)||"[]");
-
-  function render(){
-    box.innerHTML="";
-    imgs.forEach(src=>{
-      const img=document.createElement("img");
-      img.src=src;
-      box.appendChild(img);
-    });
-  }
-
-  input.onchange=()=>{
-    [...input.files].forEach(f=>{
-      const r=new FileReader();
-      r.onload=e=>{
-        imgs.push(e.target.result);
-        localStorage.setItem("album_"+key,JSON.stringify(imgs));
-        render();
-      };
-      r.readAsDataURL(f);
-    });
-    input.value="";
-  };
-  render();
-}
-document.querySelectorAll(".album").forEach(loadAlbum);
-</script>
-
+                // 应用偏移变换（保留原有旋转角度，添加平移）
+                const originalTransform = shape.style.transform || getComputedStyle(shape).transform;
+                shape.style.transform = `${originalTransform} translate(${moveX}px, ${moveY}px)`;
+            });
+        });
+    </script>
 </body>
 </html>
