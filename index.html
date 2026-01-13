@@ -2,51 +2,60 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>Zhong / Notes</title>
+  <title>神户小德 / Index</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
   <style>
     :root {
-      --bg: #0f1115;
-      --card: rgba(255, 255, 255, 0.06);
-      --border: rgba(255, 255, 255, 0.12);
-      --text-main: #ffffff;
-      --text-sub: rgba(255, 255, 255, 0.6);
-      --accent: #7aa2ff;
+      /* ===== 高级配色方案 ===== */
+      --bg-main: #f4f6fb;          /* 主背景：冷浅灰蓝 */
+      --bg-gradient-1: #eef2ff;    /* 渐变蓝 */
+      --bg-gradient-2: #f7f4ff;    /* 渐变紫 */
+      --card-bg: rgba(255, 255, 255, 0.75);
+      --border: rgba(20, 20, 40, 0.08);
+
+      --text-main: #1c1f2a;
+      --text-sub: #5a5f73;
+      --accent: #6b7cff;          /* 设计感主色 */
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-        "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont,
+        "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
     }
 
     body {
       min-height: 100vh;
-      background: var(--bg);
+      background:
+        linear-gradient(
+          120deg,
+          var(--bg-gradient-1),
+          var(--bg-gradient-2),
+          var(--bg-main)
+        );
       color: var(--text-main);
       overflow-x: hidden;
     }
 
-    /* ===== 动态背景 ===== */
+    /* ===== 鼠标交互背景 ===== */
     .bg {
       position: fixed;
       inset: 0;
       background:
         radial-gradient(
-          600px circle at var(--x, 50%) var(--y, 50%),
-          rgba(122, 162, 255, 0.15),
-          transparent 40%
+          520px circle at var(--x, 50%) var(--y, 50%),
+          rgba(107, 124, 255, 0.25),
+          transparent 45%
         );
       pointer-events: none;
-      transition: background 0.05s linear;
+      transition: background 0.06s linear;
     }
 
-    /* ===== 页面布局 ===== */
     main {
-      max-width: 960px;
+      max-width: 980px;
       margin: 0 auto;
       padding: 96px 24px 120px;
     }
@@ -56,39 +65,46 @@
     }
 
     header h1 {
-      font-size: 48px;
+      font-size: 52px;
       font-weight: 700;
       letter-spacing: -0.02em;
     }
 
     header p {
-      margin-top: 16px;
+      margin-top: 18px;
       font-size: 18px;
       color: var(--text-sub);
-      max-width: 520px;
-      line-height: 1.6;
+      max-width: 560px;
+      line-height: 1.7;
     }
 
-    /* ===== 分类卡片 ===== */
+    /* ===== 卡片网格 ===== */
     .grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: 24px;
     }
 
+    /* 用 a 做按钮 */
     .card {
-      background: var(--card);
+      display: block;
+      text-decoration: none;
+      background: var(--card-bg);
       border: 1px solid var(--border);
-      border-radius: 16px;
-      padding: 28px;
-      backdrop-filter: blur(10px);
-      transition: transform 0.25s ease, border-color 0.25s ease;
-      cursor: pointer;
+      border-radius: 18px;
+      padding: 30px;
+      backdrop-filter: blur(14px);
+      transition:
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        border-color 0.25s ease;
+      color: inherit;
     }
 
     .card:hover {
       transform: translateY(-6px);
       border-color: var(--accent);
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
     }
 
     .card h2 {
@@ -106,7 +122,7 @@
       margin-top: 96px;
       font-size: 14px;
       color: var(--text-sub);
-      opacity: 0.6;
+      opacity: 0.7;
     }
   </style>
 </head>
@@ -116,36 +132,37 @@
 
   <main>
     <header>
-      <h1>Zhong</h1>
+      <h1>神户小德</h1>
       <p>
-        个人记录站点。用于整理想法、游戏设计、实验项目与零散笔记。
+        个人索引页。用于整理游戏设计、项目实验、外部工具与长期记录。
       </p>
     </header>
 
     <section class="grid">
-      <div class="card">
+      <!-- 外链示例 -->
+      <a class="card" href="https://github.com/" target="_blank">
         <h2>Game Design</h2>
-        <p>机制、系统拆解、原型想法与失败记录。</p>
-      </div>
+        <p>机制拆解、系统设计、关卡与数值想法。</p>
+      </a>
 
-      <div class="card">
-        <h2>Projects</h2>
-        <p>个人项目、实验性作品与进行中的原型。</p>
-      </div>
-
-      <div class="card">
+      <a class="card" href="https://www.notion.so/" target="_blank">
         <h2>Notes</h2>
-        <p>随手记录的思考、阅读摘要与灵感。</p>
-      </div>
+        <p>长期笔记、随手记录与灵感草稿。</p>
+      </a>
 
-      <div class="card">
-        <h2>About</h2>
-        <p>背景、联系方式以及一些无关紧要的信息。</p>
-      </div>
+      <a class="card" href="https://itch.io/" target="_blank">
+        <h2>Projects</h2>
+        <p>实验性项目、原型与完成度不明的作品。</p>
+      </a>
+
+      <a class="card" href="https://twitter.com/" target="_blank">
+        <h2>Links</h2>
+        <p>社交账号、外部站点与相关资源。</p>
+      </a>
     </section>
 
     <footer>
-      © 2026 Zhong · GitHub Pages
+      © 2026 神户小德 · GitHub Pages
     </footer>
   </main>
 
