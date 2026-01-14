@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>千代 & 小德 饮食偏好记录</title>
+    <style>
+        :root {
+            /* 高级配色方案 - 低饱和、莫兰迪色系 */
+            --color-love-light: #E8F3F8; /* 爱吃（淡蓝） */
+            --color-love-border: #4A90E2;
+            --color-love-dark: #3A7BC8;
+            --color-hate-light: #F9E8E8; /* 不爱吃（淡粉） */
+            --color-hate-border: #E57373;
+            --color-hate-dark: #D32F2F;
+            --color-common-light: #E6F7F0; /* 共同偏好（淡绿） */
+            --color-common-border: #2ECC71;
+            --color-common-dark: #27AE60;
+            --color-bg-primary: #FFFFFF;
+            --color-bg-secondary: #F8F9FA;
+            --color-bg-tertiary: #F1F3F5;
+            --color-text-primary: #2D3436;
+            --color-text-secondary: #6C757D;
+            --color-text-tertiary: #ADB5BD;
+            --color-trash: #E74C3C;
+            --color-trash-hover: #C0392B;
+            --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition-default: all 0.25s ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+        }
+
+        body {
+            background-color: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            padding: 24px 16px;
+            max-width: 1600px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 40px;
+            font-weight: 600;
+            font-size: 2.5rem;
+            color: var(--color-text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        /* 云端操作按钮 */
+        .cloud-buttons {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+
+        .cloud-buttons button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-md);
+            background-color: var(--color-love-dark);
+            color: #FFFFFF;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-default);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .cloud-buttons button:hover {
+            background-color: var(--color-love-border);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        /* 整体三栏布局容器 */
+        .preference-container {
+            display: flex;
+            gap: 24px;
+            width: 100%;
+            margin-bottom: 40px;
+        }
+
+        /* 左右：个人偏好面板 */
+        .person-panel {
+            flex: 1;
+            background-color: var(--color-bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            padding: 28px;
+            transition: var(--transition-default);
+        }
+
+        .person-panel:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .person-title {
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--color-bg-tertiary);
+            color: var(--color-text-primary);
+        }
+
+        /* 中间：共同偏好面板（不可输入，自动汇总） */
+        .common-panel {
+            flex: 1;
+            background-color: var(--color-bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            padding: 28px;
+            transition: var(--transition-default);
+        }
+
+        .common-panel:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .common-title {
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--color-bg-tertiary);
+            color: var(--color-common-dark);
+            text-align: center;
+        }
+
+        /* 偏好分类容器（爱吃/不爱吃 - 上下布局） */
+        .preference-sections {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            width: 100%;
+        }
+
+        .preference-section {
+            min-height: 280px;
+            background-color: var(--color-bg-tertiary);
+            border-radius: var(--radius-md);
+            padding: 20px;
+            position: relative;
+            transition: var(--transition-default);
+        }
+
+        .preference-section:hover {
+            background-color: var(--color-bg-secondary);
+        }
+
+        /* 个人面板的区域标题 */
+        .section-title-person {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: var(--color-text-secondary);
+            text-align: center;
+            padding: 8px 0;
+            border-radius: var(--radius-sm);
+        }
+
+        .section-title-love {
+            background-color: rgba(74, 144, 226, 0.1);
+            color: var(--color-love-dark);
+        }
+
+        .section-title-hate {
+            background-color: rgba(229, 115, 115, 0.1);
+            color: var(--color-hate-dark);
+        }
+
+        /* 中间面板的区域标题 */
+        .section-title-common {
+            font-size: 1.1rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            color: var(--color-common-dark);
+            text-align: center;
+            padding: 8px 0;
+            border-radius: var(--radius-sm);
+            background-color: rgba(46, 204, 113, 0.1);
+        }
+
+        /* 偏好贴纸样式 */
+        .preference-sticker {
+            background-color: var(--color-love-light);
+            border: 1px solid var(--color-love-border);
+            border-radius: var(--radius-sm);
+            padding: 14px 20px;
+            margin-bottom: 16px;
+            box-shadow: var(--shadow-sm);
+            cursor: grab;
+            user-select: none;
+            transition: var(--transition-default);
+            position: relative;
+            z-index: 1;
+            color: var(--color-text-primary);
+        }
+
+        .preference-sticker:active {
+            cursor: grabbing;
+            box-shadow: var(--shadow-md);
+            transform: scale(1.03);
+            z-index: 10;
+        }
+
+        .preference-sticker.hate {
+            background-color: var(--color-hate-light);
+            border-color: var(--color-hate-border);
+        }
+
+        .preference-sticker.common {
+            background-color: var(--color-common-light);
+            border-color: var(--color-common-border);
+            cursor: default;
+            box-shadow: 0 2px 8px rgba(46, 204, 113, 0.15);
+        }
+
+        .preference-sticker.common:active {
+            transform: none;
+            box-shadow: 0 2px 8px rgba(46, 204, 113, 0.15);
+        }
+
+        /* 个人面板：输入框容器 */
+        .preference-input-container {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+            margin-top: 16px;
+        }
+
+        input[type="text"] {
+            flex: 1;
+            padding: 12px 20px;
+            border: 1px solid var(--color-bg-tertiary);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition-default);
+            background-color: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--color-love-border);
+            background-color: var(--color-bg-primary);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .btn-love {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-md);
+            background-color: var(--color-love-border);
+            color: #FFFFFF;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-default);
+        }
+
+        .btn-love:hover {
+            background-color: var(--color-love-dark);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-hate {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-md);
+            background-color: var(--color-hate-border);
+            color: #FFFFFF;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-default);
+        }
+
+        .btn-hate:hover {
+            background-color: var(--color-hate-dark);
+            box-shadow: var(--shadow-sm);
+        }
+
+        /* 垃圾桶样式（高级悬浮效果） */
+        .trash-bin {
+            position: fixed;
+            left: 50%;
+            bottom: 40px;
+            transform: translateX(-50%);
+            width: 90px;
+            height: 90px;
+            background-color: var(--color-trash);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            font-size: 2.5rem;
+            box-shadow: var(--shadow-md);
+            opacity: 0.8;
+            transition: var(--transition-default);
+            z-index: 20;
+        }
+
+        .trash-bin.active {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.08);
+            background-color: var(--color-trash-hover);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* 拖拽占位符 */
+        .placeholder {
+            background-color: rgba(232, 243, 248, 0.6);
+            border: 1px dashed var(--color-love-border);
+            border-radius: var(--radius-sm);
+            padding: 14px 20px;
+            margin-bottom: 16px;
+            height: 56px;
+        }
+
+        .placeholder.hate-placeholder {
+            background-color: rgba(249, 232, 232, 0.6);
+            border-color: var(--color-hate-border);
+        }
+
+        /* 响应式适配（小屏设备三栏变纵向） */
+        @media (max-width: 1200px) {
+            .preference-container {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <!-- 引入 Font Awesome 用于垃圾桶图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <h1>千代 & 小德 饮食偏好记录</h1>
+
+    <!-- 云端保存/读取按钮 -->
+    <div class="cloud-buttons">
+        <button onclick="saveToCloud()">保存偏好到云端</button>
+        <button onclick="loadFromCloud()">从云端读取偏好</button>
+    </div>
+
+    <!-- 饮食偏好主容器（三栏布局） -->
+    <div class="preference-container">
+        <!-- 左侧：千代的偏好面板 -->
+        <div class="person-panel">
+            <h2 class="person-title">千代</h2>
+            <div class="preference-sections">
+                <!-- 千代：爱吃的 -->
+                <div class="preference-section" id="chiyo-love" data-type="love" data-person="chiyo">
+                    <h3 class="section-title-person section-title-love">爱吃的</h3>
+                </div>
+                <!-- 千代：输入框（爱吃） -->
+                <div class="preference-input-container">
+                    <input type="text" id="chiyo-love-input" placeholder="输入千代爱吃的食物...">
+                    <button class="btn-love" onclick="addPreference('chiyo', 'love')">添加</button>
+                </div>
+
+                <!-- 千代：不爱吃的 -->
+                <div class="preference-section" id="chiyo-hate" data-type="hate" data-person="chiyo">
+                    <h3 class="section-title-person section-title-hate">不爱吃的</h3>
+                </div>
+                <!-- 千代：输入框（不爱吃） -->
+                <div class="preference-input-container">
+                    <input type="text" id="chiyo-hate-input" placeholder="输入千代不爱吃的食物...">
+                    <button class="btn-hate" onclick="addPreference('chiyo', 'hate')">添加</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中间：共同偏好面板（自动汇总，不可输入） -->
+        <div class="common-panel">
+            <h2 class="common-title">二人共同偏好</h2>
+            <div class="preference-sections">
+                <!-- 共同：都爱吃的 -->
+                <div class="preference-section" id="common-love" data-type="common-love">
+                    <h3 class="section-title-common">都爱吃的</h3>
+                </div>
+
+                <!-- 共同：都不爱吃的 -->
+                <div class="preference-section" id="common-hate" data-type="common-hate">
+                    <h3 class="section-title-common">都不爱吃的</h3>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧：小德的偏好面板 -->
+        <div class="person-panel">
+            <h2 class="person-title">小德</h2>
+            <div class="preference-sections">
+                <!-- 小德：爱吃的 -->
+                <div class="preference-section" id="xiaode-love" data-type="love" data-person="xiaode">
+                    <h3 class="section-title-person section-title-love">爱吃的</h3>
+                </div>
+                <!-- 小德：输入框（爱吃） -->
+                <div class="preference-input-container">
+                    <input type="text" id="xiaode-love-input" placeholder="输入小德爱吃的食物...">
+                    <button class="btn-love" onclick="addPreference('xiaode', 'love')">添加</button>
+                </div>
+
+                <!-- 小德：不爱吃的 -->
+                <div class="preference-section" id="xiaode-hate" data-type="hate" data-person="xiaode">
+                    <h3 class="section-title-person section-title-hate">不爱吃的</h3>
+                </div>
+                <!-- 小德：输入框（不爱吃） -->
+                <div class="preference-input-container">
+                    <input type="text" id="xiaode-hate-input" placeholder="输入小德不爱吃的食物...">
+                    <button class="btn-hate" onclick="addPreference('xiaode', 'hate')">添加</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 垃圾桶 -->
+    <div class="trash-bin" id="trash-bin">
+        <i class="fas fa-trash"></i>
+    </div>
+
+    <!-- Firebase 配置与核心逻辑 -->
+    <script type="module">
+        // 导入 Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            writeBatch,
+            getDocs,
+            doc
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase 配置（沿用原有项目配置）
+        const firebaseConfig = {
+            apiKey: "AIzaSyAhZtgaE8mL3GkxsIj17g1ha-Y5HG02C_A",
+            authDomain: "weight-zqy.firebaseapp.com",
+            projectId: "weight-zqy",
+            storageBucket: "weight-zqy.firebasestorage.app",
+            messagingSenderId: "710580530798",
+            appId: "1:710580530798:web:30e48f089452364c02c07f"
+        };
+
+        // 初始化 Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const PREFERENCE_KEY = "food_preference_v1"; // 本地存储键
+
+        // 初始化本地数据结构
+        let preferenceData = JSON.parse(localStorage.getItem(PREFERENCE_KEY) || JSON.stringify({
+            chiyo: { love: [], hate: [] },
+            xiaode: { love: [], hate: [] }
+        }));
+
+        // 全局拖拽相关变量
+        let draggingSticker = null;
+        let placeholder = null;
+        let currentSection = null;
+
+        // ========== 本地数据操作 ==========
+        // 保存到本地 localStorage
+        function saveToLocal() {
+            localStorage.setItem(PREFERENCE_KEY, JSON.stringify(preferenceData));
+        }
+
+        // 计算共同偏好（核心：找出二人相同的食物）
+        function calculateCommonPreferences() {
+            // 共同爱吃：千代爱吃 ∩ 小德爱吃
+            const commonLove = preferenceData.chiyo.love
+                .map(item => item.content)
+                .filter(content => preferenceData.xiaode.love.some(item => item.content === content));
+
+            // 共同不爱吃：千代不爱吃 ∩ 小德不爱吃
+            const commonHate = preferenceData.chiyo.hate
+                .map(item => item.content)
+                .filter(content => preferenceData.xiaode.hate.some(item => item.content === content));
+
+            return { commonLove, commonHate };
+        }
+
+        // 渲染所有内容（个人偏好 + 共同偏好）
+        function renderAll() {
+            // 1. 清空所有面板内容
+            clearAllSections();
+
+            // 2. 渲染个人偏好（千代 + 小德）
+            renderPersonPreferences("chiyo");
+            renderPersonPreferences("xiaode");
+
+            // 3. 计算并渲染共同偏好
+            renderCommonPreferences();
+        }
+
+        // 清空所有区域内容
+        function clearAllSections() {
+            // 个人区域
+            document.getElementById("chiyo-love").innerHTML = '<h3 class="section-title-person section-title-love">爱吃的</h3>';
+            document.getElementById("chiyo-hate").innerHTML = '<h3 class="section-title-person section-title-hate">不爱吃的</h3>';
+            document.getElementById("xiaode-love").innerHTML = '<h3 class="section-title-person section-title-love">爱吃的</h3>';
+            document.getElementById("xiaode-hate").innerHTML = '<h3 class="section-title-person section-title-hate">不爱吃的</h3>';
+
+            // 共同区域
+            document.getElementById("common-love").innerHTML = '<h3 class="section-title-common">都爱吃的</h3>';
+            document.getElementById("common-hate").innerHTML = '<h3 class="section-title-common">都不爱吃的</h3>';
+        }
+
+        // 渲染个人偏好
+        function renderPersonPreferences(person) {
+            // 渲染爱吃的
+            preferenceData[person].love.forEach((item, index) => {
+                const sticker = createPreferenceSticker(person, "love", index, item);
+                document.getElementById(`${person}-love`).appendChild(sticker);
+            });
+
+            // 渲染不爱吃的
+            preferenceData[person].hate.forEach((item, index) => {
+                const sticker = createPreferenceSticker(person, "hate", index, item);
+                document.getElementById(`${person}-hate`).appendChild(sticker);
+            });
+        }
+
+        // 渲染共同偏好
+        function renderCommonPreferences() {
+            const { commonLove, commonHate } = calculateCommonPreferences();
+
+            // 渲染共同爱吃的
+            commonLove.forEach(content => {
+                const sticker = createCommonSticker(content, "love");
+                document.getElementById("common-love").appendChild(sticker);
+            });
+
+            // 渲染共同不爱吃的
+            commonHate.forEach(content => {
+                const sticker = createCommonSticker(content, "hate");
+                document.getElementById("common-hate").appendChild(sticker);
+            });
+        }
+
+        // 创建个人偏好贴纸
+        function createPreferenceSticker(person, type, index, item) {
+            const sticker = document.createElement("div");
+            sticker.className = `preference-sticker ${type === 'hate' ? 'hate' : ''}`;
+            sticker.dataset.person = person;
+            sticker.dataset.type = type;
+            sticker.dataset.index = index;
+            sticker.innerText = item.content;
+
+            // 绑定拖拽事件
+            sticker.addEventListener("mousedown", startDrag);
+            sticker.addEventListener("touchstart", startDrag, { passive: true });
+
+            return sticker;
+        }
+
+        // 创建共同偏好贴纸（不可拖拽）
+        function createCommonSticker(content, type) {
+            const sticker = document.createElement("div");
+            sticker.className = `preference-sticker common ${type === 'hate' ? 'hate' : ''}`;
+            sticker.innerText = content;
+            return sticker;
+        }
+
+        // 添加新偏好
+        function addPreference(person, type) {
+            const input = document.getElementById(`${person}-${type}-input`);
+            const content = input.value.trim();
+            if (!content) return;
+
+            // 避免重复添加（个人内部去重）
+            const isDuplicate = preferenceData[person][type].some(item => item.content === content);
+            if (isDuplicate) {
+                alert(`已经添加过「${content}」啦～`);
+                input.value = "";
+                return;
+            }
+
+            // 添加到本地数据
+            preferenceData[person][type].push({
+                content: content,
+                createTime: Date.now()
+            });
+
+            // 保存并重新渲染
+            saveToLocal();
+            renderAll();
+
+            // 清空输入框
+            input.value = "";
+        }
+
+        // 删除偏好
+        function deletePreference(person, type, index) {
+            preferenceData[person][type].splice(index, 1);
+            saveToLocal();
+            renderAll();
+        }
+
+        // ========== 拖拽功能实现 ==========
+        // 开始拖拽
+        function startDrag(e) {
+            draggingSticker = this;
+            currentSection = draggingSticker.parentElement;
+
+            // 跳过共同偏好贴纸（不可拖拽）
+            if (draggingSticker.classList.contains("common")) return;
+
+            // 创建占位符
+            placeholder = document.createElement("div");
+            placeholder.className = `placeholder ${currentSection.dataset.type === 'hate' ? 'hate-placeholder' : ''}`;
+            draggingSticker.parentNode.insertBefore(placeholder, draggingSticker);
+
+            // 隐藏原贴纸（通过透明度，保持布局）
+            draggingSticker.style.opacity = "0.6";
+
+            // 绑定移动和结束事件
+            document.addEventListener("mousemove", dragMove);
+            document.addEventListener("mouseup", endDrag);
+            document.addEventListener("touchmove", dragMove, { passive: true });
+            document.addEventListener("touchend", endDrag);
+        }
+
+        // 拖拽移动
+        function dragMove(e) {
+            if (!draggingSticker || draggingSticker.classList.contains("common")) return;
+
+            // 兼容鼠标和触摸事件
+            let clientX = e.clientX || (e.touches && e.touches[0].clientX);
+            let clientY = e.clientY || (e.touches && e.touches[0].clientY);
+
+            // 设置贴纸跟随鼠标/触摸点
+            draggingSticker.style.position = "absolute";
+            draggingSticker.style.left = `${clientX - draggingSticker.offsetWidth / 2}px`;
+            draggingSticker.style.top = `${clientY - draggingSticker.offsetHeight / 2}px`;
+
+            // 检测是否进入垃圾桶
+            const trashBin = document.getElementById("trash-bin");
+            const trashRect = trashBin.getBoundingClientRect();
+            const isOverTrash = clientX >= trashRect.left && clientX <= trashRect.right &&
+                                clientY >= trashRect.top && clientY <= trashRect.bottom;
+
+            // 切换垃圾桶激活状态
+            if (isOverTrash) {
+                trashBin.classList.add("active");
+            } else {
+                trashBin.classList.remove("active");
+            }
+
+            // 检测是否进入个人偏好区域（仅允许在个人同类型区域拖拽）
+            const personSections = document.querySelectorAll(".preference-section[data-person]");
+            personSections.forEach(section => {
+                const rect = section.getBoundingClientRect();
+                if (clientX >= rect.left && clientX <= rect.right && clientY >= rect.top && clientY <= rect.bottom) {
+                    if (section !== currentSection) {
+                        currentSection = section;
+                        section.appendChild(placeholder);
+                    }
+                }
+            });
+        }
+
+        // 结束拖拽
+        function endDrag(e) {
+            if (!draggingSticker || draggingSticker.classList.contains("common")) return;
+
+            // 恢复贴纸样式
+            draggingSticker.style.opacity = "1";
+            draggingSticker.style.position = "";
+            draggingSticker.style.left = "";
+            draggingSticker.style.top = "";
+
+            // 检测是否删除（放入垃圾桶）
+            const trashBin = document.getElementById("trash-bin");
+            const trashRect = trashBin.getBoundingClientRect();
+            let clientX = e.clientX || (e.changedTouches && e.changedTouches[0].clientX);
+            let clientY = e.clientY || (e.changedTouches && e.changedTouches[0].clientY);
+            const isOverTrash = clientX >= trashRect.left && clientX <= trashRect.right &&
+                                clientY >= trashRect.top && clientY <= trashRect.bottom;
+
+            if (isOverTrash) {
+                // 删除偏好
+                const person = draggingSticker.dataset.person;
+                const type = draggingSticker.dataset.type;
+                const index = parseInt(draggingSticker.dataset.index);
+                deletePreference(person, type, index);
+            } else {
+                // 恢复布局（将贴纸放回占位符位置）
+                if (currentSection && placeholder) {
+                    currentSection.replaceChild(draggingSticker, placeholder);
+                }
+            }
+
+            // 清空拖拽变量
+            draggingSticker = null;
+            placeholder = null;
+            currentSection = null;
+            trashBin.classList.remove("active");
+
+            // 解绑事件
+            document.removeEventListener("mousemove", dragMove);
+            document.removeEventListener("mouseup", endDrag);
+            document.removeEventListener("touchmove", dragMove);
+            document.removeEventListener("touchend", endDrag);
+        }
+
+        // ========== 云端数据同步 ==========
+        // 保存到 Firebase 云端
+        async function saveToCloudImpl() {
+            try {
+                const preferencesRef = collection(db, "food_preferences");
+
+                // 步骤1：删除云端旧数据
+                const oldSnap = await getDocs(preferencesRef);
+                const batch = writeBatch(db);
+                oldSnap.docs.forEach(docItem => {
+                    batch.delete(docItem.ref);
+                });
+                await batch.commit();
+
+                // 步骤2：批量上传最新偏好数据
+                const newBatch = writeBatch(db);
+                const docRef = doc(preferencesRef); // 生成唯一文档
+                newBatch.set(docRef, {
+                    ...preferenceData,
+                    updateTime: Date.now()
+                });
+                await newBatch.commit();
+
+                alert("饮食偏好数据已成功保存到云端！");
+            } catch (e) {
+                alert(`保存失败：${e.message || JSON.stringify(e)}`);
+                console.error("云端保存错误：", e);
+            }
+        }
+
+        // 从 Firebase 云端读取
+        async function loadFromCloudImpl() {
+            try {
+                const preferencesRef = collection(db, "food_preferences");
+                const snap = await getDocs(preferencesRef);
+
+                if (snap.empty) {
+                    alert("云端暂无饮食偏好数据！");
+                    return;
+                }
+
+                // 提取最新数据
+                const cloudData = snap.docs[0].data();
+                preferenceData.chiyo = cloudData.chiyo || { love: [], hate: [] };
+                preferenceData.xiaode = cloudData.xiaode || { love: [], hate: [] };
+
+                // 保存到本地并渲染
+                saveToLocal();
+                renderAll();
+                alert("饮食偏好数据已从云端成功读取！");
+            } catch (e) {
+                alert(`读取失败：${e.message || JSON.stringify(e)}`);
+                console.error("云端读取错误：", e);
+            }
+        }
+
+        // ========== 全局函数挂载（解决模块作用域问题） ==========
+        window.addPreference = addPreference;
+        window.saveToCloud = saveToCloudImpl;
+        window.loadFromCloud = loadFromCloudImpl;
+
+        // ========== 页面初始化 ==========
+        renderAll();
+    </script>
+</body>
+</html>
