@@ -1,0 +1,861 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我们的每一天</title>
+    <style>
+        :root {
+            /* 高级配色方案 - 柔和治愈系 */
+            --color-anniversary: #FCE4EC; /* 纪念日（粉色） */
+            --color-anniversary-border: #E91E63;
+            --color-menstruation: #FFEBEE; /* 生理期（红色） */
+            --color-menstruation-border: #F44336;
+            --color-birthday: #E3F2FD; /* 生日（蓝色） */
+            --color-birthday-border: #2196F3;
+            --color-record: #FFFDE7; /* 记录（黄色） */
+            --color-record-border: #FFC107;
+            --color-bg-primary: #FFFFFF;
+            --color-bg-secondary: #F8F9FA;
+            --color-bg-tertiary: #F1F3F5;
+            --color-text-primary: #2D3436;
+            --color-text-secondary: #6C757D;
+            --color-text-tertiary: #ADB5BD;
+            --color-accent: #9C27B0;
+            --color-accent-light: #EDE7F6;
+            --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
+            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition-default: all 0.25s ease-in-out;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
+        }
+
+        body {
+            background-color: var(--color-bg-secondary);
+            color: var(--color-text-primary);
+            padding: 24px 16px;
+            max-width: 1400px;
+            margin: 0 auto;
+            min-height: 100vh;
+        }
+
+        /* 顶部统计区域 */
+        .stats-container {
+            background-color: var(--color-bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            padding: 28px;
+            margin-bottom: 32px;
+            text-align: center;
+            transition: var(--transition-default);
+        }
+
+        .stats-container:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .stats-title {
+            font-size: 2.2rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--color-accent);
+        }
+
+        .days-stats {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+
+        .day-item {
+            font-size: 1.3rem;
+        }
+
+        .day-number {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-accent);
+        }
+
+        .anniversary-tips {
+            display: flex;
+            gap: 40px;
+            justify-content: center;
+            flex-wrap: wrap;
+            color: var(--color-text-secondary);
+            font-size: 1.1rem;
+        }
+
+        /* 功能按钮区域 */
+        .btn-container {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            margin-bottom: 32px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--radius-md);
+            background-color: var(--color-accent);
+            color: #FFFFFF;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--transition-default);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .btn-add-calendar {
+            background-color: var(--color-anniversary-border);
+        }
+
+        .btn-save {
+            background-color: var(--color-birthday-border);
+        }
+
+        .btn-load {
+            background-color: var(--color-record-border);
+        }
+
+        /* 标记类型选择区域 */
+        .tag-selector {
+            background-color: var(--color-bg-primary);
+            border-radius: var(--radius-md);
+            box-shadow: var(--shadow-sm);
+            padding: 20px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .tag-item {
+            padding: 10px 20px;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            border: 1px solid transparent;
+            transition: var(--transition-default);
+            user-select: none;
+        }
+
+        .tag-item.active {
+            border-color: currentColor;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .tag-anniversary {
+            background-color: var(--color-anniversary);
+            color: var(--color-anniversary-border);
+        }
+
+        .tag-menstruation {
+            background-color: var(--color-menstruation);
+            color: var(--color-menstruation-border);
+        }
+
+        .tag-birthday {
+            background-color: var(--color-birthday);
+            color: var(--color-birthday-border);
+        }
+
+        .tag-record {
+            background-color: var(--color-record);
+            color: var(--color-record-border);
+        }
+
+        /* 日历容器（新日历在上，旧日历在下） */
+        .calendar-container {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* 单个日历面板 */
+        .calendar-panel {
+            background-color: var(--color-bg-primary);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-sm);
+            padding: 24px;
+            transition: var(--transition-default);
+        }
+
+        .calendar-panel:hover {
+            box-shadow: var(--shadow-md);
+        }
+
+        .calendar-title {
+            font-size: 1.6rem;
+            font-weight: 500;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--color-bg-tertiary);
+            color: var(--color-text-primary);
+            text-align: center;
+        }
+
+        /* 日历表格 */
+        .calendar-table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 8px;
+        }
+
+        .calendar-th {
+            text-align: center;
+            padding: 12px;
+            color: var(--color-text-secondary);
+            font-weight: 500;
+            border-radius: var(--radius-sm);
+            background-color: var(--color-bg-tertiary);
+        }
+
+        .calendar-td {
+            text-align: center;
+            padding: 0;
+            height: 100px;
+        }
+
+        .date-cell {
+            width: 100%;
+            height: 100%;
+            padding: 8px;
+            border-radius: var(--radius-sm);
+            background-color: var(--color-bg-tertiary);
+            cursor: pointer;
+            transition: var(--transition-default);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .date-cell:hover {
+            background-color: var(--color-bg-secondary);
+            transform: scale(1.02);
+        }
+
+        .date-number {
+            font-size: 1.2rem;
+            font-weight: 500;
+            text-align: right;
+        }
+
+        .date-tag {
+            font-size: 0.9rem;
+            font-weight: 500;
+            margin-bottom: 4px;
+            text-align: left;
+        }
+
+        .date-subtitle {
+            font-size: 0.8rem;
+            color: var(--color-text-secondary);
+            text-align: left;
+            word-break: break-all;
+            max-height: 40px;
+            overflow: hidden;
+        }
+
+        /* 标记后的日期单元格样式 */
+        .date-cell.anniversary {
+            background-color: var(--color-anniversary);
+            border: 1px solid var(--color-anniversary-border);
+        }
+
+        .date-cell.menstruation {
+            background-color: var(--color-menstruation);
+            border: 1px solid var(--color-menstruation-border);
+        }
+
+        .date-cell.birthday {
+            background-color: var(--color-birthday);
+            border: 1px solid var(--color-birthday-border);
+        }
+
+        .date-cell.record {
+            background-color: var(--color-record);
+            border: 1px solid var(--color-record-border);
+        }
+
+        /* 副标题编辑输入框 */
+        .subtitle-input {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 90%;
+            padding: 8px 12px;
+            border: 1px solid var(--color-accent);
+            border-radius: var(--radius-sm);
+            outline: none;
+            font-size: 0.8rem;
+            z-index: 10;
+        }
+
+        /* 响应式适配 */
+        @media (max-width: 768px) {
+            .calendar-td {
+                height: 80px;
+            }
+
+            .days-stats, .anniversary-tips {
+                gap: 20px;
+            }
+
+            .stats-title {
+                font-size: 1.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 顶部统计区域 -->
+    <div class="stats-container">
+        <h1 class="stats-title">我们的时光印记</h1>
+        <div class="days-stats">
+            <div class="day-item">已相遇 <span class="day-number" id="meet-days">0</span> 天</div>
+            <div class="day-item">已相恋 <span class="day-number" id="love-days">0</span> 天</div>
+        </div>
+        <div class="anniversary-tips">
+            <div id="next-anniversary">距离 纪念日：暂无 还有 0 天</div>
+            <div id="next-birthday">距离 生日：暂无 还有 0 天</div>
+        </div>
+    </div>
+
+    <!-- 标记类型选择 -->
+    <div class="tag-selector">
+        <div class="tag-item tag-anniversary" data-tag="anniversary">纪念日</div>
+        <div class="tag-item tag-menstruation" data-tag="menstruation">生理期</div>
+        <div class="tag-item tag-birthday" data-tag="birthday">生日</div>
+        <div class="tag-item tag-record" data-tag="record">记录</div>
+    </div>
+
+    <!-- 功能按钮 -->
+    <div class="btn-container">
+        <button class="btn btn-add-calendar" onclick="addNextCalendar()">新增下一个月日历</button>
+        <button class="btn btn-save" onclick="saveToCloud()">保存日历到云端</button>
+        <button class="btn btn-load" onclick="loadFromCloud()">从云端读取日历</button>
+    </div>
+
+    <!-- 日历容器（新日历在上，旧日历在下） -->
+    <div class="calendar-container" id="calendar-wrapper"></div>
+
+    <!-- Firebase 配置与核心逻辑 -->
+    <script type="module">
+        // 导入 Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import {
+            getFirestore,
+            collection,
+            writeBatch,
+            getDocs,
+            doc
+        } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // Firebase 配置（沿用原有项目配置）
+        const firebaseConfig = {
+            apiKey: "AIzaSyAhZtgaE8mL3GkxsIj17g1ha-Y5HG02C_A",
+            authDomain: "weight-zqy.firebaseapp.com",
+            projectId: "weight-zqy",
+            storageBucket: "weight-zqy.firebasestorage.app",
+            messagingSenderId: "710580530798",
+            appId: "1:710580530798:web:30e48f089452364c02c07f"
+        };
+
+        // 初始化 Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const CALENDAR_KEY = "our_days_calendar_v1"; // 本地存储键
+
+        // 核心常量配置
+        const MEET_DATE = new Date(2025, 5, 7); // 相遇日期：2025年6月7日（月份从0开始）
+        const LOVE_DATE = new Date(2025, 8, 21); // 相恋日期：2025年9月21日
+        let activeTag = null; // 当前选中的标记类型
+        let calendarData = {
+            calendars: [], // 存储日历列表（{ year: 2025, month: 5, dates: [] }）
+            tags: {} // 存储日期标记（key: "2025-06-07", value: { type: "anniversary", subtitle: "" }）
+        };
+
+        // ========== 初始化与本地数据加载 ==========
+        function init() {
+            // 加载本地数据
+            const localData = localStorage.getItem(CALENDAR_KEY);
+            if (localData) {
+                calendarData = JSON.parse(localData);
+            } else {
+                // 初始化默认日历：2025年6月
+                addCalendar(2025, 5, true);
+            }
+
+            // 绑定标记选择事件
+            bindTagSelector();
+
+            // 更新统计数据
+            updateStats();
+
+            // 渲染所有日历
+            renderAllCalendars();
+
+            // 定时更新统计（每分钟）
+            setInterval(updateStats, 60000);
+        }
+
+        // ========== 日历操作 ==========
+        // 添加指定年月的日历（isInit：是否为初始化，不自动排序列表）
+        function addCalendar(year, month, isInit = false) {
+            // 检查是否已存在该年月的日历
+            const exists = calendarData.calendars.some(c => c.year === year && c.month === month);
+            if (exists) return;
+
+            // 生成当月日期数据
+            const dateCount = new Date(year, month + 1, 0).getDate(); // 当月天数
+            const dates = Array.from({ length: dateCount }, (_, i) => i + 1);
+
+            // 添加日历数据
+            const newCalendar = { year, month, dates };
+            calendarData.calendars.push(newCalendar);
+
+            // 非初始化状态下，按「新日期在上」排序（年月倒序）
+            if (!isInit) {
+                calendarData.calendars.sort((a, b) => {
+                    if (a.year !== b.year) return b.year - a.year;
+                    return b.month - a.month;
+                });
+            }
+
+            // 保存本地并渲染
+            saveToLocal();
+            if (!isInit) renderAllCalendars();
+
+            // 自动生成周年标记
+            generateAnniversaryTags(year, month);
+        }
+
+        // 新增下一个月日历
+        function addNextCalendar() {
+            if (calendarData.calendars.length === 0) {
+                addCalendar(2025, 5);
+                return;
+            }
+
+            // 获取最新的日历（列表第一个，因为已排序）
+            const latest = calendarData.calendars[0];
+            let nextYear = latest.year;
+            let nextMonth = latest.month + 1;
+
+            // 跨年份处理
+            if (nextMonth > 11) {
+                nextYear += 1;
+                nextMonth = 0;
+            }
+
+            // 添加下一个月日历
+            addCalendar(nextYear, nextMonth);
+        }
+
+        // 渲染所有日历
+        function renderAllCalendars() {
+            const wrapper = document.getElementById("calendar-wrapper");
+            wrapper.innerHTML = "";
+
+            // 遍历日历列表，逐个渲染
+            calendarData.calendars.forEach(calendar => {
+                const calendarPanel = createCalendarPanel(calendar);
+                wrapper.appendChild(calendarPanel);
+            });
+        }
+
+        // 创建单个日历面板
+        function createCalendarPanel(calendar) {
+            const { year, month, dates } = calendar;
+            const monthName = new Date(year, month).toLocaleDateString("zh-CN", { year: "numeric", month: "long" });
+
+            // 创建日历面板容器
+            const panel = document.createElement("div");
+            panel.className = "calendar-panel";
+            panel.dataset.year = year;
+            panel.dataset.month = month;
+
+            // 日历标题
+            const title = document.createElement("h2");
+            title.className = "calendar-title";
+            title.innerText = monthName;
+            panel.appendChild(title);
+
+            // 日历表格
+            const table = document.createElement("table");
+            table.className = "calendar-table";
+
+            // 表格头部（星期）
+            const thead = document.createElement("thead");
+            const weekTr = document.createElement("tr");
+            const weeks = ["日", "一", "二", "三", "四", "五", "六"];
+            weeks.forEach(week => {
+                const th = document.createElement("th");
+                th.className = "calendar-th";
+                th.innerText = week;
+                weekTr.appendChild(th);
+            });
+            thead.appendChild(weekTr);
+            table.appendChild(thead);
+
+            // 表格内容（日期）
+            const tbody = document.createElement("tbody");
+            const firstDay = new Date(year, month, 1).getDay(); // 当月1号是星期几（0=周日）
+            let dateIndex = 0;
+            let row = document.createElement("tr");
+
+            // 填充月初空白单元格
+            for (let i = 0; i < firstDay; i++) {
+                const td = document.createElement("td");
+                row.appendChild(td);
+            }
+
+            // 填充日期单元格
+            dates.forEach(date => {
+                // 新建行（每7个单元格一行）
+                if (row.children.length >= 7) {
+                    tbody.appendChild(row);
+                    row = document.createElement("tr");
+                }
+
+                const td = document.createElement("td");
+                td.className = "calendar-td";
+
+                const dateStr = `${year}-${String(month + 1).padStart(2, "0")}-${String(date).padStart(2, "0")}`;
+                const tagInfo = calendarData.tags[dateStr] || {};
+
+                // 创建日期单元格内容
+                const dateCell = document.createElement("div");
+                dateCell.className = `date-cell ${tagInfo.type || ""}`;
+                dateCell.dataset.date = dateStr;
+
+                // 日期数字
+                const dateNumber = document.createElement("div");
+                dateNumber.className = "date-number";
+                dateNumber.innerText = date;
+                dateCell.appendChild(dateNumber);
+
+                // 标记标题
+                if (tagInfo.type) {
+                    const tagMap = {
+                        anniversary: "纪念日",
+                        menstruation: "生理期",
+                        birthday: "生日",
+                        record: "记录"
+                    };
+                    const tagTitle = document.createElement("div");
+                    tagTitle.className = "date-tag";
+                    tagTitle.innerText = tagInfo.anniversaryYear ? `${tagInfo.anniversaryYear}周年${tagMap[tagInfo.type]}` : tagMap[tagInfo.type];
+                    dateCell.appendChild(tagTitle);
+
+                    // 副标题
+                    const subtitle = document.createElement("div");
+                    subtitle.className = "date-subtitle";
+                    subtitle.innerText = tagInfo.subtitle || "";
+                    dateCell.appendChild(subtitle);
+                }
+
+                // 绑定单元格点击事件（标记/编辑副标题）
+                dateCell.addEventListener("click", handleDateCellClick);
+                td.appendChild(dateCell);
+                row.appendChild(td);
+            });
+
+            // 填充月末空白单元格
+            while (row.children.length < 7) {
+                const emptyTd = document.createElement("td");
+                row.appendChild(emptyTd);
+            }
+            tbody.appendChild(row);
+            table.appendChild(tbody);
+            panel.appendChild(table);
+
+            return panel;
+        }
+
+        // ========== 标记与编辑功能 ==========
+        // 绑定标记选择事件
+        function bindTagSelector() {
+            const tagItems = document.querySelectorAll(".tag-item");
+            tagItems.forEach(item => {
+                item.addEventListener("click", () => {
+                    tagItems.forEach(t => t.classList.remove("active"));
+                    item.classList.add("active");
+                    activeTag = item.dataset.tag;
+                });
+            });
+        }
+
+        // 处理日期单元格点击
+        function handleDateCellClick() {
+            const dateStr = this.dataset.date;
+            const tagInfo = calendarData.tags[dateStr] || {};
+
+            // 有活跃标记：添加/更新标记
+            if (activeTag) {
+                calendarData.tags[dateStr] = {
+                    type: activeTag,
+                    subtitle: tagInfo.subtitle || "",
+                    anniversaryYear: tagInfo.anniversaryYear || null
+                };
+                saveToLocal();
+                renderAllCalendars();
+                updateStats();
+                return;
+            }
+
+            // 无活跃标记：编辑副标题（已有标记的单元格）
+            if (tagInfo.type) {
+                const cell = this;
+                const currentSubtitle = tagInfo.subtitle || "";
+
+                // 创建输入框
+                const input = document.createElement("input");
+                input.className = "subtitle-input";
+                input.value = currentSubtitle;
+                input.setAttribute("maxlength", "50");
+
+                // 输入框失去焦点时保存
+                input.addEventListener("blur", () => {
+                    calendarData.tags[dateStr].subtitle = input.value.trim();
+                    saveToLocal();
+                    renderAllCalendars();
+                });
+
+                // 回车保存
+                input.addEventListener("keydown", (e) => {
+                    if (e.key === "Enter") input.blur();
+                });
+
+                // 添加输入框并聚焦
+                cell.innerHTML = "";
+                cell.appendChild(input);
+                input.focus();
+            }
+        }
+
+        // 生成周年标记（已标记的纪念日/生日，在后续月份自动生成X周年标记）
+        function generateAnniversaryTags(targetYear, targetMonth) {
+            const targetDateStrPrefix = `${targetYear}-${String(targetMonth + 1).padStart(2, "0")}`;
+
+            // 遍历所有标记，找出纪念日和生日
+            Object.entries(calendarData.tags).forEach(([dateStr, tagInfo]) => {
+                if (!["anniversary", "birthday"].includes(tagInfo.type)) return;
+
+                // 解析原始标记日期
+                const [origYear, origMonth, origDay] = dateStr.split("-").map(Number);
+                const targetDateStr = `${targetDateStrPrefix}-${String(origDay).padStart(2, "0")}`;
+
+                // 计算周年数（仅当目标年月 >= 原始年月时生成）
+                const targetDate = new Date(targetYear, targetMonth, origDay);
+                const origDate = new Date(origYear, origMonth - 1, origDay);
+                if (targetDate < origDate) return;
+
+                const anniversaryYear = targetYear - origYear;
+                if (anniversaryYear <= 0) return;
+
+                // 检查目标日期是否存在（当月有该日期）
+                const targetMonthDays = new Date(targetYear, targetMonth + 1, 0).getDate();
+                if (origDay > targetMonthDays) return;
+
+                // 添加周年标记
+                calendarData.tags[targetDateStr] = {
+                    type: tagInfo.type,
+                    subtitle: tagInfo.subtitle || "",
+                    anniversaryYear: anniversaryYear
+                };
+            });
+
+            saveToLocal();
+        }
+
+        // ========== 统计数据更新 ==========
+        function updateStats() {
+            const now = new Date();
+
+            // 计算已相遇/相恋天数
+            const meetDays = Math.floor((now - MEET_DATE) / (1000 * 60 * 60 * 24));
+            const loveDays = Math.floor((now - LOVE_DATE) / (1000 * 60 * 60 * 24));
+
+            // 更新页面显示
+            document.getElementById("meet-days").innerText = Math.max(0, meetDays);
+            document.getElementById("love-days").innerText = Math.max(0, loveDays);
+
+            // 查找最近的纪念日和生日
+            updateNextAnniversary(now);
+            updateNextBirthday(now);
+        }
+
+        // 更新最近的纪念日提示
+        function updateNextAnniversary(now) {
+            let nextAnniversary = null;
+            let minDays = Infinity;
+
+            // 遍历所有纪念日标记
+            Object.entries(calendarData.tags).forEach(([dateStr, tagInfo]) => {
+                if (tagInfo.type !== "anniversary") return;
+
+                // 解析日期
+                const [year, month, day] = dateStr.split("-").map(Number);
+                let anniversaryDate = new Date(now.getFullYear(), month - 1, day);
+
+                // 若今年已过，取明年
+                if (anniversaryDate < now) {
+                    anniversaryDate = new Date(now.getFullYear() + 1, month - 1, day);
+                }
+
+                // 计算距离天数
+                const days = Math.floor((anniversaryDate - now) / (1000 * 60 * 60 * 24)) + 1;
+
+                // 更新最近的纪念日
+                if (days < minDays) {
+                    minDays = days;
+                    nextAnniversary = {
+                        date: anniversaryDate,
+                        subtitle: tagInfo.subtitle || "首次相遇",
+                        days: days
+                    };
+                }
+            });
+
+            // 更新页面显示
+            const tipEl = document.getElementById("next-anniversary");
+            if (nextAnniversary) {
+                tipEl.innerText = `距离 纪念日：${nextAnniversary.subtitle} 还有 ${nextAnniversary.days} 天`;
+            } else {
+                tipEl.innerText = "距离 纪念日：暂无 还有 0 天";
+            }
+        }
+
+        // 更新最近的生日提示
+        function updateNextBirthday(now) {
+            let nextBirthday = null;
+            let minDays = Infinity;
+
+            // 遍历所有生日标记
+            Object.entries(calendarData.tags).forEach(([dateStr, tagInfo]) => {
+                if (tagInfo.type !== "birthday") return;
+
+                // 解析日期
+                const [year, month, day] = dateStr.split("-").map(Number);
+                let birthdayDate = new Date(now.getFullYear(), month - 1, day);
+
+                // 若今年已过，取明年
+                if (birthdayDate < now) {
+                    birthdayDate = new Date(now.getFullYear() + 1, month - 1, day);
+                }
+
+                // 计算距离天数
+                const days = Math.floor((birthdayDate - now) / (1000 * 60 * 60 * 24)) + 1;
+
+                // 更新最近的生日
+                if (days < minDays) {
+                    minDays = days;
+                    nextBirthday = {
+                        date: birthdayDate,
+                        subtitle: tagInfo.subtitle || "未知",
+                        days: days
+                    };
+                }
+            });
+
+            // 更新页面显示
+            const tipEl = document.getElementById("next-birthday");
+            if (nextBirthday) {
+                tipEl.innerText = `距离 ${nextBirthday.subtitle} 的生日 还有 ${nextBirthday.days} 天`;
+            } else {
+                tipEl.innerText = "距离 生日：暂无 还有 0 天";
+            }
+        }
+
+        // ========== 数据存储 ==========
+        // 保存到本地 localStorage
+        function saveToLocal() {
+            localStorage.setItem(CALENDAR_KEY, JSON.stringify(calendarData));
+        }
+
+        // 保存到 Firebase 云端
+        async function saveToCloudImpl() {
+            try {
+                const calendarsRef = collection(db, "our_days_calendars");
+
+                // 步骤1：删除云端旧数据
+                const oldSnap = await getDocs(calendarsRef);
+                const batch = writeBatch(db);
+                oldSnap.docs.forEach(docItem => {
+                    batch.delete(docItem.ref);
+                });
+                await batch.commit();
+
+                // 步骤2：批量上传最新日历数据
+                const newBatch = writeBatch(db);
+                const docRef = doc(calendarsRef);
+                newBatch.set(docRef, {
+                    ...calendarData,
+                    updateTime: Date.now()
+                });
+                await newBatch.commit();
+
+                alert("日历数据已成功保存到云端！");
+            } catch (e) {
+                alert(`保存失败：${e.message || JSON.stringify(e)}`);
+                console.error("云端保存错误：", e);
+            }
+        }
+
+        // 从 Firebase 云端读取
+        async function loadFromCloudImpl() {
+            try {
+                const calendarsRef = collection(db, "our_days_calendars");
+                const snap = await getDocs(calendarsRef);
+
+                if (snap.empty) {
+                    alert("云端暂无日历数据！");
+                    return;
+                }
+
+                // 提取最新数据
+                const cloudData = snap.docs[0].data();
+                calendarData.calendars = cloudData.calendars || [];
+                calendarData.tags = cloudData.tags || {};
+
+                // 保存到本地并渲染
+                saveToLocal();
+                renderAllCalendars();
+                updateStats();
+                alert("日历数据已从云端成功读取！");
+            } catch (e) {
+                alert(`读取失败：${e.message || JSON.stringify(e)}`);
+                console.error("云端读取错误：", e);
+            }
+        }
+
+        // ========== 全局函数挂载 ==========
+        window.addNextCalendar = addNextCalendar;
+        window.saveToCloud = saveToCloudImpl;
+        window.loadFromCloud = loadFromCloudImpl;
+
+        // ========== 页面初始化 ==========
+        init();
+    </script>
+</body>
+</html>
