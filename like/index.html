@@ -5,289 +5,164 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>千代 & 小德 饮食偏好记录</title>
     <style>
-        :root {
-            /* 高级配色方案 - 低饱和、莫兰迪色系 */
-            --color-love-light: #E8F3F8; /* 爱吃（淡蓝） */
-            --color-love-border: #4A90E2;
-            --color-love-dark: #3A7BC8;
-            --color-hate-light: #F9E8E8; /* 不爱吃（淡粉） */
-            --color-hate-border: #E57373;
-            --color-hate-dark: #D32F2F;
-            --color-common-light: #E6F7F0; /* 共同偏好（淡绿） */
-            --color-common-border: #2ECC71;
-            --color-common-dark: #27AE60;
-            --color-bg-primary: #FFFFFF;
-            --color-bg-secondary: #F8F9FA;
-            --color-bg-tertiary: #F1F3F5;
-            --color-text-primary: #2D3436;
-            --color-text-secondary: #6C757D;
-            --color-text-tertiary: #ADB5BD;
-            --color-trash: #E74C3C;
-            --color-trash-hover: #C0392B;
-            --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
-            --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-            --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
-            --radius-sm: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --transition-default: all 0.25s ease-in-out;
-        }
+      
+      :root {
+  /* 米其林级中性色系统 */
+  --bg-main: #f6f4f1;
+  --bg-panel: #ffffff;
+  --bg-soft: #f0eee9;
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
-        }
+  --accent-green: #7a8f7a;   /* 鼠尾草绿 */
+  --accent-brown: #8a6f5a;   /* 咖啡棕 */
+  --accent-red: #a85c4a;     /* 暖红（克制） */
 
-     body {
-    background:
-        radial-gradient(1200px 600px at 20% 10%, rgba(120,140,255,0.12), transparent 60%),
-        radial-gradient(1000px 800px at 80% 20%, rgba(160,120,255,0.10), transparent 65%),
-        linear-gradient(180deg, #0a0d1a, #05060c);
-    color: #e6e7ee;
-    padding: 32px 20px;
-    max-width: 1600px;
-    margin: 0 auto;
-    min-height: 100vh;
+  --text-main: #2e2e2e;
+  --text-sub: #7a7a7a;
+  --text-muted: #b0b0b0;
+
+  --border-soft: rgba(0,0,0,0.06);
+
+  --shadow-soft: 0 10px 30px rgba(0,0,0,0.06);
+  --shadow-hover: 0 20px 50px rgba(0,0,0,0.1);
+
+  --radius-lg: 20px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
 }
 
+/* ===== 基础 ===== */
+body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(122,143,122,0.12), transparent 60%),
+    radial-gradient(1000px 500px at 90% 0%, rgba(168,92,74,0.08), transparent 55%),
+    var(--bg-main);
+  color: var(--text-main);
+}
 
+/* ===== 标题 ===== */
 h1 {
-    text-align: center;
-    margin-bottom: 48px;
-    font-weight: 500;
-    font-size: 2.4rem;
-    letter-spacing: 0.12em;
-    color: #f0f1ff;
+  font-size: 2.6rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 36px;
 }
 
+/* ===== 云端按钮（像餐厅后台按钮） ===== */
+.cloud-buttons button {
+  background: var(--bg-panel);
+  color: var(--text-main);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-soft);
+}
 
-        /* 云端操作按钮 */
-        .cloud-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            margin-bottom: 32px;
-        }
+.cloud-buttons button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
 
-        .cloud-buttons button {
-            padding: 12px 24px;
-            border: none;
-            border-radius: var(--radius-md);
-            background-color: var(--color-love-dark);
-            color: #FFFFFF;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition-default);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .cloud-buttons button:hover {
-            background-color: var(--color-love-border);
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-
-        /* 整体三栏布局容器 */
-        .preference-container {
-            display: flex;
-            gap: 24px;
-            width: 100%;
-            margin-bottom: 40px;
-        }
-
-        /* 左右：个人偏好面板 */
-     .person-panel,
+/* ===== 面板 ===== */
+.person-panel,
 .common-panel {
-    flex: 1;
-    background: rgba(255,255,255,0.04);
-    border-radius: 20px;
-    padding: 32px;
-    backdrop-filter: blur(14px);
-    border: 1px solid rgba(255,255,255,0.08);
-    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
-    transition: transform 0.4s ease, box-shadow 0.4s ease;
+  background: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-soft);
+  border: 1px solid var(--border-soft);
 }
 
-.person-panel:hover,
-.common-panel:hover {
-    transform: translateY(-6px);
-    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
-}
-
+/* ===== 面板标题 ===== */
 .person-title {
-    font-size: 1.6rem;
-    font-weight: 400;
-    letter-spacing: 0.2em;
-    margin-bottom: 28px;
-    text-align: center;
-    color: #ffffff;
+  font-size: 1.7rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
 }
 
 .common-title {
-    font-size: 1.6rem;
-    font-weight: 400;
-    letter-spacing: 0.2em;
-    margin-bottom: 28px;
-    text-align: center;
-    color: #9dffcf;
+  font-size: 1.6rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  color: var(--accent-green);
 }
 
-
-  .preference-section {
-    min-height: 260px;
-    background: rgba(255,255,255,0.02);
-    border-radius: 14px;
-    padding: 20px;
-    transition: background 0.3s ease;
+/* ===== 区块 ===== */
+.preference-section {
+  background: var(--bg-soft);
+  border-radius: var(--radius-md);
 }
 
-.preference-section:hover {
-    background: rgba(255,255,255,0.05);
+/* ===== 区块标题 ===== */
+.section-title-love {
+  background: rgba(122,143,122,0.12);
+  color: var(--accent-green);
 }
 
-        /* 个人面板的区域标题 */
-        .section-title-person {
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-bottom: 20px;
-            color: var(--color-text-secondary);
-            text-align: center;
-            padding: 8px 0;
-            border-radius: var(--radius-sm);
-        }
+.section-title-hate {
+  background: rgba(168,92,74,0.12);
+  color: var(--accent-red);
+}
 
-        .section-title-love {
-            background-color: rgba(74, 144, 226, 0.1);
-            color: var(--color-love-dark);
-        }
+.section-title-common {
+  background: rgba(122,143,122,0.16);
+  color: var(--accent-green);
+}
 
-        .section-title-hate {
-            background-color: rgba(229, 115, 115, 0.1);
-            color: var(--color-hate-dark);
-        }
-
-        /* 中间面板的区域标题 */
-        .section-title-common {
-            font-size: 1.1rem;
-            font-weight: 500;
-            margin-bottom: 20px;
-            color: var(--color-common-dark);
-            text-align: center;
-            padding: 8px 0;
-            border-radius: var(--radius-sm);
-            background-color: rgba(46, 204, 113, 0.1);
-        }
-
-        /* 偏好贴纸样式 */
+/* ===== 食物贴纸（像菜单标签） ===== */
 .preference-sticker {
-    background: linear-gradient(
-        135deg,
-        rgba(255,255,255,0.18),
-        rgba(255,255,255,0.06)
-    );
-    border: 1px solid rgba(255,255,255,0.25);
-    border-radius: 12px;
-    padding: 14px 20px;
-    margin-bottom: 14px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
-    cursor: grab;
-    transition: transform 0.25s ease, box-shadow 0.25s ease;
+  background: #fff;
+  border: 1px solid var(--border-soft);
+  border-radius: 999px; /* 药丸形 */
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
 }
-
-.preference-sticker:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 16px 40px rgba(0,0,0,0.45);
-}
-        .preference-sticker:active {
-            cursor: grabbing;
-            box-shadow: var(--shadow-md);
-            transform: scale(1.03);
-            z-index: 10;
-        }
 
 .preference-sticker.hate {
-    background: linear-gradient(
-        135deg,
-        rgba(255,140,140,0.18),
-        rgba(255,140,140,0.06)
-    );
+  background: #fff8f6;
+  border-color: rgba(168,92,74,0.3);
 }
 
 .preference-sticker.common {
-    background: linear-gradient(
-        135deg,
-        rgba(140,255,200,0.18),
-        rgba(140,255,200,0.06)
-    );
-    border-color: rgba(140,255,200,0.4);
-    cursor: default;
+  background: #f3f6f3;
+  border-color: rgba(122,143,122,0.4);
 }
 
-        .preference-sticker.common:active {
-            transform: none;
-            box-shadow: 0 2px 8px rgba(46, 204, 113, 0.15);
-        }
-
-        /* 个人面板：输入框容器 */
-        .preference-input-container {
-            display: flex;
-            gap: 12px;
-            width: 100%;
-            margin-top: 16px;
-        }
-
-        input[type="text"] {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: #ffffff;
+/* ===== 输入区 ===== */
+input[type="text"] {
+  background: #ffffff;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
 }
 
 input[type="text"]:focus {
-    border-color: #aeb6ff;
-    box-shadow: 0 0 0 3px rgba(160,170,255,0.2);
+  border-color: var(--accent-green);
+  box-shadow: 0 0 0 3px rgba(122,143,122,0.15);
 }
 
-        .btn-love,
+/* ===== 添加按钮 ===== */
+.btn-love {
+  background: var(--accent-green);
+  border-radius: 999px;
+}
+
 .btn-hate {
-    background: linear-gradient(135deg, #7f8cff, #a68bff);
-    border: none;
+  background: var(--accent-red);
+  border-radius: 999px;
 }
 
-.btn-hate {
-    background: linear-gradient(135deg, #ff7a7a, #ff9a9a);
+/* ===== 垃圾桶（像餐厅后厨） ===== */
+.trash-bin {
+  background: #ffffff;
+  color: var(--accent-red);
+  border: 1px solid var(--border-soft);
+  box-shadow: var(--shadow-soft);
+}
+
+.trash-bin.active {
+  background: var(--accent-red);
+  color: #fff;
 }
 
 
-     .trash-bin {
-    background: rgba(255,255,255,0.08);
-    border: 1px solid rgba(255,255,255,0.2);
-    backdrop-filter: blur(12px);
-}
-
-        .trash-bin.active {
-            opacity: 1;
-            transform: translateX(-50%) scale(1.08);
-            background-color: var(--color-trash-hover);
-            box-shadow: var(--shadow-lg);
-        }
-
-        /* 拖拽占位符 */
-        .placeholder {
-            background-color: rgba(232, 243, 248, 0.6);
-            border: 1px dashed var(--color-love-border);
-            border-radius: var(--radius-sm);
-            padding: 14px 20px;
-            margin-bottom: 16px;
-            height: 56px;
-        }
-
-        .placeholder.hate-placeholder {
-            background-color: rgba(249, 232, 232, 0.6);
-            border-color: var(--color-hate-border);
-        }
+    
 
         /* 响应式适配（小屏设备三栏变纵向） */
         @media (max-width: 1200px) {
