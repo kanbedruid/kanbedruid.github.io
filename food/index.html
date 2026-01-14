@@ -18,7 +18,9 @@ body {
 h1 {
   font-weight: 500;
   margin-bottom: 16px;
-    <div style="margin-bottom:16px;">
+
+}
+      <div style="margin-bottom:16px;">
   位置：
   <input id="filter-location" placeholder="如：南京" />
   &nbsp;&nbsp;
@@ -27,8 +29,6 @@ h1 {
   &nbsp;&nbsp;
   <button id="reset">总榜</button>
 </div>
-}
-
 
 
 table {
@@ -61,6 +61,16 @@ th {
 <body>
 <h1>小德的饭店排名</h1>
 <div id="table">加载中…</div>
+    <div style="margin-bottom:16px;">
+  位置：
+  <input id="filter-location" placeholder="如：南京" />
+  &nbsp;&nbsp;
+  类别：
+  <input id="filter-category" placeholder="如：粤菜" />
+  &nbsp;&nbsp;
+  <button id="reset">总榜</button>
+</div>
+
 
 <script>
   let originalData = [];
