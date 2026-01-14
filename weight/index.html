@@ -250,12 +250,19 @@ function render(){
 }
 
 function renderTable(){
-  const tb=document.getElementById("records");
-  tb.innerHTML="";
-  data.forEach((r,i)=>{
-    const tr=document.createElement("tr");
+  const tb = document.getElementById("records");
+  tb.innerHTML = "";
+
+  // 关键：生成“倒序索引列表”，但不改变 data 本身
+  const indexes = [...data.keys()].reverse();
+
+  indexes.forEach(i => {
+    const r = data[i];
+    const tr = document.createElement("tr");
+
     if(isWeekend(r.date)) tr.classList.add("weekend");
-    tr.innerHTML=`
+
+    tr.innerHTML = `
 <td>${r.date}</td>
 <td>${r.name}</td>
 <td class="${r.checkin?'plus':''}">
@@ -281,10 +288,12 @@ ${r.diff===1?'↓':r.diff===-1?'↑':''}
 </td>
 <td><input type="number" value="${r.extra}"
  onchange="update(${i},'extra',this.value)"></td>
-<td>${score(r)}</td>`;
+<td>${score(r)}</td>
+`;
     tb.appendChild(tr);
   });
 }
+
 
 function renderRank(){
   const ws=weekStart(new Date());
