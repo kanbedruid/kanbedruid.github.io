@@ -17,10 +17,9 @@ body {
 
 h1 {
   font-weight: 500;
-  margin-bottom: 16px;
-
+  margin-bottom: 12px;
 }
-      <div style="margin-bottom:16px;">
+  <div style="margin-bottom:16px;">
   位置：
   <input id="filter-location" placeholder="如：南京" />
   &nbsp;&nbsp;
@@ -30,6 +29,20 @@ h1 {
   <button id="reset">总榜</button>
 </div>
 
+
+.controls {
+  margin-bottom: 16px;
+}
+
+.controls input {
+  padding: 4px 6px;
+  margin-right: 8px;
+}
+
+.controls button {
+  padding: 4px 10px;
+  cursor: pointer;
+}
 
 table {
   width: 100%;
@@ -49,62 +62,40 @@ th {
   font-weight: 500;
 }
 
-/* 高饱和评分色（增强版） */
-.score-blue    { background: #9dc3e6; }  /* 深一点的蓝 */
-.score-purple { background: #b4a7d6; }  /* 明显紫 */
-.score-orange { background: #f4b183; }  /* 橙 */
-.score-red    { background: #e06666; }  /* 红 */
-
+/* 高饱和评分色（Excel 风格） */
+.score-blue    { background: #9dc3e6; }
+.score-purple { background: #b4a7d6; }
+.score-orange { background: #f4b183; }
+.score-red    { background: #e06666; }
 </style>
 </head>
 
 <body>
-
 <h1>小德的饭店排名</h1>
 
-<div style="margin-bottom:16px;">
+<div class="controls">
   位置：
   <input id="filter-location" placeholder="如：南京">
-  &nbsp;&nbsp;
   类别：
   <input id="filter-category" placeholder="如：粤菜">
-  &nbsp;&nbsp;
   <button id="reset">总榜</button>
 </div>
 
 <div id="table">加载中…</div>
 
 <script>
-  let originalData = [];
+let originalData = [];
 
-  fetch("饭店评分.xlsx")
-    .then(r => r.arrayBuffer())
-    .then(buf => {
-      const wb = XLSX.read(buf, { type: "array" });
-      const sheet = wb.Sheets[wb.SheetNames[0]];
-      originalData = XLSX.utils.sheet_to_json(sheet);
-      render(originalData);
-    });
-
-  /* 你原来的 JS 函数保持不动 */
-</script>
-
-</body>
-
-
-<script>
-  let originalData = [];
 fetch("饭店评分.xlsx")
   .then(r => r.arrayBuffer())
   .then(buf => {
     const wb = XLSX.read(buf, { type: "array" });
     const sheet = wb.Sheets[wb.SheetNames[0]];
-   originalData = XLSX.utils.sheet_to_json(sheet);
-render(originalData);
-
+    originalData = XLSX.utils.sheet_to_json(sheet);
+    render(originalData);
   })
   .catch(() => {
-    document.getElementById("table").innerText = "未找到 data.xlsx";
+    document.getElementById("table").innerText = "未找到 饭店评分.xlsx";
   });
 
 function scoreClass(v) {
@@ -117,15 +108,17 @@ function scoreClass(v) {
 }
 
 function isValidHeader(h) {
-  if (!h) return false;                 // 空字符串
+  if (!h) return false;
   if (h.startsWith("__EMPTY")) return false;
   return true;
 }
 
 function render(data) {
-  if (!data.length) return;
+  if (!data.length) {
+    document.getElementById("table").innerText = "无匹配结果";
+    return;
+  }
 
-  /* 关键：彻底过滤空列 */
   const headers = Object.keys(data[0]).filter(isValidHeader);
 
   const table = document.createElement("table");
@@ -146,7 +139,7 @@ function render(data) {
       const td = document.createElement("td");
       const val = row[key];
 
-      /* 排名列永远白色 */
+      /* 排名列不着色 */
       if (key !== "排名" && typeof val === "number") {
         td.className = scoreClass(val);
       }
@@ -164,8 +157,11 @@ function render(data) {
   container.innerHTML = "";
   container.appendChild(table);
 }
-  document.getElementById("filter-location").addEventListener("input", applyFilter);
+
+/* 筛选逻辑 */
+document.getElementById("filter-location").addEventListener("input", applyFilter);
 document.getElementById("filter-category").addEventListener("input", applyFilter);
+
 document.getElementById("reset").addEventListener("click", () => {
   document.getElementById("filter-location").value = "";
   document.getElementById("filter-category").value = "";
