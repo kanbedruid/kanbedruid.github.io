@@ -18,17 +18,17 @@
   --c-accent: #9a8cff;
   --c-accent-soft: #ece9ff;
 
-  --c-anniversary: #f3e7f0;
-  --c-anniversary-border: #c89bc3;
+ --c-anniversary: #ffe3f1;
+--c-anniversary-border: #ff6fb1;
 
-  --c-menstruation: #f8e6e6;
-  --c-menstruation-border: #d48b8b;
+--c-menstruation: #ffe1e1;
+--c-menstruation-border: #ff5a5a;
 
-  --c-birthday: #e8f1fa;
-  --c-birthday-border: #8bb4d4;
+--c-birthday: #e1f0ff;
+--c-birthday-border: #4da3ff;
 
-  --c-record: #f6f2e6;
-  --c-record-border: #d1c08a;
+--c-record: #fff3d6;
+--c-record-border: #ffb703;
 
   --radius-sm: 10px;
   --radius-md: 16px;
@@ -222,19 +222,20 @@ body {
 }
 
 .calendar-td {
-  height: 110px;
+  padding: 0;
 }
+
 
 /* ===== 日期格 ===== */
 .date-cell {
   width: 100%;
-  height: 100%;
+  aspect-ratio: 1 / 1;   /* 保持正方形 */
   border-radius: var(--radius-md);
   background: var(--c-bg-soft);
   position: relative;
   cursor: pointer;
   transition: var(--transition);
-  padding: 10px;
+  padding: 8px;
 }
 
 .date-cell:hover {
@@ -271,24 +272,31 @@ body {
 }
 
 /* ===== 标记状态 ===== */
+.date-cell.anniversary,
+.date-cell.menstruation,
+.date-cell.birthday,
+.date-cell.record {
+  box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+}
+
 .date-cell.anniversary {
-  background: var(--c-anniversary);
-  border: 1px solid var(--c-anniversary-border);
+  background: linear-gradient(135deg, #ffe3f1, #ffd1e8);
+  border: 2px solid #ff6fb1;
 }
 
 .date-cell.menstruation {
-  background: var(--c-menstruation);
-  border: 1px solid var(--c-menstruation-border);
+  background: linear-gradient(135deg, #ffe1e1, #ffcaca);
+  border: 2px solid #ff5a5a;
 }
 
 .date-cell.birthday {
-  background: var(--c-birthday);
-  border: 1px solid var(--c-birthday-border);
+  background: linear-gradient(135deg, #e1f0ff, #cfe6ff);
+  border: 2px solid #4da3ff;
 }
 
 .date-cell.record {
-  background: var(--c-record);
-  border: 1px solid var(--c-record-border);
+  background: linear-gradient(135deg, #fff3d6, #ffe6ad);
+  border: 2px solid #ffb703;
 }
 
 /* ===== 删除 & 输入 ===== */
@@ -318,6 +326,32 @@ body {
   font-size: 0.8rem;
   text-align: center;
   outline: none;
+}
+@media (max-width: 640px) {
+
+  .calendar-table {
+    border-spacing: 6px;
+  }
+
+  .date-cell {
+    padding: 6px;
+  }
+
+  .date-number {
+    font-size: 0.7rem;
+  }
+
+  .date-tag {
+    font-size: 0.8rem;
+  }
+
+  .date-subtitle {
+    font-size: 0.65rem;
+  }
+
+  .calendar-title {
+    font-size: 1.2rem;
+  }
 }
 
     </style>
