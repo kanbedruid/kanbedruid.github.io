@@ -7,33 +7,32 @@
 
 <style>
 :root{
-  /* ===== 高饱和度对比配色（满足要求：对比度高、无相近色） ===== */
-  --bg-main:#f8f9fc;
-  --bg-grad1:#eef5ff;
-  --bg-grad2:#fff5f8;
-  --card-bg:rgba(255,255,255,0.9);
-  --border:#dce1e9;
+  /* ===== 法式高饱和度对比配色 ===== */
+  --bg-main:#f8f9fd;
+  --bg-grad1:#e6f7ff;
+  --bg-grad2:#fff7e6;
+  --card-bg:rgba(255,255,255,0.95);
+  --border:#d1d9e6;
 
-  --text-main:#1a1c24;
-  --text-sub:#4e5969;
-  --accent:#2563eb; /* 高饱和蓝（主强调色） */
+  --text-main:#1a2b48;
+  --text-sub:#4a5a77;
+  --accent:#2f54e8; /* 高饱和法式宝蓝（主强调色） */
+  --accent-hover:#1a36c9;
 
-  /* 高饱和度功能色（区分明显，无重合，对比度高） */
-  --plus:#059669; /* 深翠绿（正向：签到、早睡、运动） */
-  --plus-bg:#d1fae5; /* 翠绿浅背景（与plus形成高对比，不刺眼） */
-  --minus:#dc2626; /* 正红（负向：熬夜、体重上升） */
-  --minus-bg:#fee2e2; /* 红浅背景（与minus高对比） */
-  --weekend:#f59e0b; /* 亮橙黄（周末） */
-  --weekend-bg:#fffbeb; /* 橙黄浅背景（与weekend高对比） */
-  
-  /* 表格单元格间距（解决色块重合核心：增加单元格边框间距） */
-  --cell-gap: 4px; /* 单元格之间的空隙，避免色块相连 */
+  /* 高饱和度状态色（增强对比） */
+  --plus:#e6fff2; /* 清新绿底 */
+  --plus-border:#36d399; /* 高饱和翠绿（正状态） */
+  --minus:#fff0f0; /* 柔粉底 */
+  --minus-border:#f87272; /* 高饱和绯红（负状态） */
+  --weekend:#fffbe6; /* 暖黄底 */
+  --weekend-border:#ffc83d; /* 高饱和明黄（周末状态） */
 
-  --radius-lg: 18px;
-  --radius-md: 12px;
-  --radius-sm: 8px;
-  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.06);
-  --transition: all .3s ease-in-out;
+  /* 法式精致细节 */
+  --radius-lg:18px;
+  --radius-md:12px;
+  --radius-sm:8px;
+  --shadow-soft:0 4px 20px rgba(0,0,0,0.08);
+  --transition:all .3s ease-in-out;
 }
 
 *{
@@ -47,157 +46,161 @@ body{
   background:
     linear-gradient(120deg,var(--bg-grad1),var(--bg-grad2),var(--bg-main));
   color:var(--text-main);
-  max-width: 1500px;
-  margin: 0 auto;
+  min-height:100vh;
 }
 
-/* ===== 页面标题（法式风格） ===== */
+/* ===== 页面标题 ===== */
 h1{
-  font-size: 3.2rem;
-  letter-spacing: 4px;
-  margin-bottom: 32px;
-  color: var(--accent);
-  font-weight: 700;
-  text-align: center;
+  font-size:48px;
+  letter-spacing:2px;
+  margin-bottom:32px;
+  text-align:center;
+  color:var(--accent); /* 高饱和主色调点缀 */
+  font-family:"Noto Serif SC", serif;
+  font-weight:700;
 }
 
 h2{
-  font-size: 1.8rem;
-  margin-bottom: 16px;
-  color: var(--text-main);
-  padding-bottom: 8px;
-  border-bottom: 1px solid var(--border);
+  font-size:24px;
+  margin-bottom:16px;
+  color:var(--text-main);
+  border-bottom:2px solid var(--accent);
+  padding-bottom:8px;
+  display:inline-block;
 }
 
-/* ===== 卡片区块（法式精致卡片） ===== */
+/* ===== 卡片区块 ===== */
 .section{
   background:var(--card-bg);
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
-  padding:24px;
+  padding:28px;
   margin-bottom:28px;
   backdrop-filter:blur(14px);
-  box-shadow: var(--shadow-soft);
-  transition: var(--transition);
+  box-shadow:var(--shadow-soft);
+  transition:var(--transition);
 }
 
 .section:hover{
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.09);
-  transform: translateY(-2px);
+  box-shadow:0 8px 30px rgba(0,0,0,0.12);
+  transform:translateY(-2px);
 }
 
-/* ===== 表格（核心修改：解决色块重合，提高饱和度） ===== */
+/* ===== 表格 ===== */
 table{
   width:100%;
-  border-collapse: separate; /* 关键1：取消合并边框，改为分离模式 */
-  border-spacing: var(--cell-gap); /* 关键2：设置单元格间距，避免色块相连 */
-  font-size: 14px;
-  table-layout: fixed;
+  border-collapse:collapse;
+  font-size:16px;
 }
 
 th,td{
-  padding: 12px 8px; /* 增加内边距，提升色块视觉效果 */
-  text-align: center;
-  border-radius: var(--radius-sm); /* 单元格圆角，法式精致感 */
-  border: none; /* 移除原有边框，避免与色块冲突 */
+  padding:12px 10px;
+  text-align:center;
 }
 
 th{
   color:var(--text-sub);
-  font-weight: 600;
-  background: var(--bg-main); /* 表头背景，区分内容区 */
+  font-weight:700;
+  border-bottom:2px solid var(--border);
+  background:var(--bg-main);
 }
 
-/* 关键：色块样式优化（高饱和度，无重合，独立显示） */
+td{
+  border-bottom:1px solid var(--border);
+  transition:var(--transition);
+}
+
+tr:last-child td{
+  border-bottom:none;
+}
+
+tr:hover td{
+  background:rgba(230,247,255,0.5);
+}
+
+/* ===== 高饱和度状态色（增强对比） ===== */
 .plus{ 
-  background: var(--plus-bg) !important; 
-  color: var(--plus);
-  font-weight: 500;
-  box-shadow: 0 2px 4px rgba(5, 150, 105, 0.1); /* 轻微阴影，突出色块 */
+  background:var(--plus); 
+  border-left:4px solid var(--plus-border);
+  font-weight:500;
 }
 .minus{ 
-  background: var(--minus-bg) !important; 
-  color: var(--minus);
-  font-weight: 500;
-  box-shadow: 0 2px 4px rgba(220, 38, 38, 0.1);
+  background:var(--minus); 
+  border-left:4px solid var(--minus-border);
+  font-weight:500;
 }
 .weekend{ 
-  background: var(--weekend-bg) !important; 
-  color: var(--weekend);
-  font-weight: 500;
-  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1);
+  background:var(--weekend); 
+  border-left:4px solid var(--weekend-border);
+  font-weight:500;
 }
 
-/* 表格行：避免整行背景重合，仅单元格独立上色 */
-tr{
-  background: transparent; /* 行背景透明，防止色块被覆盖 */
-}
-
-/* ===== 输入控件（法式风格优化，高对比度） ===== */
+/* ===== 输入控件 ===== */
 input[type="number"]{
-  width: 72px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 8px 6px;
-  background: #ffffff;
-  color: var(--text-main);
-  transition: var(--transition);
-  text-align: center;
+  width:72px;
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+  padding:8px;
+  background:rgba(255,255,255,0.9);
+  color:var(--text-main);
+  font-size:14px;
+  transition:var(--transition);
 }
 
 input[type="number"]:focus{
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  outline:none;
+  border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(47,84,232,0.15);
 }
 
 input[type="checkbox"]{
-  transform:scale(1.2);
+  transform:scale(1.3);
   cursor:pointer;
-  accent-color: var(--accent); /* 复选框高饱和度配色，统一风格 */
+  accent-color:var(--accent); /* 高饱和复选框颜色 */
 }
 
-/* ===== 按钮（法式风格，高饱和度对比） ===== */
+/* ===== 按钮 ===== */
 button{
-  margin:24px 10px 24px 0;
-  padding: 12px 20px;
+  margin:24px 12px 24px 0;
+  padding:12px 24px;
   border:none;
-  border-radius: var(--radius-sm);
-  background: var(--accent);
-  color: #ffffff;
-  font-size: 14px;
-  cursor: pointer;
-  transition: var(--transition);
-  box-shadow: var(--shadow-soft);
-  letter-spacing: 1px;
+  border-radius:var(--radius-md);
+  background:var(--accent);
+  color:#fff;
+  font-size:16px;
+  cursor:pointer;
+  transition:var(--transition);
+  box-shadow:var(--shadow-soft);
 }
 
 button:hover{
-  opacity: 0.95;
-  transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(37, 99, 235, 0.2);
+  background:var(--accent-hover);
+  transform:translateY(-3px);
+  box-shadow:0 6px 20px rgba(47,84,232,0.25);
 }
 
-/* ===== 图表（高饱和度数据系列，优化视觉） ===== */
+button:active{
+  transform:translateY(0);
+}
+
+/* ===== 图表 ===== */
 canvas{
   max-height:280px;
-  padding: 16px;
-  background: var(--card-bg);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  margin-top: 16px;
+  padding:10px;
+  background:var(--card-bg);
+  border-radius:var(--radius-md);
+  box-shadow:var(--shadow-soft);
 }
 
-/* ===== 表格整体容器（法式风格优化） ===== */
+/* ===== 表格整体容器 ===== */
 .table-wrap{
   background:var(--card-bg);
   border:1px solid var(--border);
   border-radius:var(--radius-lg);
-  padding: 24px 16px;
+  padding:20px;
   backdrop-filter:blur(14px);
   overflow-x:auto;
-  box-shadow: var(--shadow-soft);
-  margin-top: 16px;
+  box-shadow:var(--shadow-soft);
 }
 </style>
 </head>
@@ -326,11 +329,10 @@ function renderTable(){
     const r = data[i];
     const tr = document.createElement("tr");
 
-    // 周末仅给日期单元格上色（避免整行色块重合，符合要求）
-    const dateTdClass = isWeekend(r.date) ? 'weekend' : '';
+    if(isWeekend(r.date)) tr.classList.add("weekend");
 
     tr.innerHTML = `
-<td class="${dateTdClass}">${r.date}</td>
+<td>${r.date}</td>
 <td>${r.name}</td>
 <td class="${r.checkin?'plus':''}">
 <input type="checkbox" ${r.checkin?'checked':''}
@@ -387,19 +389,15 @@ function renderChart(){
     ds[r.name][r.date]=Number(r.weight);
   });
 
-  // 图表数据系列：高饱和度配色，与页面风格统一
-  const datasets=Object.entries(ds).map(([name,map], index)=>{
-    const colors = [var(--accent), var(--plus), var(--weekend)]; // 高饱和度配色组
-    return {
-      label:name,
-      data:labels.map(d=>map[d]??null),
-      spanGaps:true,
-      borderWidth:3,
-      borderColor: index === 0 ? var(--accent) : (index === 1 ? var(--plus) : var(--weekend)),
-      backgroundColor: index === 0 ? 'rgba(37, 99, 235, 0.1)' : (index === 1 ? 'rgba(5, 150, 105, 0.1)' : 'rgba(245, 158, 11, 0.1)'),
-      tension: 0.2
-    }
-  });
+  const datasets=Object.entries(ds).map(([name,map])=>({
+    label:name,
+    data:labels.map(d=>map[d]??null),
+    spanGaps:true,
+    borderWidth:3,
+    borderColor: name==="千代" ? var(--plus-border) : var(--accent), // 高饱和度图表线条
+    backgroundColor: name==="千代" ? "rgba(54, 211, 153, 0.1)" : "rgba(47, 84, 232, 0.1)",
+    tension:0.2
+  }));
 
   if(chart) chart.destroy();
   chart=new Chart(document.getElementById("chart"),{
@@ -407,15 +405,13 @@ function renderChart(){
     data:{labels,datasets},
     options:{
       responsive:true,
-      plugins:{legend:{position:"top"}},
+      plugins:{
+        legend:{position:"top", labels:{fontSize:16}},
+        tooltip:{backgroundColor:var(--card-bg), color:var(--text-main), borderColor:var(--border), borderWidth:1}
+      },
       scales:{
-        y:{
-          title:{display:true,text:"体重"},
-          grid:{color:var(--border)}
-        },
-        x:{
-          grid:{display:false}
-        }
+        y:{title:{display:true,text:"体重（kg）",fontSize:14}, grid:{color:var(--border)}},
+        x:{grid:{display:false}}
       }
     }
   });
@@ -425,7 +421,6 @@ function renderChart(){
 window.saveToCloud = function() {};
 window.loadFromCloud = function() {};
 
-// 初始渲染
 render();
 </script>
   
@@ -453,7 +448,7 @@ render();
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  /* ===== 保存到云端（修复重复上传+语法错误） ===== */
+  /* ===== 保存到云端（保留原有功能，优化提示） ===== */
   async function saveToCloudImpl() {
     try {
       const raw = localStorage.getItem("diet_records_v3");
@@ -469,7 +464,7 @@ render();
       }
 
       // 步骤1：获取云端旧数据并批量删除（避免重复）
-      const recordsRef = collection(db, "records"); // 正确获取集合引用（路径：records）
+      const recordsRef = collection(db, "records");
       const oldQuery = query(recordsRef);
       const oldSnap = await getDocs(oldQuery);
       
@@ -481,10 +476,9 @@ render();
         await batch.commit();
       }
 
-      // 步骤2：批量上传本地最新数据（修复核心：正确生成文档引用）
+      // 步骤2：批量上传本地最新数据
       const newBatch = writeBatch(db);
       localData.forEach(r => {
-        // 正确语法：doc(集合引用) → 生成该集合下的唯一空白文档引用
         const docRef = doc(recordsRef); 
         newBatch.set(docRef, {
           date: r.date,
@@ -502,27 +496,25 @@ render();
 
       await newBatch.commit();
       alert(`成功保存 ${localData.length} 条记录到云端（已清除旧数据）`);
-      render(); // 刷新页面数据
+      render();
     } catch (e) {
       alert("保存失败，错误详情：" + (e.message || JSON.stringify(e)));
       console.error("云端保存错误：", e);
     }
   }
 
-  /* ===== 从云端恢复（修复排序+去重问题，优化自动读取） ===== */
+  /* ===== 从云端恢复（优化：自动读取时静默无弹窗，高饱和度提示兼容） ===== */
   async function loadFromCloudImpl() {
     try {
-      const recordsRef = collection(db, "records"); // 正确获取集合引用
-      // 修复：按实际记录日期 date 排序
+      const recordsRef = collection(db, "records");
       const q = query(recordsRef, orderBy("date", "asc"));
       const snap = await getDocs(q);
 
       if (snap.empty) {
-        // 自动读取时静默，手动点击时弹窗
+        // 自动读取时仅打印日志，手动点击时弹窗提示
+        console.log("云端暂无健康记录数据，使用本地存储数据");
         if (document.activeElement?.innerText === "从云端读取") {
           alert("云端没有数据");
-        } else {
-          console.log("云端暂无健康记录数据，使用本地存储数据");
         }
         return;
       }
@@ -558,14 +550,14 @@ render();
       // 步骤4：更新本地存储并刷新页面
       localStorage.setItem("diet_records_v3", JSON.stringify(normalizedData));
       
-      // 仅手动点击时弹窗，自动读取时静默
+      // 仅手动点击时弹窗提示，自动读取时静默
       if (document.activeElement?.innerText === "从云端读取") {
         alert(`已从云端恢复 ${normalizedData.length} 条唯一记录`);
       } else {
-        console.log(`已从云端自动恢复 ${normalizedData.length} 条健康记录`);
+        console.log(`健康记录数据已从云端自动读取：${normalizedData.length} 条唯一记录`);
       }
       
-      // 刷新数据（无需重载页面，提升体验）
+      // 刷新数据（无需重载页面，直接更新数据并渲染）
       data = normalizedData;
       save();
       render();
@@ -578,11 +570,12 @@ render();
     }
   }
 
-  // 关键：将模块内的函数挂载到全局 window 对象，解决 ReferenceError
+  // 挂载全局函数
   window.saveToCloud = saveToCloudImpl;
   window.loadFromCloud = loadFromCloudImpl;
 
-  /* ===== 页面初始化：自动读取云端数据 ===== */
+  /* ===== 页面初始化：自动读取云端数据（核心功能） ===== */
+  // 先自动静默读取云端数据，再完成页面渲染
   await loadFromCloudImpl();
 </script>
 
