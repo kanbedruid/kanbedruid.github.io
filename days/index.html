@@ -6,76 +6,183 @@
     <title>我们的每一天</title>
   <style>
 :root {
+  /* ===== 基础配色（顶部区域保持原逻辑） ===== */
   --c-bg-main: #f6f7fb;
   --c-bg-panel: rgba(255, 255, 255, 0.88);
-  --c-bg-soft: #eef0f6;
+  --c-bg-soft: #f1f3fa;
 
   --c-text-main: #2b2e3a;
-  --c-text-sub: #6f7490;
-  --c-text-muted: #a6aac0;
+  --c-text-sub: #6f7390;
+  --c-text-muted: #9aa0bb;
 
-  --c-accent: #8f82ff;
+  --c-accent: #9a8cff;
 
-  /* ===== 高对比特殊色（调整重点） ===== */
-  --c-anniversary: #f7c6df;
-  --c-anniversary-border: #d63384;
+  /* ===== 高对比事件色（重点修改） ===== */
+  --c-anniversary: #f6d7eb;
+  --c-anniversary-border: #d84fa3;
 
   --c-menstruation: #ffd6d6;
-  --c-menstruation-border: #c9184a;
+  --c-menstruation-border: #e14c4c;
 
-  --c-birthday: #d6ebff;
-  --c-birthday-border: #1c7ed6;
+  --c-birthday: #d8ecff;
+  --c-birthday-border: #3f86c9;
 
-  --c-record: #fff3bf;
-  --c-record-border: #f59f00;
+  --c-record: #fff0c9;
+  --c-record-border: #e2a600;
 
+  --radius-sm: 10px;
   --radius-md: 14px;
   --radius-lg: 20px;
 
-  --shadow-soft: 0 10px 26px rgba(0,0,0,0.08);
+  --shadow-soft: 0 10px 26px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 14px 36px rgba(0, 0, 0, 0.1);
+
   --transition: all 0.25s cubic-bezier(.4,0,.2,1);
 }
 
-/* ===== 日历整体容器（不贴边，固定宽度） ===== */
-.calendar-container {
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
-  align-items: center;
+/* ===== 全局 ===== */
+* {
+  box-sizing: border-box;
 }
 
-.calendar-panel {
-  width: 520px;              /* 固定视觉宽度 */
-  max-width: 90vw;
+body {
+  margin: 0;
+  padding: 40px 20px;
+  min-height: 100vh;
+  background:
+    radial-gradient(1200px 800px at 20% 0%, #e8eaff 0%, transparent 60%),
+    radial-gradient(1000px 700px at 80% 10%, #f6e9f3 0%, transparent 55%),
+    var(--c-bg-main);
+  color: var(--c-text-main);
+  font-family: -apple-system, BlinkMacSystemFont, "Inter", "PingFang SC", "Noto Sans SC", sans-serif;
+}
+
+/* ================================================================= */
+/* =================== 顶 部 区 域（完全保留） ====================== */
+/* ================================================================= */
+
+.stats-container {
   background: var(--c-bg-panel);
-  backdrop-filter: blur(14px);
   border-radius: var(--radius-lg);
-  padding: 28px;
+  padding: 36px 28px;
+  margin-bottom: 40px;
   box-shadow: var(--shadow-soft);
-  position: relative;
-}
-
-/* ===== 日历表格 ===== */
-.calendar-table {
-  width: 100%;
-  border-collapse: separate;
-  border-spacing: 10px;       /* 保证不挤 */
-  table-layout: fixed;
-}
-
-.calendar-th {
   text-align: center;
-  font-size: 12px;
+}
+
+.stats-title {
+  font-size: 2.4rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  margin-bottom: 28px;
+  color: var(--c-accent);
+}
+
+.days-stats {
+  display: flex;
+  justify-content: center;
+  gap: 56px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.day-item {
+  font-size: 1.1rem;
+  color: var(--c-text-sub);
+}
+
+.day-number {
+  display: block;
+  margin-top: 6px;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--c-accent);
+}
+
+.birthday-tips {
+  display: flex;
+  justify-content: center;
+  gap: 40px;
+  flex-wrap: wrap;
+  font-size: 0.95rem;
   color: var(--c-text-muted);
 }
 
-/* ===== 单元格严格 60x60 ===== */
+.btn-container {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  margin-bottom: 36px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: 14px 30px;
+  border-radius: 999px;
+  border: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: white;
+  background: linear-gradient(135deg, var(--c-accent), #b9b1ff);
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition);
+}
+
+.btn:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* ================================================================= */
+/* ======================= 日 历 区 域（修改） ======================= */
+/* ================================================================= */
+
+/* 日历整体不要顶边 */
+.calendar-container {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 40px;
+}
+
+.calendar-panel {
+  background: var(--c-bg-panel);
+  border-radius: var(--radius-lg);
+  padding: 24px 28px 28px;
+  box-shadow: var(--shadow-soft);
+  max-width: 520px;
+  width: 100%;
+}
+
+.calendar-title {
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 500;
+  margin-bottom: 18px;
+}
+
+/* 表格整体收紧 */
+.calendar-table {
+  margin: 0 auto;
+  border-collapse: separate;
+  border-spacing: 10px;
+}
+
+/* 星期标题 */
+.calendar-th {
+  text-align: center;
+  font-size: 0.75rem;
+  color: var(--c-text-muted);
+  height: 20px;
+}
+
+/* ===== 关键：固定 60×60 ===== */
 .calendar-td {
   width: 60px;
   height: 60px;
 }
 
-/* ===== 日期格 ===== */
+/* 日期格 */
 .date-cell {
   width: 60px;
   height: 60px;
@@ -83,8 +190,11 @@
   background: var(--c-bg-soft);
   position: relative;
   cursor: pointer;
-  transition: var(--transition);
   padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition);
   overflow: hidden;
 }
 
@@ -93,42 +203,25 @@
   box-shadow: var(--shadow-soft);
 }
 
-/* ===== 日期数字 ===== */
+/* 日期数字 */
 .date-number {
   position: absolute;
-  top: 6px;
-  right: 8px;
-  font-size: 11px;
+  top: 4px;
+  right: 6px;
+  font-size: 0.6rem;
   color: var(--c-text-muted);
 }
 
-/* ===== 内容区域：自动换行 + 自适应字体 ===== */
+/* 内容自动适配 */
 .date-content {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
   text-align: center;
-  gap: 2px;
-  padding: 2px;
-}
-
-.date-tag {
-  font-weight: 600;
-  font-size: clamp(10px, 2.5vw, 13px);
-  line-height: 1.15;
+  font-size: clamp(9px, 1.8vw, 12px);
+  line-height: 1.2;
   word-break: break-word;
+  overflow-wrap: anywhere;
 }
 
-.date-subtitle {
-  font-size: clamp(9px, 2vw, 11px);
-  color: var(--c-text-sub);
-  line-height: 1.1;
-  word-break: break-word;
-}
-
-/* ===== 高对比状态色 ===== */
+/* ===== 高饱和事件样式 ===== */
 .date-cell.anniversary {
   background: var(--c-anniversary);
   border: 2px solid var(--c-anniversary-border);
@@ -149,20 +242,19 @@
   border: 2px solid var(--c-record-border);
 }
 
-/* ===== 删除按钮 ===== */
+/* 删除按钮 */
 .date-close {
   position: absolute;
   top: 4px;
   left: 4px;
   width: 16px;
   height: 16px;
+  font-size: 0.7rem;
   border-radius: 50%;
-  font-size: 11px;
   display: none;
   align-items: center;
   justify-content: center;
-  color: rgba(0,0,0,0.5);
-  background: rgba(255,255,255,0.6);
+  color: #666;
 }
 
 .date-cell:hover .date-close {
