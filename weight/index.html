@@ -4,134 +4,199 @@
 <meta charset="UTF-8">
 <title>健康记录</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- 法式衬线字体（兼容中文，打造优雅氛围） -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Garamond:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --bg-main:#f4f6fb;
-  --bg-grad1:#eef2ff;
-  --bg-grad2:#f7f4ff;
-  --card-bg:rgba(255,255,255,.75);
-  --border:rgba(30,30,60,.08);
+  /* ===== 法式高级莫兰迪配色替换 ===== */
+  --bg-main: #F9F7F5; /* 法式米白背景纸 */
+  --bg-grad1: #E6F0F8; /* 法式雾蓝渐变1 */
+  --bg-grad2: #EEF7F1; /* 法式薄荷绿渐变2 */
+  --card-bg: #FFFFFF; /* 纯白卡片背景 */
+  --border: #E8E5E1; /* 柔和边框色 */
 
-  --text-main:#1c1f2a;
-  --text-sub:#5a5f73;
-  --accent:#6b7cff;
+  --text-main: #2C2825; /* 法式深棕文字 */
+  --text-sub: #7A726B; /* 浅棕次级文字 */
+  --accent: #6B7CFF; /* 保留原有强调色，贴合法式柔和感 */
+  --accent-gold: #A67C52; /* 法式焦糖金棕强调色 */
 
-  --plus:#e6f6ee;
-  --minus:#fde8ec;
-  --weekend:#fff6dc;
+  --plus: #EEF7F1; /* 法式薄荷绿（正向状态） */
+  --minus: #F9E6E8; /* 法式柔粉（负向状态） */
+  --weekend: #FCFBF9; /* 法式浅米（周末状态） */
+
+  /* 法式精致圆角与阴影 */
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.09);
+  --transition: all .3s ease-in-out;
 }
 
 *{
   box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,
-  "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  /* 法式衬线字体替换，兼顾可读性与优雅感 */
+  font-family: "Garamond", "Noto Serif SC", serif;
 }
 
 body{
   margin:0;
-  padding:40px 24px 80px;
+  padding: 48px 32px 80px;
+  /* 法式柔和渐变背景，替换原有冷色调 */
   background:
-    linear-gradient(120deg,var(--bg-grad1),var(--bg-grad2),var(--bg-main));
-  color:var(--text-main);
+    linear-gradient(120deg, var(--bg-grad1), var(--bg-grad2), var(--bg-main));
+  color: var(--text-main);
+  min-height: 100vh;
 }
 
 /* ===== 页面标题 ===== */
 h1{
-  font-size:40px;
-  letter-spacing:-.02em;
-  margin-bottom:32px;
+  font-size: 3.2rem;
+  letter-spacing: 4px;
+  margin-bottom: 40px;
+  text-align: center;
+  color: var(--accent-gold); /* 法式焦糖金棕点缀 */
+  font-weight: 700;
+  font-family: "Noto Serif SC", serif;
 }
 
 h2{
-  font-size:20px;
-  margin-bottom:16px;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: var(--text-main);
+  font-weight: 500;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 /* ===== 卡片区块 ===== */
 .section{
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:24px;
-  margin-bottom:28px;
-  backdrop-filter:blur(14px);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 32px;
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition);
+}
+
+.section:hover{
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
 }
 
 /* ===== 表格 ===== */
 table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:14px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.05rem;
 }
 
 th,td{
-  padding:8px 6px;
-  text-align:center;
+  padding: 12px 10px;
+  text-align: center;
 }
 
 th{
-  color:var(--text-sub);
-  font-weight:500;
-  border-bottom:1px solid var(--border);
+  color: var(--text-sub);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 1px;
 }
 
 td{
-  border-bottom:1px solid rgba(0,0,0,.04);
+  border-bottom: 1px solid rgba(0,0,0,.04);
+  vertical-align: middle;
 }
 
 tr:last-child td{
-  border-bottom:none;
+  border-bottom: none;
 }
 
 /* ===== 状态色 ===== */
-.plus{ background:var(--plus); }
-.minus{ background:var(--minus); }
-.weekend{ background:var(--weekend); }
+.plus{ 
+  background: var(--plus); 
+  border-radius: var(--radius-sm);
+}
+.minus{ 
+  background: var(--minus); 
+  border-radius: var(--radius-sm);
+}
+.weekend{ 
+  background: var(--weekend); 
+}
 
 /* ===== 输入控件 ===== */
 input[type="number"]{
-  width:64px;
-  border:1px solid var(--border);
-  border-radius:6px;
-  padding:4px;
-  background:rgba(255,255,255,.8);
+  width: 72px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font-size: 1rem;
+  transition: var(--transition);
+}
+
+input[type="number"]:focus{
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(166, 124, 82, 0.15);
 }
 
 input[type="checkbox"]{
-  transform:scale(1.1);
-  cursor:pointer;
+  transform: scale(1.2);
+  cursor: pointer;
+  accent-color: var(--accent-gold);
 }
 
 /* ===== 按钮 ===== */
 button{
-  margin:24px 10px 24px 0;
-  padding:10px 18px;
-  border:none;
-  border-radius:10px;
-  background:var(--accent);
-  color:#fff;
-  font-size:14px;
-  cursor:pointer;
+  margin: 24px 12px 24px 0;
+  padding: 14px 24px;
+  border: none;
+  border-radius: var(--radius-sm);
+  background: var(--card-bg);
+  color: var(--text-main);
+  font-size: 1.05rem;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition);
+  letter-spacing: 1px;
 }
 
 button:hover{
-  opacity:.9;
+  background: var(--accent-gold);
+  color: #FFFFFF;
+  border-color: var(--accent-gold);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  opacity: 0.95;
 }
 
 /* ===== 图表 ===== */
 canvas{
-  max-height:220px;
+  max-height: 280px;
+  padding: 16px 0;
 }
 
 /* ===== 表格整体容器 ===== */
 .table-wrap{
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:16px;
-  backdrop-filter:blur(14px);
-  overflow-x:auto;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  backdrop-filter: blur(14px);
+  overflow-x: auto;
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition);
+}
+
+.table-wrap:hover{
+  box-shadow: var(--shadow-hover);
 }
 </style>
 </head>
@@ -324,7 +389,9 @@ function renderChart(){
     label:name,
     data:labels.map(d=>map[d]??null),
     spanGaps:true,
-    borderWidth:2
+    borderWidth:2,
+    borderColor: name === "千代" ? "#9AB3C9" : "#9FD3B6", // 法式配色对应
+    backgroundColor: name === "千代" ? "rgba(154, 179, 201, 0.1)" : "rgba(159, 211, 182, 0.1)"
   }));
 
   if(chart) chart.destroy();
@@ -333,8 +400,19 @@ function renderChart(){
     data:{labels,datasets},
     options:{
       responsive:true,
-      plugins:{legend:{position:"top"}},
-      scales:{y:{title:{display:true,text:"体重"}}}
+      plugins:{
+        legend:{position:"top", font: { family: "Garamond", size: 14 }},
+        title: { display: false }
+      },
+      scales:{
+        y:{
+          title:{display:true,text:"体重（kg）", font: { family: "Garamond" }},
+          grid: { color: "rgba(0, 0, 0, 0.04)" }
+        },
+        x:{
+          grid: { display: false }
+        }
+      }
     }
   });
 }
@@ -370,7 +448,7 @@ render();
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  /* ===== 保存到云端（修复重复上传+语法错误） ===== */
+  /* ===== 保存到云端（保留原有修复逻辑，优化提示） ===== */
   async function saveToCloudImpl() {
     try {
       const raw = localStorage.getItem("diet_records_v3");
@@ -386,7 +464,7 @@ render();
       }
 
       // 步骤1：获取云端旧数据并批量删除（避免重复）
-      const recordsRef = collection(db, "records"); // 正确获取集合引用（路径：records）
+      const recordsRef = collection(db, "records");
       const oldQuery = query(recordsRef);
       const oldSnap = await getDocs(oldQuery);
       
@@ -398,11 +476,9 @@ render();
         await batch.commit();
       }
 
-      // 步骤2：批量上传本地最新数据（修复核心：正确生成文档引用）
+      // 步骤2：批量上传本地最新数据
       const newBatch = writeBatch(db);
       localData.forEach(r => {
-        // 正确语法：doc(集合引用) → 生成该集合下的唯一空白文档引用
-        // 错误原由：之前用了 collection(recordsRef).doc()，recordsRef 已是集合，再次调用 collection 导致路径为空
         const docRef = doc(recordsRef); 
         newBatch.set(docRef, {
           date: r.date,
@@ -420,23 +496,27 @@ render();
 
       await newBatch.commit();
       alert(`成功保存 ${localData.length} 条记录到云端（已清除旧数据）`);
-      render(); // 刷新页面数据
+      render();
     } catch (e) {
       alert("保存失败，错误详情：" + (e.message || JSON.stringify(e)));
       console.error("云端保存错误：", e);
     }
   }
 
-  /* ===== 从云端恢复（修复排序+去重问题） ===== */
-  async function loadFromCloudImpl() {
+  /* ===== 从云端恢复（优化：自动读取时静默无弹窗） ===== */
+  async function loadFromCloudImpl(isManual = false) {
     try {
-      const recordsRef = collection(db, "records"); // 正确获取集合引用
-      // 修复：按实际记录日期 date 排序
+      const recordsRef = collection(db, "records");
       const q = query(recordsRef, orderBy("date", "asc"));
       const snap = await getDocs(q);
 
       if (snap.empty) {
-        alert("云端没有数据");
+        // 手动读取弹窗提示，自动读取仅打印日志
+        if (isManual) {
+          alert("云端没有数据");
+        } else {
+          console.log("云端暂无健康记录数据，使用本地存储数据");
+        }
         return;
       }
 
@@ -470,17 +550,34 @@ render();
 
       // 步骤4：更新本地存储并刷新页面
       localStorage.setItem("diet_records_v3", JSON.stringify(normalizedData));
-      alert(`已从云端恢复 ${normalizedData.length} 条唯一记录`);
-      location.reload();
+      
+      // 手动读取弹窗提示，自动读取静默日志
+      if (isManual) {
+        alert(`已从云端恢复 ${normalizedData.length} 条唯一记录`);
+        location.reload();
+      } else {
+        console.log(`已从云端自动恢复 ${normalizedData.length} 条健康记录`);
+        // 自动读取时更新全局数据并渲染，无需刷新页面
+        data = normalizedData;
+        save();
+        render();
+      }
     } catch (e) {
-      alert("读取失败，错误详情：" + (e.message || JSON.stringify(e)));
       console.error("云端读取错误：", e);
+      // 仅手动读取时弹窗提示错误
+      if (isManual) {
+        alert("读取失败，错误详情：" + (e.message || JSON.stringify(e)));
+      }
     }
   }
 
-  // 关键：将模块内的函数挂载到全局 window 对象，解决 ReferenceError
+  // 挂载全局函数，手动点击时传入 isManual = true
   window.saveToCloud = saveToCloudImpl;
-  window.loadFromCloud = loadFromCloudImpl;
+  window.loadFromCloud = () => loadFromCloudImpl(true);
+
+  /* ===== 页面初始化：自动调用云端读取功能 ===== */
+  // 静默自动读取云端数据，无需弹窗干扰
+  await loadFromCloudImpl(false);
 </script>
 
 </body>
