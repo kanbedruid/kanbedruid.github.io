@@ -359,7 +359,7 @@ input[type="text"]:focus {
 <body>
     <h1>千代 & 小德 饮食偏好记录</h1>
 
-    <!-- 云端保存/读取按钮 -->
+    <!-- 云端保存/读取按钮（保留原有两个按钮，无删除） -->
     <div class="cloud-buttons">
         <button onclick="saveToCloud()">保存偏好到云端</button>
         <button onclick="loadFromCloud()">从云端读取偏好</button>
@@ -730,7 +730,7 @@ input[type="text"]:focus {
                         });
                     }
 
-                    // d. 保存本地数据并重新渲染（核心：确保数据与视图同步）
+                    // d. 保存本地数据并重新渲染（核心：确保视图与数据同步，贴纸颜色更新）
                     saveToLocal();
                     renderAll();
                 } else {
@@ -789,7 +789,8 @@ input[type="text"]:focus {
                 const snap = await getDocs(preferencesRef);
 
                 if (snap.empty) {
-                    alert("云端暂无饮食偏好数据！");
+                    // 云端无数据时，不报错，仅保留本地数据（避免影响页面使用）
+                    console.log("云端暂无饮食偏好数据，使用本地存储数据");
                     return;
                 }
 
@@ -801,10 +802,9 @@ input[type="text"]:focus {
                 // 保存到本地并渲染
                 saveToLocal();
                 renderAll();
-                alert("饮食偏好数据已从云端成功读取！");
+                console.log("饮食偏好数据已从云端成功读取！"); // 改为控制台打印，避免重复弹窗干扰
             } catch (e) {
-                alert(`读取失败：${e.message || JSON.stringify(e)}`);
-                console.error("云端读取错误：", e);
+                console.error("云端读取错误：", e); // 改为控制台打印，不弹窗影响页面初始化
             }
         }
 
@@ -813,7 +813,10 @@ input[type="text"]:focus {
         window.saveToCloud = saveToCloudImpl;
         window.loadFromCloud = loadFromCloudImpl;
 
-        // ========== 页面初始化 ==========
+        // ========== 页面初始化（核心修改：自动调用云端读取函数） ==========
+        // 1. 先执行云端自动读取
+        await loadFromCloudImpl(); // 注意：使用await，确保读取完成后再渲染页面
+        // 2. 再渲染页面内容
         renderAll();
     </script>
 </body>
