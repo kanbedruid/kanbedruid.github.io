@@ -4,213 +4,312 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>愿望清单</title>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    <!-- 法式衬线字体（兼容中文，打造优雅氛围） -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Garamond:wght@400;700&display=swap" rel="stylesheet">
 
     <style>
         :root {
-  --fg-main: #E8E8F0;
-  --fg-sub: #A0A0B8;
+            /* ===== 法式高级莫兰迪配色 ===== */
+            --fg-main: #2C2825; /* 法式深棕文字（替代原浅灰，更有质感） */
+            --fg-sub: #7A726B; /* 浅棕次级文字 */
+            --fg-fade: #B0A8A0; /* 淡棕提示文字 */
 
-  --bg-panel: rgba(255,255,255,0.06);
-  --bg-soft: rgba(255,255,255,0.04);
-  --border-soft: rgba(255,255,255,0.18);
+            --bg-paper: #F9F7F5; /* 法式米白背景纸 */
+            --bg-panel: #FFFFFF; /* 纯白面板 */
+            --bg-soft: #F5F2EF; /* 法式浅灰柔色 */
+            --bg-section: #FCFBF9; /* 区域浅背景 */
 
-  --accent-unfulfilled: rgba(183,168,255,0.35);
-  --accent-fulfilled: rgba(140,200,170,0.35);
-  --accent-danger: #EF5350;
+            --border-soft: #E8E5E1; /* 柔和边框色 */
 
-  --radius-lg: 18px;
-  --radius-md: 14px;
-  --radius-sm: 10px;
-}
+            /* 愿望状态配色（法式莫兰迪柔和色调） */
+            --accent-unfulfilled: #9AB3C9; /* 法式雾蓝（未实现） */
+            --accent-unfulfilled-bg: #E6F0F8; /* 雾蓝背景 */
+            --accent-unfulfilled-fade: rgba(154, 179, 201, 0.15); /* 雾蓝淡色 */
 
-* {
-  box-sizing: border-box;
-}
+            --accent-fulfilled: #9FD3B6; /* 法式薄荷绿（已实现） */
+            --accent-fulfilled-bg: #EEF7F1; /* 薄荷绿背景 */
+            --accent-fulfilled-fade: rgba(159, 211, 182, 0.15); /* 薄荷绿淡色 */
 
-body {
-  margin: 0;
-  padding: 48px 32px 120px;
-  color: var(--fg-main);
-  font-family: Inter, sans-serif;
-  background:
-    radial-gradient(1200px 800px at 20% 10%, #1b1f3b 0%, transparent 60%),
-    radial-gradient(1000px 700px at 80% 20%, #2a174a 0%, transparent 65%),
-    linear-gradient(180deg, #090b16, #05060c);
-}
+            --accent-danger: #C98A8A; /* 法式柔粉（删除/垃圾桶） */
+            --accent-danger-bg: #F9E6E8; /* 柔粉背景 */
 
-h1 {
-  text-align: center;
-  font-family: "Noto Serif SC", serif;
-  font-size: 42px;
-  letter-spacing: 4px;
-  margin-bottom: 36px;
-}
+            /* 法式精致圆角 */
+            --radius-lg: 16px;
+            --radius-md: 12px;
+            --radius-sm: 8px;
+            --radius-circle: 999px;
 
-.cloud-buttons {
-  display: flex;
-  justify-content: center;
-  gap: 18px;
-  margin-bottom: 36px;
-}
+            /* 法式柔和阴影 */
+            --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.09);
 
-.cloud-buttons button {
-  padding: 10px 26px;
-  border-radius: 999px;
-  border: 1px solid var(--border-soft);
-  background: var(--bg-soft);
-  color: var(--fg-main);
-  cursor: pointer;
-  backdrop-filter: blur(6px);
-}
+            /* 顺滑过渡 */
+            --transition: all .3s ease-in-out;
+        }
 
-.cloud-buttons button:hover {
-  border-color: #B7A8FF;
-}
+        * {
+            box-sizing: border-box;
+        }
 
-/* ===== 主体布局 ===== */
-.wish-container {
-  display: flex;
-  gap: 28px;
-}
+        body {
+            margin: 0;
+            padding: 48px 32px 120px;
+            color: var(--fg-main);
+            font-family: "Garamond", "Noto Serif SC", serif; /* 法式衬线字体 */
+            background: 
+                radial-gradient(1200px 800px at 20% 10%, #FFFFFF 0%, transparent 60%),
+                radial-gradient(1000px 700px at 80% 20%, #Fcfaf7 0%, transparent 65%),
+                var(--bg-paper); /* 替换原深色渐变，改为法式浅色调 */
+        }
 
-.person-panel {
-  flex: 1;
-  padding: 24px;
-  background: var(--bg-panel);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-soft);
-  backdrop-filter: blur(10px);
-}
+        h1 {
+            text-align: center;
+            font-family: "Noto Serif SC", serif;
+            font-size: 3.2rem;
+            letter-spacing: 4px;
+            margin-bottom: 40px;
+            color: #A67C52; /* 法式焦糖金棕强调色 */
+            font-weight: 700;
+        }
 
-.person-title {
-  font-family: "Noto Serif SC", serif;
-  font-size: 22px;
-  letter-spacing: 2px;
-  margin-bottom: 20px;
-  text-align: center;
-}
+        .cloud-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 24px;
+            margin-bottom: 48px;
+            flex-wrap: wrap;
+        }
 
-.wish-sections {
-  display: flex;
-  gap: 16px;
-  margin-bottom: 20px;
-}
+        .cloud-buttons button {
+            padding: 14px 32px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-soft);
+            background: var(--bg-panel);
+            color: var(--fg-main);
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-soft);
+            font-size: 1.05rem;
+            letter-spacing: 1px;
+        }
 
-.wish-section {
-  flex: 1;
-  min-height: 280px;
-  padding: 16px;
-  background: rgba(0,0,0,0.25);
-  border-radius: var(--radius-md);
-  border: 1px dashed rgba(255,255,255,0.15);
-}
+        .cloud-buttons button:hover {
+            border-color: var(--accent-unfulfilled);
+            background: var(--bg-soft);
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+        }
 
-.section-title {
-  text-align: center;
-  font-size: 13px;
-  letter-spacing: 3px;
-  color: var(--fg-sub);
-  margin-bottom: 14px;
-}
+        /* ===== 主体布局 ===== */
+        .wish-container {
+            display: flex;
+            gap: 32px;
+            max-width: 1500px;
+            margin: 0 auto;
+        }
 
-/* ===== 愿望条目 ===== */
-.wish-sticker {
-  padding: 12px 16px;
-  margin-bottom: 12px;
-  border-radius: var(--radius-sm);
-  background: rgba(183,168,255,0.15);
-  border: 1px solid var(--accent-unfulfilled);
-  cursor: grab;
-  user-select: none;
-}
+        .person-panel {
+            flex: 1;
+            padding: 32px 28px;
+            background: var(--bg-panel);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border-soft);
+            box-shadow: var(--shadow-soft);
+            transition: var(--transition);
+        }
 
-.wish-sticker.fulfilled {
-  background: rgba(140,200,170,0.18);
-  border-color: var(--accent-fulfilled);
-}
+        .person-panel:hover {
+            box-shadow: var(--shadow-hover);
+            transform: translateY(-2px);
+        }
 
-.wish-sticker:active {
-  cursor: grabbing;
-  transform: scale(1.03);
-}
+        .person-title {
+            font-family: "Noto Serif SC", serif;
+            font-size: 1.8rem;
+            letter-spacing: 2px;
+            margin-bottom: 24px;
+            text-align: center;
+            color: var(--fg-main);
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--bg-soft);
+        }
 
-/* ===== 输入区 ===== */
-.wish-input-container {
-  display: flex;
-  gap: 10px;
-}
+        .wish-sections {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
 
-input[type="text"] {
-  flex: 1;
-  padding: 10px 14px;
-  background: rgba(0,0,0,0.35);
-  border: 1px solid var(--border-soft);
-  border-radius: 999px;
-  color: var(--fg-main);
-}
+        .wish-section {
+            flex: 1;
+            min-height: 280px;
+            padding: 20px 18px;
+            background: var(--bg-section);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-soft);
+            box-shadow: var(--shadow-soft);
+            transition: var(--transition);
+        }
 
-input::placeholder {
-  color: var(--fg-sub);
-}
+        .wish-section:hover {
+            background: var(--bg-soft);
+            opacity: 0.95;
+        }
 
-button {
-  padding: 10px 22px;
-  border-radius: 999px;
-  border: 1px solid var(--border-soft);
-  background: var(--bg-soft);
-  color: var(--fg-main);
-  cursor: pointer;
-}
+        .section-title {
+            text-align: center;
+            font-size: 1.05rem;
+            letter-spacing: 3px;
+            color: var(--fg-sub);
+            margin-bottom: 18px;
+            text-transform: capitalize;
+            font-weight: 500;
+        }
 
-button:hover {
-  border-color: #B7A8FF;
-}
+        /* ===== 愿望条目 ===== */
+        .wish-sticker {
+            padding: 14px 18px;
+            margin-bottom: 16px;
+            border-radius: var(--radius-sm);
+            background: var(--accent-unfulfilled-bg);
+            border: 1px solid var(--accent-unfulfilled);
+            cursor: grab;
+            user-select: none;
+            transition: var(--transition);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            font-size: 1.05rem;
+            letter-spacing: 0.5px;
+        }
 
-/* ===== 垃圾桶 ===== */
-.trash-bin {
-  position: fixed;
-  left: 50%;
-  bottom: 36px;
-  transform: translateX(-50%);
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: rgba(239,83,80,0.75);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 26px;
-  opacity: 0.6;
-  backdrop-filter: blur(6px);
-}
+        .wish-sticker.fulfilled {
+            background: var(--accent-fulfilled-bg);
+            border-color: var(--accent-fulfilled);
+        }
 
-.trash-bin.active {
-  opacity: 1;
-  transform: translateX(-50%) scale(1.15);
-}
+        .wish-sticker:active {
+            cursor: grabbing;
+            transform: scale(1.03) rotate(-1deg);
+            box-shadow: var(--shadow-hover);
+        }
 
-/* ===== 拖拽占位 ===== */
-.placeholder {
-  height: 44px;
-  margin-bottom: 12px;
-  border-radius: var(--radius-sm);
-  border: 1px dashed var(--accent-unfulfilled);
-  background: rgba(183,168,255,0.12);
-}
+        .wish-sticker:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-soft);
+        }
 
-.fulfilled-placeholder {
-  border-color: var(--accent-fulfilled);
-  background: rgba(140,200,170,0.12);
-}
+        /* ===== 输入区 ===== */
+        .wish-input-container {
+            display: flex;
+            gap: 14px;
+        }
 
-/* ===== 响应式 ===== */
-@media (max-width: 900px) {
-  .wish-container {
-    flex-direction: column;
-  }
-}
+        input[type="text"] {
+            flex: 1;
+            padding: 14px 20px;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-soft);
+            border-radius: var(--radius-sm);
+            color: var(--fg-main);
+            font-size: 1.05rem;
+            transition: var(--transition);
+            box-shadow: var(--shadow-soft);
+            font-family: "Garamond", "Noto Serif SC", serif;
+        }
 
+        input::placeholder {
+            color: var(--fg-fade);
+            letter-spacing: 1px;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #A67C52;
+            box-shadow: 0 0 0 3px rgba(166, 124, 82, 0.15);
+            transform: translateY(-1px);
+        }
+
+        button {
+            padding: 14px 26px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border-soft);
+            background: var(--bg-panel);
+            color: var(--fg-main);
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow-soft);
+            font-size: 1.05rem;
+            font-family: "Garamond", "Noto Serif SC", serif;
+        }
+
+        button:hover {
+            border-color: #A67C52;
+            background: var(--accent-light);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* ===== 垃圾桶 ===== */
+        .trash-bin {
+            position: fixed;
+            left: 50%;
+            bottom: 40px;
+            transform: translateX(-50%);
+            width: 88px;
+            height: 88px;
+            border-radius: 50%;
+            background: var(--accent-danger);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.2rem;
+            opacity: 0.85;
+            transition: var(--transition);
+            box-shadow: var(--shadow-soft);
+            color: white;
+        }
+
+        .trash-bin.active {
+            opacity: 1;
+            transform: translateX(-50%) scale(1.08);
+            background: #C96A6A;
+            box-shadow: var(--shadow-hover);
+        }
+
+        /* ===== 拖拽占位 ===== */
+        .placeholder {
+            height: 52px;
+            margin-bottom: 16px;
+            border-radius: var(--radius-sm);
+            border: 1px dashed var(--accent-unfulfilled);
+            background: var(--accent-unfulfilled-fade);
+        }
+
+        .fulfilled-placeholder {
+            border-color: var(--accent-fulfilled);
+            background: var(--accent-fulfilled-fade);
+        }
+
+        /* ===== 响应式 ===== */
+        @media (max-width: 900px) {
+            .wish-container {
+                flex-direction: column;
+            }
+
+            h1 {
+                font-size: 2.4rem;
+                margin-bottom: 32px;
+            }
+
+            .person-panel {
+                padding: 24px 20px;
+            }
+
+            .trash-bin {
+                width: 76px;
+                height: 76px;
+                font-size: 1.8rem;
+            }
+        }
     </style>
     <!-- 引入 Font Awesome 用于垃圾桶图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -218,7 +317,7 @@ button:hover {
 <body>
     <h1>愿望清单</h1>
 
-    <!-- 云端保存/读取按钮 -->
+    <!-- 云端保存/读取按钮（保留原有，无删除） -->
     <div class="cloud-buttons">
         <button onclick="saveToCloud()">保存愿望到云端</button>
         <button onclick="loadFromCloud()">从云端读取愿望</button>
@@ -278,7 +377,7 @@ button:hover {
             doc
         } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // Firebase 配置（沿用你的原有项目配置）
+        // Firebase 配置（沿用原有项目配置）
         const firebaseConfig = {
             apiKey: "AIzaSyAhZtgaE8mL3GkxsIj17g1ha-Y5HG02C_A",
             authDomain: "weight-zqy.firebaseapp.com",
@@ -437,6 +536,8 @@ button:hover {
                     // 找到插入位置（简化版：直接替换占位符到当前区域）
                     if (section !== currentSection) {
                         currentSection = section;
+                        // 更新占位符样式为目标区域类型
+                        placeholder.className = `placeholder ${currentSection.dataset.section === 'fulfilled' ? 'fulfilled-placeholder' : ''}`;
                         section.appendChild(placeholder);
                     }
                 }
@@ -490,7 +591,7 @@ button:hover {
             document.removeEventListener("touchend", endDrag);
         }
 
-        // ========== 云端数据同步 ==========
+        // ========== 云端数据同步（含自动读取优化） ==========
         // 保存到 Firebase 云端
         async function saveToCloudImpl() {
             try {
@@ -521,14 +622,19 @@ button:hover {
             }
         }
 
-        // 从 Firebase 云端读取
+        // 从 Firebase 云端读取（优化：自动读取时静默无弹窗）
         async function loadFromCloudImpl() {
             try {
                 const wishesRef = collection(db, "wishes");
                 const snap = await getDocs(wishesRef);
 
                 if (snap.empty) {
-                    alert("云端暂无愿望数据！");
+                    // 自动读取时仅打印日志，不弹窗干扰
+                    console.log("云端暂无愿望数据，使用本地存储数据");
+                    // 手动点击时才弹窗提示
+                    if (document.activeElement?.innerText === "从云端读取愿望") {
+                        alert("云端暂无愿望数据！");
+                    }
                     return;
                 }
 
@@ -540,10 +646,19 @@ button:hover {
                 // 保存到本地并渲染
                 saveToLocal();
                 renderWishes();
-                alert("愿望数据已从云端成功读取！");
+
+                // 仅手动点击时弹窗提示，自动读取时静默
+                if (document.activeElement?.innerText === "从云端读取愿望") {
+                    alert("愿望数据已从云端成功读取！");
+                } else {
+                    console.log("愿望数据已从云端自动读取并渲染");
+                }
             } catch (e) {
-                alert(`读取失败：${e.message || JSON.stringify(e)}`);
                 console.error("云端读取错误：", e);
+                // 仅手动点击时弹窗提示错误
+                if (document.activeElement?.innerText === "从云端读取愿望") {
+                    alert(`读取失败：${e.message || JSON.stringify(e)}`);
+                }
             }
         }
 
@@ -552,7 +667,10 @@ button:hover {
         window.saveToCloud = saveToCloudImpl;
         window.loadFromCloud = loadFromCloudImpl;
 
-        // ========== 页面初始化 ==========
+        // ========== 页面初始化（核心：自动调用云端读取函数） ==========
+        // 1. 先自动静默读取云端数据（await确保异步操作完成）
+        await loadFromCloudImpl();
+        // 2. 再渲染页面内容（确保云端数据优先加载）
         renderWishes();
     </script>
 </body>
