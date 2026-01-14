@@ -206,12 +206,6 @@ body {
 }
 
 /* ===== 表格 ===== */
-.calendar-table {
-  display: grid;
-  grid-template-columns: repeat(7, 110px);
-  justify-content: center;
-  gap: 12px;
-}
 
 
 .calendar-th {
@@ -221,21 +215,19 @@ body {
 }
 
 .calendar-td {
-  width: 110px;
-  height: 110px;
+  height: auto; /* 不要固定 */
+}
+
+.calendar-table {
+  width: 770px; /* 7 × 110 */
+  margin: 0 auto;
 }
 
 
 /* ===== 日期格 ===== */
 .date-cell {
   width: 100%;
-  height: 100%;
-  border-radius: var(--radius-md);
-  background: var(--c-bg-soft);
-  position: relative;
-  cursor: pointer;
-  transition: var(--transition);
-  padding: 10px;
+  aspect-ratio: 1 / 1;
 }
 
 .date-cell:hover {
@@ -260,12 +252,13 @@ body {
 .date-tag {
   font-size: clamp(12px, 1.2vw, 15px);
   line-height: 1.2;
+  word-break: break-word;
 }
-
 
 .date-subtitle {
   font-size: clamp(10px, 1vw, 12px);
   line-height: 1.2;
+  word-break: break-word;
 }
 
 
