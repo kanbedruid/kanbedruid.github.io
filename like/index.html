@@ -6,261 +6,421 @@
     <title>千代 & 小德 饮食偏好记录</title>
    <style>
 :root {
-  /* ===== 米其林 / 杂志级配色 ===== */
-  --bg-paper: #F6F4F1;
-  --bg-canvas: #FCFBF9;
-  --bg-panel: #FFFFFF;
-  --bg-soft: #F1EFEA;
+  /* 米其林餐盘风配色 - 柔和低饱和，贴近食材原色 */
+  --color-bg-main: #f9f7f4; /* 米白色背景，类似餐盘底 */
+  --color-panel: #ffffff; /* 面板底色，干净通透 */
+  --color-love-light: #e8f4f8; /* 爱吃贴纸 - 淡青，像青柠点缀 */
+  --color-love-border: #82c3ec;
+  --color-love-text: #2d7d9a;
+  --color-hate-light: #fdf2f8; /* 不爱吃贴纸 - 淡粉，像樱花粉 */
+  --color-hate-border: #fec5e5;
+  --color-hate-text: #9a2d5a;
+  --color-common-light: #eaf6fa; /* 共同偏好 - 浅蓝绿，像薄荷 */
+  --color-common-border: #b2f0e1;
+  --color-common-text: #2d9a7c;
+  --color-text-title: #4a4a4a; /* 标题灰，不刺眼 */
+  --color-text-body: #6e6e6e; /* 正文灰，柔和易读 */
+  --color-divider: #f0e9e0; /* 分隔线，像餐盘边缘 */
+  --color-trash: #e5704b; /* 垃圾桶 - 暖橙红，像干玫瑰 */
+  --color-trash-hover: #d45a30;
+  --color-btn-love: #82c3ec;
+  --color-btn-love-hover: #5babd9;
+  --color-btn-hate: #fec5e5;
+  --color-btn-hate-hover: #faa7cd;
+  --color-btn-cloud: #a8d8ea;
+  --color-btn-cloud-hover: #79c2d0;
 
-  --ink-main: #2E2E2E;
-  --ink-sub: #7A7A7A;
-  --ink-fade: #B8B8B8;
+  /* 圆角与阴影 - 模拟餐盘弧度和光影 */
+  --radius-xs: 4px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 20px;
+  --radius-circle: 50%;
+  --shadow-xs: 0 1px 3px rgba(0,0,0,0.05);
+  --shadow-sm: 0 3px 8px rgba(0,0,0,0.08);
+  --shadow-md: 0 5px 15px rgba(0,0,0,0.1);
 
-  /* 爱吃 / 不爱吃 / 共同 */
-  --love-bg: #EEF4FF;
-  --love-border: #9DB7E8;
-
-  --hate-bg: #FFF0ED;
-  --hate-border: #E6A19A;
-
-  --common-bg: #EEF7F1;
-  --common-border: #9FD3B6;
-
-  /* 强调 */
-  --accent-warm: #D8C7A2;
-
-  /* 阴影 */
-  --shadow-soft: 0 6px 18px rgba(0,0,0,0.05);
-  --shadow-hover: 0 10px 28px rgba(0,0,0,0.08);
-
-  --radius-lg: 22px;
-  --radius-md: 16px;
-  --radius-sm: 12px;
-
-  --transition: all .25s ease;
+  /* 过渡动效 - 游戏化轻盈反馈 */
+  --transition-fast: all 0.15s ease-out;
+  --transition-normal: all 0.25s ease-in-out;
 }
 
 * {
+  margin: 0;
+  padding: 0;
   box-sizing: border-box;
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-    "PingFang SC", "Noto Sans SC", sans-serif;
+  font-family: "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 
 body {
-  margin: 0;
-  padding: 32px 20px 120px;
-  background:
-    radial-gradient(1200px 600px at 20% 0%, #FFFFFF 0%, transparent 60%),
-    var(--bg-paper);
-  color: var(--ink-main);
+  background-color: var(--color-bg-main);
+  color: var(--color-text-body);
+  padding: 32px 20px;
+  max-width: 1700px;
+  margin: 0 auto;
+  min-height: 100vh;
+  line-height: 1.5;
 }
 
-/* ===== 标题 ===== */
 h1 {
   text-align: center;
+  margin-bottom: 48px;
   font-weight: 500;
-  font-size: 2.4rem;
-  margin-bottom: 32px;
-  letter-spacing: .02em;
+  font-size: 2.8rem;
+  color: var(--color-text-title);
+  letter-spacing: -0.03em;
+  position: relative;
 }
 
-/* ===== 云端按钮（像菜单按钮） ===== */
+h1::after {
+  content: "";
+  display: block;
+  width: 80px;
+  height: 3px;
+  background-color: var(--color-divider);
+  margin: 16px auto 0;
+  border-radius: var(--radius-xs);
+}
+
+/* 云端按钮 - 像餐盘旁的调味罐 */
 .cloud-buttons {
   display: flex;
-  justify-content: center;
   gap: 20px;
+  justify-content: center;
   margin-bottom: 40px;
 }
 
 .cloud-buttons button {
-  padding: 12px 28px;
-  border-radius: 999px;
-  border: 1px solid var(--accent-warm);
-  background: var(--bg-panel);
-  color: var(--ink-main);
-  font-size: 0.95rem;
+  padding: 14px 30px;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-btn-cloud);
+  color: var(--color-text-title);
+  font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: var(--transition);
+  transition: var(--transition-normal);
+  box-shadow: var(--shadow-xs);
 }
 
 .cloud-buttons button:hover {
-  background: var(--bg-soft);
+  background-color: var(--color-btn-cloud-hover);
+  box-shadow: var(--shadow-sm);
   transform: translateY(-2px);
-  box-shadow: var(--shadow-soft);
 }
 
-/* ===== 三栏整体布局 ===== */
+/* 三栏布局容器 - 像三联餐盘 */
 .preference-container {
-  display: grid;
-  grid-template-columns: 1.1fr 0.8fr 1.1fr;
-  gap: 28px;
-  max-width: 1500px;
-  margin: 0 auto;
+  display: flex;
+  gap: 30px;
+  width: 100%;
+  margin-bottom: 50px;
 }
 
-/* ===== 面板（像餐桌托盘） ===== */
-.person-panel,
-.common-panel {
-  background: var(--bg-panel);
+/* 左右个人面板 - 独立餐盘样式 */
+.person-panel {
+  flex: 1;
+  background-color: var(--color-panel);
   border-radius: var(--radius-lg);
-  padding: 28px 26px 32px;
-  box-shadow: var(--shadow-soft);
-  transition: var(--transition);
+  box-shadow: var(--shadow-xs);
+  padding: 32px;
+  transition: var(--transition-normal);
+  border: 1px solid var(--color-divider);
 }
 
-.person-panel:hover,
-.common-panel:hover {
-  box-shadow: var(--shadow-hover);
+.person-panel:hover {
+  box-shadow: var(--shadow-sm);
+  transform: translateY(-3px);
 }
 
-/* ===== 面板标题 ===== */
 .person-title {
-  font-size: 1.6rem;
+  font-size: 1.9rem;
   font-weight: 500;
-  margin-bottom: 20px;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--color-divider);
+  color: var(--color-text-title);
+  text-align: center;
+}
+
+/* 中间共同面板 - 视觉焦点餐盘 */
+.common-panel {
+  flex: 1;
+  background-color: var(--color-panel);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  padding: 32px;
+  transition: var(--transition-normal);
+  border: 1px solid var(--color-common-border);
+  position: relative;
+}
+
+.common-panel::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: -5px;
+  right: -5px;
+  bottom: -5px;
+  border: 1px dashed var(--color-common-border);
+  border-radius: var(--radius-lg);
+  z-index: -1;
+  opacity: 0.5;
+}
+
+.common-panel:hover {
+  box-shadow: var(--shadow-md);
+  transform: translateY(-3px);
 }
 
 .common-title {
-  font-size: 1.5rem;
+  font-size: 1.9rem;
   font-weight: 500;
+  margin-bottom: 28px;
+  padding-bottom: 20px;
+  border-bottom: 2px solid var(--color-common-border);
+  color: var(--color-common-text);
   text-align: center;
-  margin-bottom: 24px;
-  color: #4F7E63;
 }
 
-/* ===== 偏好区域 ===== */
+/* 偏好区域 - 餐盘分区 */
 .preference-sections {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 28px;
+  width: 100%;
 }
 
 .preference-section {
-  background: var(--bg-soft);
+  min-height: 300px;
+  background-color: var(--color-bg-main);
   border-radius: var(--radius-md);
-  padding: 18px 18px 22px;
-  min-height: 220px;
-  transition: var(--transition);
+  padding: 24px;
+  position: relative;
+  transition: var(--transition-normal);
+  border: 1px solid var(--color-divider);
 }
 
-/* ===== 区域标题 ===== */
-.section-title-person,
-.section-title-common {
-  text-align: center;
-  font-size: 0.95rem;
-  letter-spacing: .12em;
+.preference-section:hover {
+  background-color: #faf7f2;
+}
+
+/* 区域标题 - 像餐盘分区标签 */
+.section-title-person {
+  font-size: 1.2rem;
   font-weight: 500;
-  margin-bottom: 18px;
-  color: var(--ink-sub);
+  margin-bottom: 24px;
+  padding: 8px 0;
+  border-radius: var(--radius-xs);
+  text-align: center;
 }
 
-/* ===== 输入区 ===== */
-.preference-input-container {
-  display: flex;
-  gap: 12px;
+.section-title-love {
+  background-color: var(--color-love-light);
+  color: var(--color-love-text);
 }
 
-input[type="text"] {
-  flex: 1;
-  padding: 12px 18px;
-  border-radius: 999px;
-  border: 1px solid #DDD;
-  background: #FFF;
-  font-size: .95rem;
-  transition: var(--transition);
+.section-title-hate {
+  background-color: var(--color-hate-light);
+  color: var(--color-hate-text);
 }
 
-input[type="text"]:focus {
-  outline: none;
-  border-color: var(--accent-warm);
-  box-shadow: 0 0 0 3px rgba(216,199,162,0.25);
+.section-title-common {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 24px;
+  padding: 8px 0;
+  border-radius: var(--radius-xs);
+  color: var(--color-common-text);
+  text-align: center;
+  background-color: var(--color-common-light);
 }
 
-/* ===== 添加按钮（像点菜） ===== */
-.btn-love,
-.btn-hate {
-  padding: 10px 22px;
-  border-radius: 999px;
-  border: none;
-  cursor: pointer;
-  font-size: .9rem;
-  transition: var(--transition);
-}
-
-.btn-love {
-  background: var(--love-border);
-  color: white;
-}
-
-.btn-hate {
-  background: var(--hate-border);
-  color: white;
-}
-
-.btn-love:hover,
-.btn-hate:hover {
-  transform: translateY(-1px);
-  box-shadow: var(--shadow-soft);
-}
-
-/* ===== 贴纸（餐牌 / 菜名卡） ===== */
+/* 贴纸样式 - 游戏化便利贴，像餐盘装饰 */
 .preference-sticker {
-  background: var(--love-bg);
-  border: 1px solid var(--love-border);
+  background-color: var(--color-love-light);
+  border: 2px solid var(--color-love-border);
   border-radius: var(--radius-sm);
-  padding: 12px 16px;
-  margin-bottom: 14px;
-  font-size: .95rem;
+  padding: 16px 22px;
+  margin-bottom: 18px;
+  box-shadow: var(--shadow-xs);
   cursor: grab;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
-  transition: var(--transition);
+  user-select: none;
+  transition: var(--transition-fast);
+  position: relative;
+  z-index: 1;
+  color: var(--color-love-text);
+  font-size: 1rem;
 }
 
-.preference-sticker.hate {
-  background: var(--hate-bg);
-  border-color: var(--hate-border);
+/* 贴纸倾斜角 - 游戏化随性 */
+.preference-sticker:nth-child(odd) {
+  transform: rotate(-1deg);
 }
 
-.preference-sticker.common {
-  background: var(--common-bg);
-  border-color: var(--common-border);
-  cursor: default;
+.preference-sticker:nth-child(even) {
+  transform: rotate(1deg);
 }
 
 .preference-sticker:active {
   cursor: grabbing;
-  transform: scale(1.05) rotate(-1deg);
+  box-shadow: var(--shadow-sm);
+  transform: scale(1.05) rotate(0deg);
+  z-index: 10;
 }
 
-/* ===== 垃圾桶（不突兀） ===== */
+.preference-sticker.hate {
+  background-color: var(--color-hate-light);
+  border-color: var(--color-hate-border);
+  color: var(--color-hate-text);
+}
+
+/* 共同贴纸 - 更精致的装饰感 */
+.preference-sticker.common {
+  background-color: var(--color-common-light);
+  border-color: var(--color-common-border);
+  color: var(--color-common-text);
+  cursor: default;
+  box-shadow: 0 2px 8px rgba(178, 240, 225, 0.3);
+}
+
+.preference-sticker.common:active {
+  transform: none;
+  box-shadow: 0 2px 8px rgba(178, 240, 225, 0.3);
+}
+
+/* 输入框与按钮 - 像餐盘小工具 */
+.preference-input-container {
+  display: flex;
+  gap: 14px;
+  width: 100%;
+  margin-top: 20px;
+}
+
+input[type="text"] {
+  flex: 1;
+  padding: 14px 24px;
+  border: 2px solid var(--color-divider);
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  outline: none;
+  transition: var(--transition-fast);
+  background-color: var(--color-bg-main);
+  color: var(--color-text-body);
+}
+
+input[type="text"]:focus {
+  border-color: var(--color-love-border);
+  background-color: var(--color-panel);
+  box-shadow: 0 0 0 3px rgba(130, 195, 236, 0.1);
+}
+
+.btn-love {
+  padding: 14px 28px;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-btn-love);
+  color: var(--color-love-text);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.btn-love:hover {
+  background-color: var(--color-btn-love-hover);
+  transform: translateY(-2px);
+}
+
+.btn-hate {
+  padding: 14px 28px;
+  border: none;
+  border-radius: var(--radius-md);
+  background-color: var(--color-btn-hate);
+  color: var(--color-hate-text);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition-normal);
+}
+
+.btn-hate:hover {
+  background-color: var(--color-btn-hate-hover);
+  transform: translateY(-2px);
+}
+
+/* 垃圾桶 - 像餐桌旁的收纳罐 */
 .trash-bin {
   position: fixed;
-  bottom: 32px;
   left: 50%;
+  bottom: 40px;
   transform: translateX(-50%);
-  width: 84px;
-  height: 84px;
-  border-radius: 50%;
-  background: #E57373;
-  color: white;
-  font-size: 2rem;
+  width: 100px;
+  height: 100px;
+  background-color: var(--color-trash);
+  border-radius: var(--radius-circle);
   display: flex;
   align-items: center;
   justify-content: center;
-  opacity: .85;
-  transition: var(--transition);
+  color: var(--color-panel);
+  font-size: 2.8rem;
+  box-shadow: var(--shadow-sm);
+  opacity: 0.85;
+  transition: var(--transition-normal);
+  z-index: 20;
 }
 
 .trash-bin.active {
   opacity: 1;
-  transform: translateX(-50%) scale(1.08);
-  background: #D84343;
+  transform: translateX(-50%) scale(1.1);
+  background-color: var(--color-trash-hover);
+  box-shadow: var(--shadow-md);
 }
 
-/* ===== 响应式 ===== */
+/* 拖拽占位符 - 虚线餐盘格 */
+.placeholder {
+  background-color: rgba(232, 244, 248, 0.4);
+  border: 2px dashed var(--color-love-border);
+  border-radius: var(--radius-sm);
+  padding: 16px 22px;
+  margin-bottom: 18px;
+  height: 62px;
+}
+
+.placeholder.hate-placeholder {
+  background-color: rgba(253, 242, 248, 0.4);
+  border-color: var(--color-hate-border);
+}
+
+/* 响应式适配 - 不同尺寸餐盘布局 */
 @media (max-width: 1200px) {
   .preference-container {
-    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+  .common-panel {
+    order: -1; /* 共同区域置顶 */
+  }
+  .person-title, .common-title {
+    font-size: 1.7rem;
+  }
+  h1 {
+    font-size: 2.2rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .preference-section {
+    min-height: 250px;
+  }
+  .trash-bin {
+    width: 80px;
+    height: 80px;
+    font-size: 2.2rem;
+  }
+  .cloud-buttons {
+    flex-direction: column;
+    width: 80%;
+    margin: 0 auto 30px;
   }
 }
 </style>
