@@ -4,217 +4,213 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>愿望清单</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+
     <style>
         :root {
-            /* 全局样式变量 */
-            --color-yellow-light: #FFF9C4; /* 未实现愿望（淡黄色） */
-            --color-yellow-border: #FDD835;
-            --color-green-light: #E8F5E9; /* 已实现愿望（绿色） */
-            --color-green-border: #4CAF50;
-            --color-gray-light: #F5F5F5; /* 背景/分栏 */
-            --color-gray-border: #E0E0E0;
-            --color-trash: #EF5350; /* 垃圾桶颜色 */
-            --color-trash-hover: #E53935;
-            --color-text-main: #212121;
-            --color-text-sub: #757575;
-            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
-            --shadow-md: 0 4px 8px rgba(0,0,0,0.1);
-            --radius-sm: 8px;
-            --radius-md: 12px;
-        }
+  --fg-main: #E8E8F0;
+  --fg-sub: #A0A0B8;
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-        }
+  --bg-panel: rgba(255,255,255,0.06);
+  --bg-soft: rgba(255,255,255,0.04);
+  --border-soft: rgba(255,255,255,0.18);
 
-        body {
-            background-color: var(--color-gray-light);
-            color: var(--color-text-main);
-            padding: 24px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
+  --accent-unfulfilled: rgba(183,168,255,0.35);
+  --accent-fulfilled: rgba(140,200,170,0.35);
+  --accent-danger: #EF5350;
 
-        h1 {
-            text-align: center;
-            margin-bottom: 32px;
-            font-weight: 600;
-            font-size: 2.2rem;
-            color: var(--color-text-main);
-        }
+  --radius-lg: 18px;
+  --radius-md: 14px;
+  --radius-sm: 10px;
+}
 
-        /* 整体分栏容器 */
-        .wish-container {
-            display: flex;
-            gap: 24px;
-            width: 100%;
-            margin-bottom: 32px;
-        }
+* {
+  box-sizing: border-box;
+}
 
-        /* 个人愿望面板（左右各一个） */
-        .person-panel {
-            flex: 1;
-            background-color: #FFFFFF;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-sm);
-            padding: 20px;
-        }
+body {
+  margin: 0;
+  padding: 48px 32px 120px;
+  color: var(--fg-main);
+  font-family: Inter, sans-serif;
+  background:
+    radial-gradient(1200px 800px at 20% 10%, #1b1f3b 0%, transparent 60%),
+    radial-gradient(1000px 700px at 80% 20%, #2a174a 0%, transparent 65%),
+    linear-gradient(180deg, #090b16, #05060c);
+}
 
-        .person-title {
-            font-size: 1.5rem;
-            font-weight: 500;
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--color-gray-border);
-        }
+h1 {
+  text-align: center;
+  font-family: "Noto Serif SC", serif;
+  font-size: 42px;
+  letter-spacing: 4px;
+  margin-bottom: 36px;
+}
 
-        /* 愿望分类容器（清单/已实现） */
-        .wish-sections {
-            display: flex;
-            gap: 16px;
-            margin-bottom: 24px;
-        }
+.cloud-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 18px;
+  margin-bottom: 36px;
+}
 
-        .wish-section {
-            flex: 1;
-            min-height: 300px;
-            background-color: var(--color-gray-light);
-            border-radius: var(--radius-sm);
-            padding: 16px;
-            position: relative;
-        }
+.cloud-buttons button {
+  padding: 10px 26px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-soft);
+  color: var(--fg-main);
+  cursor: pointer;
+  backdrop-filter: blur(6px);
+}
 
-        .section-title {
-            font-size: 1rem;
-            font-weight: 500;
-            margin-bottom: 16px;
-            color: var(--color-text-sub);
-            text-align: center;
-        }
+.cloud-buttons button:hover {
+  border-color: #B7A8FF;
+}
 
-        /* 愿望贴纸样式 */
-        .wish-sticker {
-            background-color: var(--color-yellow-light);
-            border: 1px solid var(--color-yellow-border);
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow-sm);
-            cursor: grab;
-            user-select: none;
-            transition: all 0.2s ease;
-            position: relative;
-            z-index: 1;
-        }
+/* ===== 主体布局 ===== */
+.wish-container {
+  display: flex;
+  gap: 28px;
+}
 
-        .wish-sticker:active {
-            cursor: grabbing;
-            box-shadow: var(--shadow-md);
-            transform: scale(1.02);
-            z-index: 10;
-        }
+.person-panel {
+  flex: 1;
+  padding: 24px;
+  background: var(--bg-panel);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border-soft);
+  backdrop-filter: blur(10px);
+}
 
-        .wish-sticker.fulfilled {
-            background-color: var(--color-green-light);
-            border-color: var(--color-green-border);
-        }
+.person-title {
+  font-family: "Noto Serif SC", serif;
+  font-size: 22px;
+  letter-spacing: 2px;
+  margin-bottom: 20px;
+  text-align: center;
+}
 
-        /* 输入框容器 */
-        .wish-input-container {
-            display: flex;
-            gap: 8px;
-            width: 100%;
-        }
+.wish-sections {
+  display: flex;
+  gap: 16px;
+  margin-bottom: 20px;
+}
 
-        input[type="text"] {
-            flex: 1;
-            padding: 10px 16px;
-            border: 1px solid var(--color-gray-border);
-            border-radius: var(--radius-sm);
-            font-size: 1rem;
-            outline: none;
-            transition: border-color 0.2s ease;
-        }
+.wish-section {
+  flex: 1;
+  min-height: 280px;
+  padding: 16px;
+  background: rgba(0,0,0,0.25);
+  border-radius: var(--radius-md);
+  border: 1px dashed rgba(255,255,255,0.15);
+}
 
-        input[type="text"]:focus {
-            border-color: var(--color-yellow-border);
-        }
+.section-title {
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 3px;
+  color: var(--fg-sub);
+  margin-bottom: 14px;
+}
 
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: var(--radius-sm);
-            background-color: var(--color-yellow-border);
-            color: #FFFFFF;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
-        }
+/* ===== 愿望条目 ===== */
+.wish-sticker {
+  padding: 12px 16px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-sm);
+  background: rgba(183,168,255,0.15);
+  border: 1px solid var(--accent-unfulfilled);
+  cursor: grab;
+  user-select: none;
+}
 
-        button:hover {
-            background-color: #FBC02D;
-        }
+.wish-sticker.fulfilled {
+  background: rgba(140,200,170,0.18);
+  border-color: var(--accent-fulfilled);
+}
 
-        /* 垃圾桶样式 */
-        .trash-bin {
-            position: fixed;
-            left: 50%;
-            bottom: 32px;
-            transform: translateX(-50%);
-            width: 80px;
-            height: 80px;
-            background-color: var(--color-trash);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #FFFFFF;
-            font-size: 2rem;
-            box-shadow: var(--shadow-md);
-            opacity: 0.7;
-            transition: all 0.3s ease;
-            z-index: 20;
-        }
+.wish-sticker:active {
+  cursor: grabbing;
+  transform: scale(1.03);
+}
 
-        .trash-bin.active {
-            opacity: 1;
-            transform: translateX(-50%) scale(1.1);
-            background-color: var(--color-trash-hover);
-        }
+/* ===== 输入区 ===== */
+.wish-input-container {
+  display: flex;
+  gap: 10px;
+}
 
-        /* 保存/读取按钮 */
-        .cloud-buttons {
-            display: flex;
-            gap: 16px;
-            justify-content: center;
-            margin-bottom: 24px;
-        }
+input[type="text"] {
+  flex: 1;
+  padding: 10px 14px;
+  background: rgba(0,0,0,0.35);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  color: var(--fg-main);
+}
 
-        .cloud-buttons button {
-            background-color: #2196F3;
-        }
+input::placeholder {
+  color: var(--fg-sub);
+}
 
-        .cloud-buttons button:hover {
-            background-color: #1976D2;
-        }
+button {
+  padding: 10px 22px;
+  border-radius: 999px;
+  border: 1px solid var(--border-soft);
+  background: var(--bg-soft);
+  color: var(--fg-main);
+  cursor: pointer;
+}
 
-        /* 拖拽占位符 */
-        .placeholder {
-            background-color: rgba(255, 249, 196, 0.5);
-            border: 1px dashed var(--color-yellow-border);
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            margin-bottom: 12px;
-            height: 48px;
-        }
+button:hover {
+  border-color: #B7A8FF;
+}
 
-        .placeholder.fulfilled-placeholder {
-            background-color: rgba(232, 245, 233, 0.5);
-            border-color: var(--color-green-border);
-        }
+/* ===== 垃圾桶 ===== */
+.trash-bin {
+  position: fixed;
+  left: 50%;
+  bottom: 36px;
+  transform: translateX(-50%);
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: rgba(239,83,80,0.75);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  opacity: 0.6;
+  backdrop-filter: blur(6px);
+}
+
+.trash-bin.active {
+  opacity: 1;
+  transform: translateX(-50%) scale(1.15);
+}
+
+/* ===== 拖拽占位 ===== */
+.placeholder {
+  height: 44px;
+  margin-bottom: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px dashed var(--accent-unfulfilled);
+  background: rgba(183,168,255,0.12);
+}
+
+.fulfilled-placeholder {
+  border-color: var(--accent-fulfilled);
+  background: rgba(140,200,170,0.12);
+}
+
+/* ===== 响应式 ===== */
+@media (max-width: 900px) {
+  .wish-container {
+    flex-direction: column;
+  }
+}
+
     </style>
     <!-- 引入 Font Awesome 用于垃圾桶图标 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
