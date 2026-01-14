@@ -524,6 +524,53 @@ body {
         margin-bottom: 20px;
     }
 }
+      /* ======================= */
+/* ===== 手机端强制修复 ===== */
+/* ======================= */
+
+.calendar-panel {
+  overflow-x: auto;
+}
+
+/* 阻止 table 在手机端被压缩 */
+.calendar-table {
+  min-width: max-content;
+  table-layout: fixed;
+}
+
+/* td / cell 强制物理尺寸 */
+.calendar-td,
+.date-cell {
+  width: 60px !important;
+  height: 60px !important;
+  min-width: 60px;
+  min-height: 60px;
+  max-width: 60px;
+  max-height: 60px;
+  flex-shrink: 0;
+}
+
+/* 防止文字把格子撑开 */
+.date-content {
+  max-width: 100%;
+  max-height: 100%;
+  font-size: clamp(9px, 2.8vw, 12px);
+  line-height: 1.15;
+  overflow: hidden;
+}
+
+/* 手机端允许横向滑动，不挤压 */
+@media (max-width: 768px) {
+  .calendar-container {
+    justify-content: flex-start;
+  }
+
+  .calendar-panel {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+}
+
 </style>
 
 </head>
