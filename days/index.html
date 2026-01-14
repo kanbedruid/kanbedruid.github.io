@@ -385,7 +385,7 @@
     </div>
 
     <!-- 标记类型选择 -->
-    <div class="tag-selector">
+    <div class="tag-selector" id="tag-selector">
         <div class="tag-item tag-anniversary" data-tag="anniversary">纪念日</div>
         <div class="tag-item tag-menstruation" data-tag="menstruation">生理期</div>
         <div class="tag-item tag-birthday" data-tag="birthday">生日</div>
@@ -454,8 +454,10 @@
                 addCalendar(2025, 5, true);
             }
 
-            // 绑定标记选择事件
-            bindTagSelector();
+            // 使用 事件委托 绑定标记选择器，解决动态渲染失效问题
+            bindTagSelectorByDelegate();
+            // 使用 事件委托 绑定日期单元格点击，解决动态渲染失效问题
+            bindDateCellByDelegate();
 
             // 更新统计数据
             updateStats();
@@ -465,6 +467,46 @@
 
             // 定时更新统计（每分钟）
             setInterval(updateStats, 60000);
+        }
+
+        // ========== 事件委托：解决动态元素事件绑定问题 ==========
+        // 绑定标记选择器（事件委托到父元素）
+        function bindTagSelectorByDelegate() {
+            const tagSelector = document.getElementById("tag-selector");
+            tagSelector.addEventListener("click", (e) => {
+                const target = e.target;
+                if (target.classList.contains("tag-item")) {
+                    // 移除所有active
+                    document.querySelectorAll(".tag-item").forEach(t => t.classList.remove("active"));
+                    // 给当前点击的添加active
+                    target.classList.add("active");
+                    activeTag = target.dataset.tag;
+                }
+            });
+        }
+
+        // 绑定日期单元格和取消按钮（事件委托到日历容器）
+        function bindDateCellByDelegate() {
+            const calendarWrapper = document.getElementById("calendar-wrapper");
+            
+            // 监听日期单元格点击
+            calendarWrapper.addEventListener("click", (e) => {
+                const target = e.target;
+                // 点击的是日期单元格
+                if (target.classList.contains("date-cell")) {
+                    handleDateCellClick(target);
+                }
+                // 点击的是取消按钮
+                else if (target.classList.contains("date-close")) {
+                    e.stopPropagation();
+                    const dateCell = target.parentElement;
+                    const dateStr = dateCell.dataset.date;
+                    delete calendarData.tags[dateStr];
+                    saveToLocal();
+                    renderAllCalendars();
+                    updateStats();
+                }
+            });
         }
 
         // ========== 日历操作 ==========
@@ -608,13 +650,6 @@
                     const closeBtn = document.createElement("div");
                     closeBtn.className = "date-close";
                     closeBtn.innerText = "×";
-                    closeBtn.addEventListener("click", (e) => {
-                        e.stopPropagation(); // 阻止触发单元格点击事件
-                        delete calendarData.tags[dateStr];
-                        saveToLocal();
-                        renderAllCalendars();
-                        updateStats();
-                    });
                     dateCell.appendChild(closeBtn);
                 }
 
@@ -643,8 +678,6 @@
                     contentContainer.appendChild(subtitle);
                 }
 
-                // 绑定单元格点击事件（标记/编辑副标题）
-                dateCell.addEventListener("click", handleDateCellClick);
                 td.appendChild(dateCell);
                 row.appendChild(td);
             });
@@ -662,22 +695,11 @@
         }
 
         // ========== 标记与编辑功能 ==========
-        // 绑定标记选择事件
-        function bindTagSelector() {
-            const tagItems = document.querySelectorAll(".tag-item");
-            tagItems.forEach(item => {
-                item.addEventListener("click", () => {
-                    tagItems.forEach(t => t.classList.remove("active"));
-                    item.classList.add("active");
-                    activeTag = item.dataset.tag;
-                });
-            });
-        }
-
-        // 处理日期单元格点击
-        function handleDateCellClick() {
-            const dateStr = this.dataset.date;
+        // 处理日期单元格点击（独立函数，供事件委托调用）
+        function handleDateCellClick(dateCell) {
+            const dateStr = dateCell.dataset.date;
             const tagInfo = calendarData.tags[dateStr] || {};
+            const contentContainer = dateCell.querySelector(".date-content");
 
             // 有活跃标记：添加/更新标记
             if (activeTag) {
@@ -694,8 +716,6 @@
 
             // 无活跃标记：编辑副标题（已有标记的单元格）
             if (tagInfo.type) {
-                const cell = this;
-                const contentContainer = cell.querySelector(".date-content");
                 const currentSubtitle = tagInfo.subtitle || "";
 
                 // 创建输入框
@@ -844,7 +864,7 @@
                 saveToLocal();
                 renderAllCalendars();
                 updateStats();
-                alert("日历数据已从云端成功读取！");
+                alert("日历数据已从云端读取成功！");
             } catch (e) {
                 alert(`读取失败：${e.message || JSON.stringify(e)}`);
                 console.error("云端读取错误：", e);
