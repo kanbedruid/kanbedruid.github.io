@@ -13,6 +13,8 @@
       --fg: #e8e8f0;
       --muted: #a0a0b8;
       --accent: #b7a8ff;
+      --border-light: rgba(255,255,255,0.18);
+      --bg-btn: rgba(255,255,255,0.03);
     }
 
     * {
@@ -23,7 +25,7 @@
       margin: 0;
       padding: 0;
       height: 100%;
-      overflow: hidden;
+      overflow: auto; /* 改为auto，适配小屏幕内容显示 */
       color: var(--fg);
       font-family: Inter, sans-serif;
       background:
@@ -41,51 +43,169 @@
     main {
       position: relative;
       z-index: 1;
-      height: 100%;
+      min-height: 100%;
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      padding: 60px 20px 80px;
     }
 
     .container {
       text-align: center;
-      max-width: 760px;
-      padding: 40px;
+      max-width: 800px;
+      width: 100%;
     }
 
     h1 {
       font-family: "Noto Serif SC", serif;
       font-size: 46px;
       letter-spacing: 4px;
-      margin-bottom: 12px;
+      margin-bottom: 20px;
     }
 
     .subtitle {
       font-size: 14px;
       letter-spacing: 6px;
       color: var(--muted);
-      margin-bottom: 72px;
+      margin-bottom: 30px;
     }
 
- .buttons {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 36px;
-}
+    /* ===== 小型日历表格 ===== */
+    .mini-calendar {
+      margin: 0 auto 40px;
+      width: 220px;
+      border: 1px solid var(--border-light);
+      backdrop-filter: blur(8px);
+      border-radius: 8px;
+      overflow: hidden;
+    }
 
+    .calendar-header {
+      padding: 8px;
+      background: rgba(255,255,255,0.05);
+      border-bottom: 1px solid var(--border-light);
+    }
 
-    .btn {
+    .calendar-week, .calendar-days {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+    }
+
+    .calendar-week span, .calendar-days span {
+      padding: 6px;
+      font-size: 12px;
+      text-align: center;
+    }
+
+    .calendar-week span {
+      color: var(--muted);
+      letter-spacing: 1px;
+    }
+
+    .calendar-days span {
+      color: var(--fg);
+      cursor: default;
+    }
+
+    .calendar-days span.current {
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* ===== 核心按钮布局 ===== */
+    /* 顶部：我们的每一天（主按钮） */
+    .main-btn-wrap {
+      margin-bottom: 40px;
+      width: 100%;
+    }
+
+    .main-btn {
       position: relative;
-      padding: 34px 26px;
-      border: 1px solid rgba(255,255,255,0.18);
-      background: rgba(255,255,255,0.03);
+      padding: 40px 26px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-btn);
       backdrop-filter: blur(8px);
       cursor: pointer;
       overflow: hidden;
       transition: transform 0.3s ease, border-color 0.3s ease;
+      border-radius: 12px;
+      width: 100%;
     }
 
-    .btn::before {
+    /* 下方：健康生活 + 左右布局容器 */
+    .secondary-buttons {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      width: 100%;
+    }
+
+    /* 健康生活按钮 */
+    .health-btn {
+      position: relative;
+      padding: 30px 26px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-btn);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+      border-radius: 12px;
+      width: 100%;
+    }
+
+    /* 左右布局：愿望清单（左，宽） | 美食组（右，两个窄按钮） */
+    .side-by-side {
+      display: flex;
+      gap: 20px;
+      width: 100%;
+    }
+
+    /* 愿望清单（左侧，占比约50%） */
+    .wish-btn {
+      position: relative;
+      padding: 60px 26px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-btn);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+      border-radius: 12px;
+      flex: 1; /* 占据左侧全部宽度 */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* 美食组（右侧，占比约50%，包含两个上下排列的小按钮） */
+    .food-group {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      flex: 1; /* 与愿望清单等宽 */
+    }
+
+    /* 右侧小型美食按钮（每个高度约为愿望清单的一半） */
+    .food-btn {
+      position: relative;
+      padding: 25px 26px;
+      border: 1px solid var(--border-light);
+      background: var(--bg-btn);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+      overflow: hidden;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+      border-radius: 12px;
+      flex: 1; /* 两个按钮均分高度 */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* 所有按钮的通用伪元素（光斑效果） */
+    .main-btn::before, .health-btn::before, .wish-btn::before, .food-btn::before {
       content: "";
       position: absolute;
       inset: 0;
@@ -98,29 +218,44 @@
       transition: opacity 0.3s;
     }
 
-    .btn:hover::before {
+    .main-btn:hover::before, .health-btn:hover::before, .wish-btn:hover::before, .food-btn:hover::before {
       opacity: 1;
     }
 
-    .btn:hover {
+    /* 所有按钮的通用hover/active效果 */
+    .main-btn:hover, .health-btn:hover, .wish-btn:hover, .food-btn:hover {
       transform: translateY(-5px);
       border-color: var(--accent);
     }
 
-    .btn:active {
+    .main-btn:active, .health-btn:active, .wish-btn:active, .food-btn:active {
       transform: scale(0.97);
     }
 
+    /* 按钮文字样式 */
     .btn-title {
       font-family: "Noto Serif SC", serif;
       font-size: 22px;
       margin-bottom: 10px;
     }
 
+    .main-btn .btn-title {
+      font-size: 26px;
+    }
+
+    .food-btn .btn-title {
+      font-size: 18px;
+      margin-bottom: 6px;
+    }
+
     .btn-desc {
       font-size: 13px;
       color: var(--muted);
       line-height: 1.7;
+    }
+
+    .food-btn .btn-desc {
+      font-size: 12px;
     }
 
     footer {
@@ -136,7 +271,15 @@
 
     @media (max-width: 640px) {
       h1 { font-size: 34px; }
-      .buttons { grid-template-columns: 1fr; }
+      .side-by-side {
+        flex-direction: column; /* 小屏幕下左右布局改为上下布局 */
+      }
+      .main-btn .btn-title {
+        font-size: 22px;
+      }
+      .wish-btn {
+        padding: 30px 26px;
+      }
     }
   </style>
 </head>
@@ -147,32 +290,109 @@
 
 <main>
   <div class="container">
-    <h1>千代 × 小德</h1>
+    <!-- 中央标题 -->
+    <h1>我们的每一天</h1>
     <div class="subtitle">我们的记录</div>
 
-  <div class="buttons">
-  <div class="btn" onclick="location.href='https://kanbedruid.github.io/weight/'">
-    <div class="btn-title">健康生活</div>
-    <div class="btn-desc">体重 · 作息 · 习惯</div>
-  </div>
+    <!-- 小型日历表格 -->
+    <div class="mini-calendar">
+      <div class="calendar-header">
+        <span style="font-size: 14px; letter-spacing: 2px;">2026 · 01</span>
+      </div>
+      <div class="calendar-week">
+        <span>日</span>
+        <span>一</span>
+        <span>二</span>
+        <span>三</span>
+        <span>四</span>
+        <span>五</span>
+        <span>六</span>
+      </div>
+      <div class="calendar-days">
+        <span></span>
+        <span></span>
+        <span></span>
+        <span></span>
+        <span>1</span>
+        <span>2</span>
+        <span>3</span>
+      </div>
+      <div class="calendar-days">
+        <span>4</span>
+        <span>5</span>
+        <span>6</span>
+        <span>7</span>
+        <span>8</span>
+        <span>9</span>
+        <span>10</span>
+      </div>
+      <div class="calendar-days">
+        <span>11</span>
+        <span>12</span>
+        <span>13</span>
+        <span class="current">14</span>
+        <span>15</span>
+        <span>16</span>
+        <span>17</span>
+      </div>
+      <div class="calendar-days">
+        <span>18</span>
+        <span>19</span>
+        <span>20</span>
+        <span>21</span>
+        <span>22</span>
+        <span>23</span>
+        <span>24</span>
+      </div>
+      <div class="calendar-days">
+        <span>25</span>
+        <span>26</span>
+        <span>27</span>
+        <span>28</span>
+        <span>29</span>
+        <span>30</span>
+        <span>31</span>
+      </div>
+    </div>
 
-  <div class="btn" onclick="location.href='https://kanbedruid.github.io/food/'">
-    <div class="btn-title">美食排名</div>
-    <div class="btn-desc">味觉 · 选择 · 记忆</div>
-  </div>
+    <!-- 顶部主按钮：我们的每一天 -->
+    <div class="main-btn-wrap">
+      <div class="main-btn" onclick="location.href='https://kanbedruid.github.io/days/'">
+        <div class="btn-title">我们的每一天</div>
+        <div class="btn-desc">时光 · 回忆 · 点滴</div>
+      </div>
+    </div>
 
-  <div class="btn" onclick="location.href='https://kanbedruid.github.io/list'">
-    <div class="btn-title">愿望清单</div>
-    <div class="btn-desc">计划 · 目标 · 未完成</div>
-  </div>
+    <!-- 下方二级按钮区域 -->
+    <div class="secondary-buttons">
+      <!-- 健康生活按钮 -->
+      <div class="health-btn" onclick="location.href='https://kanbedruid.github.io/weight/'">
+        <div class="btn-title">健康生活</div>
+        <div class="btn-desc">体重 · 作息 · 习惯</div>
+      </div>
 
-  <div class="btn" onclick="location.href='https://kanbedruid.github.io/like'">
-    <div class="btn-title">美食偏好</div>
-    <div class="btn-desc">口味 · 习惯 · 排斥</div>
-  </div>
-</div>
- 
+      <!-- 左右布局：愿望清单 | 美食组 -->
+      <div class="side-by-side">
+        <!-- 左侧：愿望清单（宽按钮） -->
+        <div class="wish-btn" onclick="location.href='https://kanbedruid.github.io/list'">
+          <div class="btn-title">愿望清单</div>
+          <div class="btn-desc">计划 · 目标 · 未完成</div>
+        </div>
 
+        <!-- 右侧：美食组（两个小按钮） -->
+        <div class="food-group">
+          <div class="food-btn" onclick="location.href='https://kanbedruid.github.io/like'">
+            <div class="btn-title">美食偏好</div>
+            <div class="btn-desc">口味 · 习惯 · 排斥</div>
+          </div>
+          <div class="food-btn" onclick="location.href='https://kanbedruid.github.io/food/'">
+            <div class="btn-title">美食排名</div>
+            <div class="btn-desc">味觉 · 选择 · 记忆</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </main>
 
 <footer>
@@ -247,8 +467,8 @@
 
   draw();
 
-  /* 按钮光斑跟随 */
-  document.querySelectorAll(".btn").forEach(btn => {
+  /* 按钮光斑跟随（适配所有新按钮） */
+  document.querySelectorAll(".main-btn, .health-btn, .wish-btn, .food-btn").forEach(btn => {
     btn.addEventListener("mousemove", e => {
       const rect = btn.getBoundingClientRect();
       btn.style.setProperty("--x", `${e.clientX - rect.left}px`);
@@ -259,9 +479,6 @@
 
 </body>
 </html>
-
-
-
 
 
 
