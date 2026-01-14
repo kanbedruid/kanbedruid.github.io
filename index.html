@@ -57,11 +57,12 @@
       width: 100%;
     }
 
+    /* 恢复大标题为 千代 × 小德 */
     h1 {
       font-family: "Noto Serif SC", serif;
       font-size: 46px;
       letter-spacing: 4px;
-      margin-bottom: 20px;
+      margin-bottom: 12px;
     }
 
     .subtitle {
@@ -161,7 +162,7 @@
       width: 100%;
     }
 
-    /* 左右布局：愿望清单 | 美食偏好（等宽） */
+    /* 左右布局：愿望清单 | 美食区域（美食偏好 + 下方链接） */
     .side-by-side {
       display: flex;
       gap: 20px;
@@ -179,10 +180,19 @@
       overflow: hidden;
       transition: transform 0.3s ease, border-color 0.3s ease;
       border-radius: 12px;
-      flex: 1; /* 与美食偏好等宽 */
+      flex: 1; /* 与美食区域等宽 */
       display: flex;
       flex-direction: column;
       justify-content: center;
+    }
+
+    /* 右侧：美食区域（美食偏好按钮 + 下方排名链接） */
+    .food-area {
+      flex: 1; /* 与愿望清单等宽 */
+      display: flex;
+      flex-direction: column;
+      align-items: center; /* 链接居中对齐按钮 */
+      gap: 16px; /* 按钮与链接的间距 */
     }
 
     /* 美食偏好（右侧，等宽） */
@@ -196,21 +206,21 @@
       overflow: hidden;
       transition: transform 0.3s ease, border-color 0.3s ease;
       border-radius: 12px;
-      flex: 1; /* 与愿望清单等宽 */
+      width: 100%; /* 填满美食区域宽度 */
       display: flex;
       flex-direction: column;
       justify-content: center;
     }
 
-    /* 美食排名下划线链接 */
+    /* 美食排名下划线链接（按钮外部正下方） */
     .food-rank-link {
-      margin-top: 12px;
       font-size: 13px;
       color: var(--muted);
       text-decoration: underline;
       text-decoration-color: var(--border-light);
       cursor: pointer;
       transition: color 0.3s ease, text-decoration-color 0.3s ease;
+      align-self: center; /* 水平居中 */
     }
 
     .food-rank-link:hover {
@@ -302,8 +312,8 @@
 
 <main>
   <div class="container">
-    <!-- 中央标题 -->
-    <h1>我们的每一天</h1>
+    <!-- 恢复大标题：千代 × 小德 -->
+    <h1>千代 × 小德</h1>
     <div class="subtitle">我们的记录</div>
 
     <!-- 日历 + 主按钮 并排容器 -->
@@ -369,7 +379,7 @@
         </div>
       </div>
 
-      <!-- 顶部主按钮：我们的每一天 -->
+      <!-- 主按钮：我们的每一天（按钮标题） -->
       <div class="main-btn" onclick="location.href='https://kanbedruid.github.io/days/'">
         <div class="btn-title">我们的每一天</div>
         <div class="btn-desc">时光 · 回忆 · 点滴</div>
@@ -384,7 +394,7 @@
         <div class="btn-desc">体重 · 作息 · 习惯</div>
       </div>
 
-      <!-- 左右布局：愿望清单 | 美食偏好（等宽） -->
+      <!-- 左右布局：愿望清单 | 美食区域 -->
       <div class="side-by-side">
         <!-- 左侧：愿望清单 -->
         <div class="wish-btn" onclick="location.href='https://kanbedruid.github.io/list'">
@@ -392,12 +402,15 @@
           <div class="btn-desc">计划 · 目标 · 未完成</div>
         </div>
 
-        <!-- 右侧：美食偏好（包含美食排名链接） -->
-        <div class="food-prefer-btn" onclick="location.href='https://kanbedruid.github.io/like'">
-          <div class="btn-title">美食偏好</div>
-          <div class="btn-desc">口味 · 习惯 · 排斥</div>
-          <!-- 美食排名下划线链接 -->
-          <div class="food-rank-link" onclick="event.stopPropagation(); location.href='https://kanbedruid.github.io/food/'">→ 小德的饭店排名</div>
+        <!-- 右侧：美食区域（美食偏好按钮 + 下方排名链接） -->
+        <div class="food-area">
+          <!-- 美食偏好按钮 -->
+          <div class="food-prefer-btn" onclick="location.href='https://kanbedruid.github.io/like'">
+            <div class="btn-title">美食偏好</div>
+            <div class="btn-desc">口味 · 习惯 · 排斥</div>
+          </div>
+          <!-- 美食排名下划线链接（按钮外部正下方） -->
+          <div class="food-rank-link" onclick="location.href='https://kanbedruid.github.io/food/'">→ 小德的饭店排名</div>
         </div>
       </div>
     </div>
@@ -488,7 +501,3 @@
 
 </body>
 </html>
-
-
-
-
