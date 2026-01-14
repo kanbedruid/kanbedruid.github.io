@@ -40,23 +40,28 @@
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans SC", sans-serif;
         }
 
-        body {
-            background-color: var(--color-bg-secondary);
-            color: var(--color-text-primary);
-            padding: 24px 16px;
-            max-width: 1600px;
-            margin: 0 auto;
-            min-height: 100vh;
-        }
+     body {
+    background:
+        radial-gradient(1200px 600px at 20% 10%, rgba(120,140,255,0.12), transparent 60%),
+        radial-gradient(1000px 800px at 80% 20%, rgba(160,120,255,0.10), transparent 65%),
+        linear-gradient(180deg, #0a0d1a, #05060c);
+    color: #e6e7ee;
+    padding: 32px 20px;
+    max-width: 1600px;
+    margin: 0 auto;
+    min-height: 100vh;
+}
 
-        h1 {
-            text-align: center;
-            margin-bottom: 40px;
-            font-weight: 600;
-            font-size: 2.5rem;
-            color: var(--color-text-primary);
-            letter-spacing: -0.02em;
-        }
+
+h1 {
+    text-align: center;
+    margin-bottom: 48px;
+    font-weight: 500;
+    font-size: 2.4rem;
+    letter-spacing: 0.12em;
+    color: #f0f1ff;
+}
+
 
         /* 云端操作按钮 */
         .cloud-buttons {
@@ -94,72 +99,54 @@
         }
 
         /* 左右：个人偏好面板 */
-        .person-panel {
-            flex: 1;
-            background-color: var(--color-bg-primary);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            padding: 28px;
-            transition: var(--transition-default);
-        }
+     .person-panel,
+.common-panel {
+    flex: 1;
+    background: rgba(255,255,255,0.04);
+    border-radius: 20px;
+    padding: 32px;
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.08);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    transition: transform 0.4s ease, box-shadow 0.4s ease;
+}
 
-        .person-panel:hover {
-            box-shadow: var(--shadow-md);
-        }
+.person-panel:hover,
+.common-panel:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 30px 80px rgba(0,0,0,0.45);
+}
 
-        .person-title {
-            font-size: 1.8rem;
-            font-weight: 500;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--color-bg-tertiary);
-            color: var(--color-text-primary);
-        }
+.person-title {
+    font-size: 1.6rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    margin-bottom: 28px;
+    text-align: center;
+    color: #ffffff;
+}
 
-        /* 中间：共同偏好面板（不可输入，自动汇总） */
-        .common-panel {
-            flex: 1;
-            background-color: var(--color-bg-primary);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-sm);
-            padding: 28px;
-            transition: var(--transition-default);
-        }
+.common-title {
+    font-size: 1.6rem;
+    font-weight: 400;
+    letter-spacing: 0.2em;
+    margin-bottom: 28px;
+    text-align: center;
+    color: #9dffcf;
+}
 
-        .common-panel:hover {
-            box-shadow: var(--shadow-md);
-        }
 
-        .common-title {
-            font-size: 1.8rem;
-            font-weight: 500;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--color-bg-tertiary);
-            color: var(--color-common-dark);
-            text-align: center;
-        }
+  .preference-section {
+    min-height: 260px;
+    background: rgba(255,255,255,0.02);
+    border-radius: 14px;
+    padding: 20px;
+    transition: background 0.3s ease;
+}
 
-        /* 偏好分类容器（爱吃/不爱吃 - 上下布局） */
-        .preference-sections {
-            display: flex;
-            flex-direction: column;
-            gap: 24px;
-            width: 100%;
-        }
-
-        .preference-section {
-            min-height: 280px;
-            background-color: var(--color-bg-tertiary);
-            border-radius: var(--radius-md);
-            padding: 20px;
-            position: relative;
-            transition: var(--transition-default);
-        }
-
-        .preference-section:hover {
-            background-color: var(--color-bg-secondary);
-        }
+.preference-section:hover {
+    background: rgba(255,255,255,0.05);
+}
 
         /* 个人面板的区域标题 */
         .section-title-person {
@@ -195,21 +182,25 @@
         }
 
         /* 偏好贴纸样式 */
-        .preference-sticker {
-            background-color: var(--color-love-light);
-            border: 1px solid var(--color-love-border);
-            border-radius: var(--radius-sm);
-            padding: 14px 20px;
-            margin-bottom: 16px;
-            box-shadow: var(--shadow-sm);
-            cursor: grab;
-            user-select: none;
-            transition: var(--transition-default);
-            position: relative;
-            z-index: 1;
-            color: var(--color-text-primary);
-        }
+.preference-sticker {
+    background: linear-gradient(
+        135deg,
+        rgba(255,255,255,0.18),
+        rgba(255,255,255,0.06)
+    );
+    border: 1px solid rgba(255,255,255,0.25);
+    border-radius: 12px;
+    padding: 14px 20px;
+    margin-bottom: 14px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.35);
+    cursor: grab;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
 
+.preference-sticker:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+}
         .preference-sticker:active {
             cursor: grabbing;
             box-shadow: var(--shadow-md);
@@ -217,17 +208,23 @@
             z-index: 10;
         }
 
-        .preference-sticker.hate {
-            background-color: var(--color-hate-light);
-            border-color: var(--color-hate-border);
-        }
+.preference-sticker.hate {
+    background: linear-gradient(
+        135deg,
+        rgba(255,140,140,0.18),
+        rgba(255,140,140,0.06)
+    );
+}
 
-        .preference-sticker.common {
-            background-color: var(--color-common-light);
-            border-color: var(--color-common-border);
-            cursor: default;
-            box-shadow: 0 2px 8px rgba(46, 204, 113, 0.15);
-        }
+.preference-sticker.common {
+    background: linear-gradient(
+        135deg,
+        rgba(140,255,200,0.18),
+        rgba(140,255,200,0.06)
+    );
+    border-color: rgba(140,255,200,0.4);
+    cursor: default;
+}
 
         .preference-sticker.common:active {
             transform: none;
@@ -243,77 +240,32 @@
         }
 
         input[type="text"] {
-            flex: 1;
-            padding: 12px 20px;
-            border: 1px solid var(--color-bg-tertiary);
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            outline: none;
-            transition: var(--transition-default);
-            background-color: var(--color-bg-secondary);
-            color: var(--color-text-primary);
-        }
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #ffffff;
+}
 
-        input[type="text"]:focus {
-            border-color: var(--color-love-border);
-            background-color: var(--color-bg-primary);
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
-        }
+input[type="text"]:focus {
+    border-color: #aeb6ff;
+    box-shadow: 0 0 0 3px rgba(160,170,255,0.2);
+}
 
-        .btn-love {
-            padding: 12px 24px;
-            border: none;
-            border-radius: var(--radius-md);
-            background-color: var(--color-love-border);
-            color: #FFFFFF;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition-default);
-        }
+        .btn-love,
+.btn-hate {
+    background: linear-gradient(135deg, #7f8cff, #a68bff);
+    border: none;
+}
 
-        .btn-love:hover {
-            background-color: var(--color-love-dark);
-            box-shadow: var(--shadow-sm);
-        }
+.btn-hate {
+    background: linear-gradient(135deg, #ff7a7a, #ff9a9a);
+}
 
-        .btn-hate {
-            padding: 12px 24px;
-            border: none;
-            border-radius: var(--radius-md);
-            background-color: var(--color-hate-border);
-            color: #FFFFFF;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: var(--transition-default);
-        }
 
-        .btn-hate:hover {
-            background-color: var(--color-hate-dark);
-            box-shadow: var(--shadow-sm);
-        }
-
-        /* 垃圾桶样式（高级悬浮效果） */
-        .trash-bin {
-            position: fixed;
-            left: 50%;
-            bottom: 40px;
-            transform: translateX(-50%);
-            width: 90px;
-            height: 90px;
-            background-color: var(--color-trash);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #FFFFFF;
-            font-size: 2.5rem;
-            box-shadow: var(--shadow-md);
-            opacity: 0.8;
-            transition: var(--transition-default);
-            z-index: 20;
-        }
+     .trash-bin {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.2);
+    backdrop-filter: blur(12px);
+}
 
         .trash-bin.active {
             opacity: 1;
