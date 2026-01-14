@@ -197,10 +197,34 @@
             box-shadow: var(--shadow-sm);
             padding: 24px;
             transition: var(--transition-default);
+            position: relative; /* 为月删除按钮提供定位容器 */
         }
 
         .calendar-panel:hover {
             box-shadow: var(--shadow-md);
+        }
+
+        /* 月删除按钮：日历面板左上角 */
+        .calendar-close {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            width: 24px;
+            height: 24px;
+            color: var(--color-close);
+            cursor: pointer;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: var(--transition-default);
+            z-index: 5;
+        }
+
+        .calendar-close:hover {
+            color: var(--color-close-hover);
+            background-color: rgba(0,0,0,0.05);
         }
 
         .calendar-title {
@@ -427,7 +451,7 @@
         // 初始化 Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const CALENDAR_KEY = "our_days_calendar_v1"; // 本地存储键
+        const CALENDAR_KEY = "our_days_calendars_v1"; // 本地存储键
 
         // 核心常量配置
         const MEET_DATE = new Date(2025, 5, 7); // 相遇日期：2025年6月7日（月份从0开始）
@@ -494,7 +518,7 @@
             saveToLocal();
             if (!isInit) renderAllCalendars();
 
-            // 自动生成周年标记
+            // 自动生成周年标记（修复：仅对应月份生成）
             generateAnniversaryTags(year, month);
         }
 
@@ -520,6 +544,31 @@
             addCalendar(nextYear, nextMonth);
         }
 
+        // 删除指定年月的日历（带二次确认）
+        function deleteCalendar(year, month) {
+            // 二次确认弹窗，防止误触
+            const isConfirm = confirm(`确定要删除 ${year}年${month + 1}月 的日历吗？删除后该月所有标记也会一并清除，且无法恢复！`);
+            if (!isConfirm) return;
+
+            // 1. 从日历列表中删除该月
+            calendarData.calendars = calendarData.calendars.filter(c => !(c.year === year && c.month === month));
+
+            // 2. 清除该月所有日期标记（格式：yyyy-mm-dd）
+            const monthStr = String(month + 1).padStart(2, "0");
+            const datePrefix = `${year}-${monthStr}-`;
+            Object.keys(calendarData.tags).forEach(dateStr => {
+                if (dateStr.startsWith(datePrefix)) {
+                    delete calendarData.tags[dateStr];
+                }
+            });
+
+            // 3. 保存本地并重新渲染
+            saveToLocal();
+            renderAllCalendars();
+            updateStats();
+            alert(`${year}年${month + 1}月 日历已成功删除！`);
+        }
+
         // 渲染所有日历
         function renderAllCalendars() {
             const wrapper = document.getElementById("calendar-wrapper");
@@ -532,7 +581,7 @@
             });
         }
 
-        // 创建单个日历面板
+        // 创建单个日历面板（新增月删除按钮）
         function createCalendarPanel(calendar) {
             const { year, month, dates } = calendar;
             const monthName = new Date(year, month).toLocaleDateString("zh-CN", { year: "numeric", month: "long" });
@@ -543,13 +592,22 @@
             panel.dataset.year = year;
             panel.dataset.month = month;
 
-            // 日历标题
+            // 1. 添加月删除按钮（左上角×）
+            const calendarCloseBtn = document.createElement("div");
+            calendarCloseBtn.className = "calendar-close";
+            calendarCloseBtn.innerText = "×";
+            calendarCloseBtn.addEventListener("click", () => {
+                deleteCalendar(year, month);
+            });
+            panel.appendChild(calendarCloseBtn);
+
+            // 2. 日历标题
             const title = document.createElement("h2");
             title.className = "calendar-title";
             title.innerText = monthName;
             panel.appendChild(title);
 
-            // 日历表格
+            // 3. 日历表格
             const table = document.createElement("table");
             table.className = "calendar-table";
 
@@ -723,7 +781,7 @@
             }
         }
 
-        // 生成周年标记（已标记的纪念日/生日，在后续月份自动生成X周年标记）
+        // 生成周年标记（修复核心：仅在「相同月份」生成周年，解决每月都出现的BUG）
         function generateAnniversaryTags(targetYear, targetMonth) {
             const targetDateStrPrefix = `${targetYear}-${String(targetMonth + 1).padStart(2, "0")}`;
 
@@ -733,11 +791,14 @@
 
                 // 解析原始标记日期
                 const [origYear, origMonth, origDay] = dateStr.split("-").map(Number);
+                // 修复点1：仅当「目标月份 === 原始标记月份」时，才生成周年（核心逻辑）
+                if (targetMonth + 1 !== origMonth) return; // 注意：origMonth是字符串转数字（1-12），targetMonth是索引（0-11）
+
                 const targetDateStr = `${targetDateStrPrefix}-${String(origDay).padStart(2, "0")}`;
 
                 // 计算周年数（仅当目标年月 >= 原始年月时生成）
                 const targetDate = new Date(targetYear, targetMonth, origDay);
-                const origDate = new Date(origYear, origMonth - 1, origDay);
+                const origDate = new Date(origYear, origMonth - 1, origDay); // origMonth转索引（0-11）
                 if (targetDate < origDate) return;
 
                 const anniversaryYear = targetYear - origYear;
@@ -746,6 +807,9 @@
                 // 检查目标日期是否存在（当月有该日期）
                 const targetMonthDays = new Date(targetYear, targetMonth + 1, 0).getDate();
                 if (origDay > targetMonthDays) return;
+
+                // 修复点2：避免重复生成（已存在该标记则跳过）
+                if (calendarData.tags[targetDateStr]) return;
 
                 // 添加周年标记
                 calendarData.tags[targetDateStr] = {
