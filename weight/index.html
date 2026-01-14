@@ -6,132 +6,191 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-:root{
-  --bg-main:#f4f6fb;
-  --bg-grad1:#eef2ff;
-  --bg-grad2:#f7f4ff;
-  --card-bg:rgba(255,255,255,.75);
-  --border:rgba(30,30,60,.08);
+:root {
+  /* ===== 法式莫兰迪配色体系 ===== */
+  --bg-main: #F9F7F5; /* 法式米白主背景 */
+  --bg-grad1: #F5F2EF; /* 渐变浅层次 */
+  --bg-grad2: #FCFBF9; /* 渐变浅层次 */
+  --card-bg: rgba(255, 255, 255, 0.9); /* 通透卡片背景 */
+  --border: rgba(166, 124, 82, 0.15); /* 焦糖色柔边 */
 
-  --text-main:#1c1f2a;
-  --text-sub:#5a5f73;
-  --accent:#6b7cff;
+  --text-main: #2C2825; /* 深棕主文字 */
+  --text-sub: #7A726B; /* 浅棕次文字 */
+  --accent: #A67C52; /* 法式焦糖金棕（核心强调色） */
 
-  --plus:#e6f6ee;
-  --minus:#fde8ec;
-  --weekend:#fff6dc;
+  --plus: #EEF7F1; /* 薄荷绿（正向状态） */
+  --minus: #F9E6E8; /* 柔粉色（负向状态） */
+  --weekend: #FFF6DC; /* 奶油黄（周末标识） */
+
+  /* 法式精致圆角 & 柔和阴影 */
+  --radius-lg: 18px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.05);
+  --shadow-hover: 0 8px 28px rgba(0, 0, 0, 0.08);
+  --transition: all .3s ease-in-out;
 }
 
-*{
-  box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,
-  "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+* {
+  box-sizing: border-box;
+  /* 法式衬线字体，兼顾中文优雅显示 */
+  font-family: "Garamond", "Noto Serif SC", "PingFang SC", serif;
 }
 
-body{
-  margin:0;
-  padding:40px 24px 80px;
-  background:
-    linear-gradient(120deg,var(--bg-grad1),var(--bg-grad2),var(--bg-main));
-  color:var(--text-main);
+body {
+  margin: 0;
+  padding: 60px 24px 100px;
+  background: linear-gradient(120deg, var(--bg-grad1), var(--bg-grad2), var(--bg-main));
+  color: var(--text-main);
+  min-height: 100vh;
 }
 
 /* ===== 页面标题 ===== */
-h1{
-  font-size:40px;
-  letter-spacing:-.02em;
-  margin-bottom:32px;
+h1 {
+  font-size: 3.2rem;
+  letter-spacing: 2px;
+  margin-bottom: 40px;
+  text-align: center;
+  color: var(--accent);
+  font-weight: 700;
 }
 
-h2{
-  font-size:20px;
-  margin-bottom:16px;
+h2 {
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  letter-spacing: 1px;
+  color: var(--text-main);
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
 }
 
 /* ===== 卡片区块 ===== */
-.section{
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:24px;
-  margin-bottom:28px;
-  backdrop-filter:blur(14px);
+.section {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 32px 28px;
+  margin-bottom: 32px;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition);
+}
+
+.section:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-3px);
 }
 
 /* ===== 表格 ===== */
-table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:14px;
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
 }
 
-th,td{
-  padding:8px 6px;
-  text-align:center;
+th,
+td {
+  padding: 12px 8px;
+  text-align: center;
 }
 
-th{
-  color:var(--text-sub);
-  font-weight:500;
-  border-bottom:1px solid var(--border);
+th {
+  color: var(--text-sub);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  letter-spacing: 1px;
 }
 
-td{
-  border-bottom:1px solid rgba(0,0,0,.04);
+td {
+  border-bottom: 1px solid rgba(166, 124, 82, 0.08);
 }
 
-tr:last-child td{
-  border-bottom:none;
+tr:last-child td {
+  border-bottom: none;
 }
 
 /* ===== 状态色 ===== */
-.plus{ background:var(--plus); }
-.minus{ background:var(--minus); }
-.weekend{ background:var(--weekend); }
-
-/* ===== 输入控件 ===== */
-input[type="number"]{
-  width:64px;
-  border:1px solid var(--border);
-  border-radius:6px;
-  padding:4px;
-  background:rgba(255,255,255,.8);
+.plus {
+  background: var(--plus);
+  color: #6A994E;
+  border-radius: var(--radius-sm);
 }
 
-input[type="checkbox"]{
-  transform:scale(1.1);
-  cursor:pointer;
+.minus {
+  background: var(--minus);
+  color: #C14745;
+  border-radius: var(--radius-sm);
+}
+
+.weekend {
+  background: var(--weekend);
+  color: #B5835A;
+  border-radius: var(--radius-sm);
+}
+
+/* ===== 输入控件 ===== */
+input[type="number"] {
+  width: 72px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  background: rgba(255, 255, 255, 0.85);
+  color: var(--text-main);
+  transition: var(--transition);
+  font-size: 1rem;
+}
+
+input[type="number"]:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(166, 124, 82, 0.1);
+}
+
+input[type="checkbox"] {
+  transform: scale(1.2);
+  cursor: pointer;
+  accent-color: var(--accent);
 }
 
 /* ===== 按钮 ===== */
-button{
-  margin:24px 10px 24px 0;
-  padding:10px 18px;
-  border:none;
-  border-radius:10px;
-  background:var(--accent);
-  color:#fff;
-  font-size:14px;
-  cursor:pointer;
+button {
+  margin: 24px 12px 24px 0;
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--radius-md);
+  background: var(--accent);
+  color: #fff;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-soft);
+  letter-spacing: 1px;
 }
 
-button:hover{
-  opacity:.9;
+button:hover {
+  opacity: 0.92;
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
 }
 
 /* ===== 图表 ===== */
-canvas{
-  max-height:220px;
+canvas {
+  max-height: 260px;
+  border-radius: var(--radius-md);
+  padding: 8px;
+  background: rgba(255, 255, 255, 0.6);
 }
 
 /* ===== 表格整体容器 ===== */
-.table-wrap{
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:16px;
-  backdrop-filter:blur(14px);
-  overflow-x:auto;
+.table-wrap {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 24px 18px;
+  backdrop-filter: blur(12px);
+  overflow-x: auto;
+  box-shadow: var(--shadow-soft);
 }
 </style>
 </head>
