@@ -59,17 +59,37 @@ th {
 </head>
 
 <body>
+
 <h1>小德的饭店排名</h1>
-<div id="table">加载中…</div>
-    <div style="margin-bottom:16px;">
+
+<div style="margin-bottom:16px;">
   位置：
-  <input id="filter-location" placeholder="如：南京" />
+  <input id="filter-location" placeholder="如：南京">
   &nbsp;&nbsp;
   类别：
-  <input id="filter-category" placeholder="如：粤菜" />
+  <input id="filter-category" placeholder="如：粤菜">
   &nbsp;&nbsp;
   <button id="reset">总榜</button>
 </div>
+
+<div id="table">加载中…</div>
+
+<script>
+  let originalData = [];
+
+  fetch("饭店评分.xlsx")
+    .then(r => r.arrayBuffer())
+    .then(buf => {
+      const wb = XLSX.read(buf, { type: "array" });
+      const sheet = wb.Sheets[wb.SheetNames[0]];
+      originalData = XLSX.utils.sheet_to_json(sheet);
+      render(originalData);
+    });
+
+  /* 你原来的 JS 函数保持不动 */
+</script>
+
+</body>
 
 
 <script>
