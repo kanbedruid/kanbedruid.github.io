@@ -18,6 +18,12 @@
     --color-bg-primary: #FFFFFF;
     --color-bg-secondary: #F9F7F5; /* 法式米白背景 */
     --color-bg-tertiary: #F5F2EF;
+    /* 新增：星期表头专属配色 */
+    --color-week-header-bg: #E8D9C7; /* 焦糖浅棕 - 与主题呼应 */
+    --color-week-header-text: #8B6E4E; /* 深焦糖色 */
+    /* 日期格子默认配色（与星期表头区分） */
+    --color-date-cell-bg: #F5F2EF;
+    --color-date-cell-text: #7A726B;
     --color-text-primary: #2C2825; /* 法式深棕文字 */
     --color-text-secondary: #7A726B;
     --color-text-tertiary: #B0A8A0;
@@ -32,8 +38,10 @@
     --radius-lg: 12px;
     --transition-default: all 0.3s ease-in-out;
     --calendar-fixed-width: 1200px; /* 桌面端固定宽度 */
-    --date-cell-size: 80px; /* 日期格子固定尺寸：80px×80px */
-    --table-spacing: 12px; /* 格子间距，统一控制 */
+    --date-cell-size-desk: 80px; /* 电脑端格子尺寸：80px×80px */
+    --date-cell-size-mobile: 60px; /* 手机端格子尺寸：60px×60px */
+    --table-spacing-desk: 12px; /* 电脑端格子间距 */
+    --table-spacing-mobile: 4px; /* 手机端格子间距 */
 }
 
 * {
@@ -211,7 +219,7 @@ body {
     color: var(--color-record-border);
 }
 
-/* ========== 日历容器 - 核心修复：手机端横向滚动 ========== */
+/* ========== 日历容器 - 保留手机端横向滚动 ========== */
 .calendar-container {
     display: flex;
     flex-direction: column;
@@ -270,7 +278,7 @@ body {
     letter-spacing: 1px;
 }
 
-/* ========== 核心修复：表格横向滚动容器 ========== */
+/* ========== 核心：表格横向滚动容器 ========== */
 .table-scroll-wrapper {
     width: 100%;
     overflow-x: auto; /* 手机端横向滚动，不溢出 */
@@ -279,42 +287,44 @@ body {
     -webkit-overflow-scrolling: touch; /* 苹果手机顺滑滚动 */
 }
 
-/* 日历表格 - 固定布局，80px格子不变 */
+/* 日历表格 - 固定布局，电脑端80px格子 */
 .calendar-table {
-    width: max-content; /* 表格宽度自适应内容，不被容器限制 */
+    width: max-content; /* 表格宽度自适应内容 */
     border-collapse: separate;
-    border-spacing: var(--table-spacing); /* 统一间距变量 */
+    border-spacing: var(--table-spacing-desk); /* 电脑端默认间距 */
     table-layout: fixed; /* 锁定格子尺寸 */
     margin: 0 auto;
 }
 
+/* ========== 星期表头样式 - 专属配色，与日期格子区分 ========== */
 .calendar-th {
     text-align: center;
     padding: 16px 0;
-    color: var(--color-text-secondary);
+    color: var(--color-week-header-text); /* 深焦糖文字 */
     font-weight: 600;
     border-radius: var(--radius-sm);
-    background-color: var(--color-bg-tertiary);
-    width: var(--date-cell-size); /* 表头宽度=格子尺寸 */
+    background-color: var(--color-week-header-bg); /* 焦糖浅棕背景 */
+    width: var(--date-cell-size-desk); /* 电脑端表头宽度=80px */
     height: 48px;
     font-size: 1.1rem;
     letter-spacing: 1px;
 }
 
+/* ========== 日期单元格 - 电脑端80px正方形，专属配色 ========== */
 .calendar-td {
     text-align: center;
     padding: 0;
-    width: var(--date-cell-size); /* 固定80px宽度 */
-    height: var(--date-cell-size); /* 固定80px高度 → 正方形 */
+    width: var(--date-cell-size-desk); /* 电脑端格子宽度=80px */
+    height: var(--date-cell-size-desk); /* 电脑端格子高度=80px */
 }
 
-/* ========== 日期单元格 - 80px正方形，文字自适应 ========== */
 .date-cell {
     width: 100%;
     height: 100%;
     padding: 6px;
     border-radius: var(--radius-sm);
-    background-color: var(--color-bg-tertiary);
+    background-color: var(--color-date-cell-bg); /* 浅灰背景，与星期区分 */
+    color: var(--color-date-cell-text); /* 灰色文字 */
     cursor: pointer;
     transition: var(--transition-default);
     position: relative;
@@ -338,7 +348,7 @@ body {
     right: 4px;
     font-size: 1.1rem;
     font-weight: 700;
-    color: var(--color-text-secondary);
+    color: var(--color-date-cell-text);
 }
 
 /* 标记内容容器：文字自适应换行+缩小 */
@@ -450,13 +460,20 @@ body {
 @media (max-width: 1200px) {
     :root {
         --calendar-fixed-width: 900px;
-        --table-spacing: 8px; /* 减小格子间距，节省宽度 */
     }
-
+    .calendar-table {
+        border-spacing: var(--table-spacing-mobile);
+    }
+    .calendar-th {
+        width: var(--date-cell-size-desk);
+    }
+    .calendar-td {
+        width: var(--date-cell-size-desk);
+        height: var(--date-cell-size-desk);
+    }
     .stats-title {
         font-size: 2.4rem;
     }
-
     .days-stats, .birthday-tips {
         gap: 40px;
     }
@@ -467,108 +484,68 @@ body {
     :root {
         --calendar-fixed-width: 700px;
     }
-
+    .calendar-th {
+        width: var(--date-cell-size-mobile);
+    }
+    .calendar-td {
+        width: var(--date-cell-size-mobile);
+        height: var(--date-cell-size-mobile);
+    }
     .stats-container {
         padding: 32px 24px;
     }
-
     .stats-title {
         font-size: 2rem;
     }
-
     .btn {
         padding: 12px 24px;
     }
 }
 
-/* 小手机端 (<700px) */
+/* 小手机端 (<700px) - 缩小格子+减小间距 */
 @media (max-width: 700px) {
     :root {
         --calendar-fixed-width: 100%; /* 宽度自适应屏幕 */
-        --table-spacing: 4px; /* 最小间距，最大化利用空间 */
     }
-
     body {
         padding: 24px 8px; /* 减小页面左右边距 */
     }
-
+    .calendar-table {
+        border-spacing: var(--table-spacing-mobile);
+    }
+    .calendar-th {
+        width: var(--date-cell-size-mobile);
+        font-size: 0.9rem;
+    }
+    .calendar-td {
+        width: var(--date-cell-size-mobile);
+        height: var(--date-cell-size-mobile);
+    }
     .stats-container {
         padding: 24px 16px;
     }
-
     .stats-title {
         font-size: 1.8rem;
         letter-spacing: 1px;
     }
-
     .days-stats, .birthday-tips {
         gap: 20px;
     }
-
     .tag-selector {
         padding: 20px 16px;
         gap: 16px;
     }
-
     .tag-item {
         padding: 10px 20px;
         font-size: 1rem;
     }
-
     .calendar-panel {
         padding: 24px 8px; /* 最小内边距 */
     }
-
     .calendar-title {
         font-size: 1.6rem;
         margin-bottom: 20px;
     }
-}
-      /* ======================= */
-/* ===== 手机端强制修复 ===== */
-/* ======================= */
-
-.calendar-panel {
-  overflow-x: auto;
-}
-
-/* 阻止 table 在手机端被压缩 */
-.calendar-table {
-  min-width: max-content;
-  table-layout: fixed;
-}
-
-/* td / cell 强制物理尺寸 */
-.calendar-td,
-.date-cell {
-  width: 60px !important;
-  height: 60px !important;
-  min-width: 60px;
-  min-height: 60px;
-  max-width: 60px;
-  max-height: 60px;
-  flex-shrink: 0;
-}
-
-/* 防止文字把格子撑开 */
-.date-content {
-  max-width: 100%;
-  max-height: 100%;
-  font-size: clamp(9px, 2.8vw, 12px);
-  line-height: 1.15;
-  overflow: hidden;
-}
-
-/* 手机端允许横向滑动，不挤压 */
-@media (max-width: 768px) {
-  .calendar-container {
-    justify-content: flex-start;
-  }
-
-  .calendar-panel {
-    padding-left: 20px;
-    padding-right: 20px;
-  }
 }
 
 </style>
