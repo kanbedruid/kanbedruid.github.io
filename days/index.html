@@ -6,311 +6,167 @@
     <title>我们的每一天</title>
   <style>
 :root {
-  /* ===== 色彩系统：清新高级、低饱和 ===== */
   --c-bg-main: #f6f7fb;
-  --c-bg-panel: rgba(255, 255, 255, 0.85);
+  --c-bg-panel: rgba(255, 255, 255, 0.88);
   --c-bg-soft: #eef0f6;
 
   --c-text-main: #2b2e3a;
-  --c-text-sub: #7a7f99;
-  --c-text-muted: #b3b7cc;
+  --c-text-sub: #6f7490;
+  --c-text-muted: #a6aac0;
 
-  --c-accent: #9a8cff;
-  --c-accent-soft: #ece9ff;
+  --c-accent: #8f82ff;
 
-  --c-anniversary: #f3e7f0;
-  --c-anniversary-border: #c89bc3;
+  /* ===== 高对比特殊色（调整重点） ===== */
+  --c-anniversary: #f7c6df;
+  --c-anniversary-border: #d63384;
 
-  --c-menstruation: #f8e6e6;
-  --c-menstruation-border: #d48b8b;
+  --c-menstruation: #ffd6d6;
+  --c-menstruation-border: #c9184a;
 
-  --c-birthday: #e8f1fa;
-  --c-birthday-border: #8bb4d4;
+  --c-birthday: #d6ebff;
+  --c-birthday-border: #1c7ed6;
 
-  --c-record: #f6f2e6;
-  --c-record-border: #d1c08a;
+  --c-record: #fff3bf;
+  --c-record-border: #f59f00;
 
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 22px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
 
-  --shadow-soft: 0 12px 30px rgba(0, 0, 0, 0.06);
-  --shadow-hover: 0 18px 42px rgba(0, 0, 0, 0.1);
-
-  --blur-panel: blur(14px);
-
-  --transition: all 0.3s cubic-bezier(.4,0,.2,1);
+  --shadow-soft: 0 10px 26px rgba(0,0,0,0.08);
+  --transition: all 0.25s cubic-bezier(.4,0,.2,1);
 }
 
-/* ===== 全局 ===== */
-* {
-  box-sizing: border-box;
-}
-
-body {
-  margin: 0;
-  padding: 40px 20px;
-  min-height: 100vh;
-  background:
-    radial-gradient(1200px 800px at 20% 0%, #e8eaff 0%, transparent 60%),
-    radial-gradient(1000px 700px at 80% 10%, #f6e9f3 0%, transparent 55%),
-    var(--c-bg-main);
-  color: var(--c-text-main);
-  font-family: -apple-system, BlinkMacSystemFont, "Inter", "PingFang SC", "Noto Sans SC", sans-serif;
-}
-
-/* ===== 顶部统计 ===== */
-.stats-container {
-  background: var(--c-bg-panel);
-  backdrop-filter: var(--blur-panel);
-  border-radius: var(--radius-lg);
-  padding: 36px 28px;
-  margin-bottom: 40px;
-  box-shadow: var(--shadow-soft);
-  text-align: center;
-}
-
-.stats-title {
-  font-size: 2.4rem;
-  font-weight: 600;
-  letter-spacing: 2px;
-  margin-bottom: 28px;
-  color: var(--c-accent);
-}
-
-.days-stats {
-  display: flex;
-  justify-content: center;
-  gap: 56px;
-  margin-bottom: 24px;
-  flex-wrap: wrap;
-}
-
-.day-item {
-  font-size: 1.1rem;
-  color: var(--c-text-sub);
-}
-
-.day-number {
-  display: block;
-  margin-top: 6px;
-  font-size: 2rem;
-  font-weight: 600;
-  color: var(--c-accent);
-}
-
-.birthday-tips {
-  display: flex;
-  justify-content: center;
-  gap: 40px;
-  flex-wrap: wrap;
-  font-size: 0.95rem;
-  color: var(--c-text-muted);
-}
-
-/* ===== 功能按钮 ===== */
-.btn-container {
-  display: flex;
-  gap: 18px;
-  justify-content: center;
-  margin-bottom: 36px;
-  flex-wrap: wrap;
-}
-
-.btn {
-  padding: 14px 30px;
-  border-radius: 999px;
-  border: none;
-  font-size: 0.95rem;
-  font-weight: 500;
-  cursor: pointer;
-  color: white;
-  background: linear-gradient(135deg, var(--c-accent), #b9b1ff);
-  box-shadow: var(--shadow-soft);
-  transition: var(--transition);
-}
-
-.btn:hover {
-  transform: translateY(-3px);
-  box-shadow: var(--shadow-hover);
-}
-
-/* ===== 标签选择 ===== */
-.tag-selector {
-  display: flex;
-  gap: 14px;
-  justify-content: center;
-  flex-wrap: wrap;
-  margin-bottom: 36px;
-}
-
-.tag-item {
-  padding: 10px 22px;
-  border-radius: 999px;
-  font-size: 0.9rem;
-  cursor: pointer;
-  transition: var(--transition);
-  background: var(--c-bg-panel);
-  box-shadow: var(--shadow-soft);
-}
-
-.tag-item.active {
-  transform: translateY(-2px);
-  box-shadow: var(--shadow-hover);
-}
-
-.tag-anniversary { color: var(--c-anniversary-border); }
-.tag-menstruation { color: var(--c-menstruation-border); }
-.tag-birthday     { color: var(--c-birthday-border); }
-.tag-record       { color: var(--c-record-border); }
-
-/* ===== 日历 ===== */
+/* ===== 日历整体容器（不贴边，固定宽度） ===== */
 .calendar-container {
   display: flex;
   flex-direction: column;
   gap: 32px;
+  align-items: center;
 }
 
 .calendar-panel {
-  max-width: 860px;
-  margin: 0 auto;
+  width: 520px;              /* 固定视觉宽度 */
+  max-width: 90vw;
+  background: var(--c-bg-panel);
+  backdrop-filter: blur(14px);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  box-shadow: var(--shadow-soft);
+  position: relative;
 }
 
-
-.calendar-title {
-  text-align: center;
-  font-size: 1.5rem;
-  font-weight: 500;
-  margin-bottom: 22px;
-  color: var(--c-text-main);
+/* ===== 日历表格 ===== */
+.calendar-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 10px;       /* 保证不挤 */
+  table-layout: fixed;
 }
-
-.calendar-close {
-  position: absolute;
-  top: 18px;
-  left: 18px;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  color: var(--c-text-muted);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.calendar-close:hover {
-  background: rgba(0,0,0,0.05);
-  color: #e57373;
-}
-
-/* ===== 表格 ===== */
-
 
 .calendar-th {
   text-align: center;
-  font-size: 0.85rem;
+  font-size: 12px;
   color: var(--c-text-muted);
 }
 
+/* ===== 单元格严格 60x60 ===== */
 .calendar-td {
-  height: auto; /* 不要固定 */
+  width: 60px;
+  height: 60px;
 }
-
-.calendar-table {
-  width: 770px; /* 7 × 110 */
-  margin: 0 auto;
-}
-
 
 /* ===== 日期格 ===== */
 .date-cell {
-  width: 100%;
-  aspect-ratio: 1 / 1;
+  width: 60px;
+  height: 60px;
+  border-radius: var(--radius-md);
+  background: var(--c-bg-soft);
+  position: relative;
+  cursor: pointer;
+  transition: var(--transition);
+  padding: 6px;
+  overflow: hidden;
 }
 
 .date-cell:hover {
-  transform: translateY(-3px);
+  transform: translateY(-2px);
   box-shadow: var(--shadow-soft);
 }
 
+/* ===== 日期数字 ===== */
 .date-number {
   position: absolute;
-  top: 10px;
-  right: 12px;
-  font-size: 0.85rem;
+  top: 6px;
+  right: 8px;
+  font-size: 11px;
   color: var(--c-text-muted);
 }
 
+/* ===== 内容区域：自动换行 + 自适应字体 ===== */
 .date-content {
-  padding: 6px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   text-align: center;
-  word-break: break-word;
+  gap: 2px;
+  padding: 2px;
 }
 
 .date-tag {
-  font-size: clamp(12px, 1.2vw, 15px);
-  line-height: 1.2;
+  font-weight: 600;
+  font-size: clamp(10px, 2.5vw, 13px);
+  line-height: 1.15;
   word-break: break-word;
 }
 
 .date-subtitle {
-  font-size: clamp(10px, 1vw, 12px);
-  line-height: 1.2;
+  font-size: clamp(9px, 2vw, 11px);
+  color: var(--c-text-sub);
+  line-height: 1.1;
   word-break: break-word;
 }
 
-
-/* ===== 标记状态 ===== */
+/* ===== 高对比状态色 ===== */
 .date-cell.anniversary {
-  background: #f6d8ef;
-  border: 1.5px solid #c86ab1;
+  background: var(--c-anniversary);
+  border: 2px solid var(--c-anniversary-border);
 }
 
 .date-cell.menstruation {
-  background: #ffd9d9;
-  border: 1.5px solid #e57373;
+  background: var(--c-menstruation);
+  border: 2px solid var(--c-menstruation-border);
 }
 
 .date-cell.birthday {
-  background: #dff0ff;
-  border: 1.5px solid #5aa6e8;
+  background: var(--c-birthday);
+  border: 2px solid var(--c-birthday-border);
 }
 
 .date-cell.record {
-  background: #fff1cc;
-  border: 1.5px solid #e0b84c;
+  background: var(--c-record);
+  border: 2px solid var(--c-record-border);
 }
 
-
-/* ===== 删除 & 输入 ===== */
+/* ===== 删除按钮 ===== */
 .date-close {
   position: absolute;
-  top: 8px;
-  left: 8px;
-  width: 18px;
-  height: 18px;
+  top: 4px;
+  left: 4px;
+  width: 16px;
+  height: 16px;
   border-radius: 50%;
-  font-size: 0.8rem;
+  font-size: 11px;
   display: none;
   align-items: center;
   justify-content: center;
-  color: var(--c-text-muted);
+  color: rgba(0,0,0,0.5);
+  background: rgba(255,255,255,0.6);
 }
 
 .date-cell:hover .date-close {
   display: flex;
-}
-
-.subtitle-input {
-  width: 90%;
-  padding: 8px 10px;
-  border-radius: 999px;
-  border: 1px solid var(--c-accent);
-  font-size: 0.8rem;
-  text-align: center;
-  outline: none;
 }
 
 </style>
