@@ -19,6 +19,16 @@ h1 {
   font-weight: 500;
   margin-bottom: 16px;
 }
+  <div style="margin-bottom:16px;">
+  位置：
+  <input id="filter-location" placeholder="如：南京" />
+  &nbsp;&nbsp;
+  类别：
+  <input id="filter-category" placeholder="如：粤菜" />
+  &nbsp;&nbsp;
+  <button id="reset">总榜</button>
+</div>
+
 
 table {
   width: 100%;
@@ -38,11 +48,12 @@ th {
   font-weight: 500;
 }
 
-/* 高饱和评分色 */
-.score-blue    { background: #bdd7ee; }
-.score-purple { background: #d9cbef; }
-.score-orange { background: #f8cbad; }
-.score-red    { background: #f4b6b6; }
+/* 高饱和评分色（增强版） */
+.score-blue    { background: #9dc3e6; }  /* 深一点的蓝 */
+.score-purple { background: #b4a7d6; }  /* 明显紫 */
+.score-orange { background: #f4b183; }  /* 橙 */
+.score-red    { background: #e06666; }  /* 红 */
+
 </style>
 </head>
 
@@ -51,13 +62,15 @@ th {
 <div id="table">加载中…</div>
 
 <script>
+  let originalData = [];
 fetch("饭店评分.xlsx")
   .then(r => r.arrayBuffer())
   .then(buf => {
     const wb = XLSX.read(buf, { type: "array" });
     const sheet = wb.Sheets[wb.SheetNames[0]];
-    const rows = XLSX.utils.sheet_to_json(sheet);
-    render(rows);
+   originalData = XLSX.utils.sheet_to_json(sheet);
+render(originalData);
+
   })
   .catch(() => {
     document.getElementById("table").innerText = "未找到 data.xlsx";
@@ -119,6 +132,32 @@ function render(data) {
   const container = document.getElementById("table");
   container.innerHTML = "";
   container.appendChild(table);
+}
+  document.getElementById("filter-location").addEventListener("input", applyFilter);
+document.getElementById("filter-category").addEventListener("input", applyFilter);
+document.getElementById("reset").addEventListener("click", () => {
+  document.getElementById("filter-location").value = "";
+  document.getElementById("filter-category").value = "";
+  render(originalData);
+});
+
+function applyFilter() {
+  const loc = document.getElementById("filter-location").value.trim();
+  const cat = document.getElementById("filter-category").value.trim();
+
+  const filtered = originalData.filter(row => {
+    const locationMatch = loc
+      ? String(row["位置"] || "").includes(loc)
+      : true;
+
+    const categoryMatch = cat
+      ? String(row["类别"] || "").includes(cat)
+      : true;
+
+    return locationMatch && categoryMatch;
+  });
+
+  render(filtered);
 }
 </script>
 </body>
