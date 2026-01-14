@@ -4,134 +4,248 @@
 <meta charset="UTF-8">
 <title>健康记录</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- 法式衬线字体（兼容中文，打造优雅氛围） -->
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@500;700&family=Garamond:wght@400;700&display=swap" rel="stylesheet">
 
 <style>
 :root{
-  --bg-main:#f4f6fb;
-  --bg-grad1:#eef2ff;
-  --bg-grad2:#f7f4ff;
-  --card-bg:rgba(255,255,255,.75);
-  --border:rgba(30,30,60,.08);
+  /* ===== 法式莫兰迪配色体系 ===== */
+  --bg-main: #F9F7F5; /* 法式米白背景纸 */
+  --bg-grad1: #FCFBF9; /* 浅柔渐变1 */
+  --bg-grad2: #F5F2EF; /* 浅柔渐变2 */
+  --card-bg: #FFFFFF; /* 纯白卡片背景 */
+  --border: #E8E5E1; /* 柔和边框色 */
 
-  --text-main:#1c1f2a;
-  --text-sub:#5a5f73;
-  --accent:#6b7cff;
+  --text-main: #2C2825; /* 法式深棕主文字 */
+  --text-sub: #7A726B; /* 浅棕次级文字 */
+  --accent: #9AB3C9; /* 法式雾蓝强调色（核心） */
+  --accent-gold: #A67C52; /* 法式焦糖金棕（标题/重点） */
 
-  --plus:#e6f6ee;
-  --minus:#fde8ec;
-  --weekend:#fff6dc;
+  /* 状态色（法式柔和版） */
+  --plus: #EEF7F1; /* 薄荷绿背景（正向状态） */
+  --plus-border: #9FD3B6; /* 薄荷绿边框 */
+  --minus: #F9E6E8; /* 柔粉背景（负向状态） */
+  --minus-border: #C98A8A; /* 柔粉边框 */
+  --weekend: #FFF6DC; /* 暖黄背景（周末） */
+  --weekend-border: #E6C890; /* 暖黄边框 */
+
+  /* 法式精致圆角与阴影 */
+  --radius-lg: 16px;
+  --radius-md: 12px;
+  --radius-sm: 8px;
+  --shadow-soft: 0 4px 16px rgba(0, 0, 0, 0.06);
+  --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.09);
+  --transition: all .3s ease-in-out;
 }
 
 *{
   box-sizing:border-box;
-  font-family:-apple-system,BlinkMacSystemFont,
-  "Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  /* 法式衬线字体统一，兼顾可读性与优雅感 */
+  font-family: "Garamond", "Noto Serif SC", serif;
 }
 
 body{
   margin:0;
-  padding:40px 24px 80px;
-  background:
-    linear-gradient(120deg,var(--bg-grad1),var(--bg-grad2),var(--bg-main));
-  color:var(--text-main);
+  padding: 48px 32px 80px;
+  /* 替换原渐变，更柔和的法式浅色调背景 */
+  background: linear-gradient(120deg, var(--bg-grad1), var(--bg-grad2), var(--bg-main));
+  color: var(--text-main);
+  min-height: 100vh;
 }
 
-/* ===== 页面标题 ===== */
+/* ===== 页面标题（法式风格优化） ===== */
 h1{
-  font-size:40px;
-  letter-spacing:-.02em;
-  margin-bottom:32px;
+  font-size: 3.2rem;
+  letter-spacing: 4px;
+  margin-bottom: 40px;
+  text-align: center;
+  color: var(--accent-gold);
+  font-family: "Noto Serif SC", serif;
+  font-weight: 700;
 }
 
 h2{
-  font-size:20px;
-  margin-bottom:16px;
+  font-size: 1.8rem;
+  margin-bottom: 20px;
+  color: var(--text-main);
+  font-family: "Noto Serif SC", serif;
+  letter-spacing: 1px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--bg-grad2);
 }
 
-/* ===== 卡片区块 ===== */
+/* ===== 卡片区块（法式精致卡片） ===== */
 .section{
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:24px;
-  margin-bottom:28px;
-  backdrop-filter:blur(14px);
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 28px;
+  margin-bottom: 32px;
+  backdrop-filter: blur(14px);
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition);
 }
 
-/* ===== 表格 ===== */
+.section:hover{
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+
+/* ===== 表格（法式简约表格） ===== */
 table{
-  width:100%;
-  border-collapse:collapse;
-  font-size:14px;
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
 }
 
 th,td{
-  padding:8px 6px;
-  text-align:center;
+  padding: 12px 10px;
+  text-align: center;
 }
 
 th{
-  color:var(--text-sub);
-  font-weight:500;
-  border-bottom:1px solid var(--border);
+  color: var(--text-sub);
+  font-weight: 500;
+  border-bottom: 1px solid var(--border);
+  font-size: 1.1rem;
 }
 
 td{
-  border-bottom:1px solid rgba(0,0,0,.04);
+  border-bottom: 1px solid rgba(0,0,0,.04);
+  vertical-align: middle;
 }
 
 tr:last-child td{
-  border-bottom:none;
+  border-bottom: none;
 }
 
-/* ===== 状态色 ===== */
-.plus{ background:var(--plus); }
-.minus{ background:var(--minus); }
-.weekend{ background:var(--weekend); }
+/* ===== 状态色（法式柔和状态区分） ===== */
+.plus{ 
+  background: var(--plus); 
+  border-radius: var(--radius-sm);
+}
+.minus{ 
+  background: var(--minus); 
+  border-radius: var(--radius-sm);
+}
+.weekend{ 
+  background: var(--weekend); 
+  border-radius: var(--radius-sm);
+}
 
-/* ===== 输入控件 ===== */
+/* ===== 输入控件（法式精致输入框） ===== */
 input[type="number"]{
-  width:64px;
-  border:1px solid var(--border);
-  border-radius:6px;
-  padding:4px;
-  background:rgba(255,255,255,.8);
+  width: 72px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 6px;
+  background: var(--card-bg);
+  color: var(--text-main);
+  font-size: 1rem;
+  transition: var(--transition);
+  text-align: center;
+}
+
+input[type="number"]:focus{
+  outline: none;
+  border-color: var(--accent-gold);
+  box-shadow: 0 0 0 3px rgba(166, 124, 82, 0.15);
 }
 
 input[type="checkbox"]{
-  transform:scale(1.1);
-  cursor:pointer;
+  transform: scale(1.2);
+  cursor: pointer;
+  accent-color: var(--accent);
 }
 
-/* ===== 按钮 ===== */
+/* ===== 按钮（法式优雅按钮） ===== */
 button{
-  margin:24px 10px 24px 0;
-  padding:10px 18px;
-  border:none;
-  border-radius:10px;
-  background:var(--accent);
-  color:#fff;
-  font-size:14px;
-  cursor:pointer;
+  margin: 24px 12px 24px 0;
+  padding: 14px 24px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--card-bg);
+  color: var(--text-main);
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: var(--transition);
+  box-shadow: var(--shadow-soft);
+  letter-spacing: 1px;
 }
 
 button:hover{
-  opacity:.9;
+  background: var(--bg-grad2);
+  border-color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-hover);
+  color: var(--accent-gold);
 }
 
-/* ===== 图表 ===== */
+/* 突出主按钮（新增一天） */
+button:first-of-type{
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+button:first-of-type:hover{
+  background: #8aa8c0;
+  border-color: #8aa8c0;
+  color: white;
+}
+
+/* ===== 图表（法式简约图表容器） ===== */
 canvas{
-  max-height:220px;
+  max-height: 260px;
+  padding: 10px 0;
 }
 
-/* ===== 表格整体容器 ===== */
+/* ===== 表格整体容器（法式滚动表格） ===== */
 .table-wrap{
-  background:var(--card-bg);
-  border:1px solid var(--border);
-  border-radius:18px;
-  padding:16px;
-  backdrop-filter:blur(14px);
-  overflow-x:auto;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 20px;
+  backdrop-filter: blur(14px);
+  overflow-x: auto;
+  box-shadow: var(--shadow-soft);
+  transition: var(--transition);
+}
+
+.table-wrap:hover{
+  box-shadow: var(--shadow-hover);
+}
+
+/* ===== 响应式优化（适配移动端） ===== */
+@media (max-width: 768px) {
+  h1{
+    font-size: 2.4rem;
+    margin-bottom: 32px;
+  }
+
+  h2{
+    font-size: 1.5rem;
+  }
+
+  .section{
+    padding: 20px 16px;
+    margin-bottom: 24px;
+  }
+
+  button{
+    padding: 12px 20px;
+    font-size: 1rem;
+    margin: 16px 8px 16px 0;
+  }
+
+  table{
+    font-size: 0.95rem;
+  }
+
+  th, td{
+    padding: 10px 6px;
+  }
 }
 </style>
 </head>
@@ -324,7 +438,10 @@ function renderChart(){
     label:name,
     data:labels.map(d=>map[d]??null),
     spanGaps:true,
-    borderWidth:2
+    borderWidth:2,
+    borderColor: name === "千代" ? var(--accent) : var(--accent-gold),
+    backgroundColor: name === "千代" ? "rgba(154, 179, 201, 0.1)" : "rgba(166, 124, 82, 0.1)",
+    fill: true
   }));
 
   if(chart) chart.destroy();
@@ -333,8 +450,20 @@ function renderChart(){
     data:{labels,datasets},
     options:{
       responsive:true,
-      plugins:{legend:{position:"top"}},
-      scales:{y:{title:{display:true,text:"体重"}}}
+      plugins:{
+        legend:{position:"top", font: { family: "Garamond", size: 14 }},
+        tooltip:{ backgroundColor: var(--card-bg), color: var(--text-main), borderColor: var(--border), borderWidth: 1 }
+      },
+      scales:{
+        y:{
+          title:{display:true,text:"体重", font: { family: "Garamond", size: 14 }},
+          grid:{ color: var(--border) }
+        },
+        x:{
+          grid:{ color: "transparent" },
+          ticks:{ font: { family: "Garamond" } }
+        }
+      }
     }
   });
 }
@@ -370,7 +499,7 @@ render();
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  /* ===== 保存到云端（修复重复上传+语法错误） ===== */
+  /* ===== 保存到云端（保留原有修复逻辑，无自动读取） ===== */
   async function saveToCloudImpl() {
     try {
       const raw = localStorage.getItem("diet_records_v3");
@@ -386,7 +515,7 @@ render();
       }
 
       // 步骤1：获取云端旧数据并批量删除（避免重复）
-      const recordsRef = collection(db, "records"); // 正确获取集合引用（路径：records）
+      const recordsRef = collection(db, "records");
       const oldQuery = query(recordsRef);
       const oldSnap = await getDocs(oldQuery);
       
@@ -398,11 +527,9 @@ render();
         await batch.commit();
       }
 
-      // 步骤2：批量上传本地最新数据（修复核心：正确生成文档引用）
+      // 步骤2：批量上传本地最新数据
       const newBatch = writeBatch(db);
       localData.forEach(r => {
-        // 正确语法：doc(集合引用) → 生成该集合下的唯一空白文档引用
-        // 错误原由：之前用了 collection(recordsRef).doc()，recordsRef 已是集合，再次调用 collection 导致路径为空
         const docRef = doc(recordsRef); 
         newBatch.set(docRef, {
           date: r.date,
@@ -420,18 +547,17 @@ render();
 
       await newBatch.commit();
       alert(`成功保存 ${localData.length} 条记录到云端（已清除旧数据）`);
-      render(); // 刷新页面数据
+      render();
     } catch (e) {
       alert("保存失败，错误详情：" + (e.message || JSON.stringify(e)));
       console.error("云端保存错误：", e);
     }
   }
 
-  /* ===== 从云端恢复（修复排序+去重问题） ===== */
+  /* ===== 从云端恢复（保留原有修复逻辑，仅手动触发） ===== */
   async function loadFromCloudImpl() {
     try {
-      const recordsRef = collection(db, "records"); // 正确获取集合引用
-      // 修复：按实际记录日期 date 排序
+      const recordsRef = collection(db, "records");
       const q = query(recordsRef, orderBy("date", "asc"));
       const snap = await getDocs(q);
 
@@ -478,7 +604,7 @@ render();
     }
   }
 
-  // 关键：将模块内的函数挂载到全局 window 对象，解决 ReferenceError
+  // 挂载全局函数，仅保留手动触发功能（无自动读取初始化）
   window.saveToCloud = saveToCloudImpl;
   window.loadFromCloud = loadFromCloudImpl;
 </script>
