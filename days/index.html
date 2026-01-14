@@ -23,6 +23,8 @@
             --color-text-tertiary: #ADB5BD;
             --color-accent: #9C27B0;
             --color-accent-light: #EDE7F6;
+            --color-close: #757575;
+            --color-close-hover: #F44336;
             --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.04);
             --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
             --radius-sm: 8px;
@@ -30,7 +32,7 @@
             --radius-lg: 16px;
             --transition-default: all 0.25s ease-in-out;
         }
- 
+
         * {
             margin: 0;
             padding: 0;
@@ -87,7 +89,7 @@
             color: var(--color-accent);
         }
 
-        .anniversary-tips {
+        .birthday-tips {
             display: flex;
             gap: 40px;
             justify-content: center;
@@ -233,6 +235,7 @@
             height: 100px;
         }
 
+        /* 日期单元格核心样式（优化文字居中） */
         .date-cell {
             width: 100%;
             height: 100%;
@@ -244,7 +247,8 @@
             position: relative;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
+            justify-content: center;
+            align-items: center;
         }
 
         .date-cell:hover {
@@ -252,26 +256,64 @@
             transform: scale(1.02);
         }
 
+        /* 日期数字：右上角固定 */
         .date-number {
+            position: absolute;
+            top: 8px;
+            right: 8px;
             font-size: 1.2rem;
             font-weight: 500;
-            text-align: right;
         }
 
+        /* 标记内容容器：居中显示 */
+        .date-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 80%;
+            height: 60%;
+            text-align: center;
+        }
+
+        /* 标记标题+副标题：居中对齐 */
         .date-tag {
             font-size: 0.9rem;
             font-weight: 500;
             margin-bottom: 4px;
-            text-align: left;
         }
 
         .date-subtitle {
             font-size: 0.8rem;
             color: var(--color-text-secondary);
-            text-align: left;
             word-break: break-all;
             max-height: 40px;
             overflow: hidden;
+        }
+
+        /* 取消按钮：右上角悬浮 */
+        .date-close {
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 20px;
+            height: 20px;
+            color: var(--color-close);
+            cursor: pointer;
+            font-size: 1rem;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+        }
+
+        .date-cell:hover .date-close {
+            display: flex;
+        }
+
+        .date-close:hover {
+            color: var(--color-close-hover);
+            background-color: rgba(0,0,0,0.05);
         }
 
         /* 标记后的日期单元格样式 */
@@ -308,6 +350,7 @@
             outline: none;
             font-size: 0.8rem;
             z-index: 10;
+            text-align: center;
         }
 
         /* 响应式适配 */
@@ -316,7 +359,7 @@
                 height: 80px;
             }
 
-            .days-stats, .anniversary-tips {
+            .days-stats, .birthday-tips {
                 gap: 20px;
             }
 
@@ -334,9 +377,10 @@
             <div class="day-item">已相遇 <span class="day-number" id="meet-days">0</span> 天</div>
             <div class="day-item">已相恋 <span class="day-number" id="love-days">0</span> 天</div>
         </div>
-        <div class="anniversary-tips">
-            <div id="next-anniversary">距离 纪念日：暂无 还有 0 天</div>
-            <div id="next-birthday">距离 生日：暂无 还有 0 天</div>
+        <!-- 只保留生日倒计时 -->
+        <div class="birthday-tips">
+            <div id="next-chiyo-birthday">距离 千代的生日 还有 0 天</div>
+            <div id="next-xiaode-birthday">距离 小德的生日 还有 0 天</div>
         </div>
     </div>
 
@@ -388,6 +432,11 @@
         // 核心常量配置
         const MEET_DATE = new Date(2025, 5, 7); // 相遇日期：2025年6月7日（月份从0开始）
         const LOVE_DATE = new Date(2025, 8, 21); // 相恋日期：2025年9月21日
+        // 二人固定生日
+        const BIRTHDAYS = {
+            chiyo: { month: 9, day: 21, name: "千代" }, // 10月21日（月份从0开始）
+            xiaode: { month: 8, day: 26, name: "小德" }  // 9月26日
+        };
         let activeTag = null; // 当前选中的标记类型
         let calendarData = {
             calendars: [], // 存储日历列表（{ year: 2025, month: 5, dates: [] }）
@@ -548,13 +597,33 @@
                 dateCell.className = `date-cell ${tagInfo.type || ""}`;
                 dateCell.dataset.date = dateStr;
 
-                // 日期数字
+                // 日期数字（右上角）
                 const dateNumber = document.createElement("div");
                 dateNumber.className = "date-number";
                 dateNumber.innerText = date;
                 dateCell.appendChild(dateNumber);
 
-                // 标记标题
+                // 取消按钮（仅标记单元格显示）
+                if (tagInfo.type) {
+                    const closeBtn = document.createElement("div");
+                    closeBtn.className = "date-close";
+                    closeBtn.innerText = "×";
+                    closeBtn.addEventListener("click", (e) => {
+                        e.stopPropagation(); // 阻止触发单元格点击事件
+                        delete calendarData.tags[dateStr];
+                        saveToLocal();
+                        renderAllCalendars();
+                        updateStats();
+                    });
+                    dateCell.appendChild(closeBtn);
+                }
+
+                // 标记内容容器（居中）
+                const contentContainer = document.createElement("div");
+                contentContainer.className = "date-content";
+                dateCell.appendChild(contentContainer);
+
+                // 标记标题 + 副标题（居中显示）
                 if (tagInfo.type) {
                     const tagMap = {
                         anniversary: "纪念日",
@@ -565,13 +634,13 @@
                     const tagTitle = document.createElement("div");
                     tagTitle.className = "date-tag";
                     tagTitle.innerText = tagInfo.anniversaryYear ? `${tagInfo.anniversaryYear}周年${tagMap[tagInfo.type]}` : tagMap[tagInfo.type];
-                    dateCell.appendChild(tagTitle);
+                    contentContainer.appendChild(tagTitle);
 
                     // 副标题
                     const subtitle = document.createElement("div");
                     subtitle.className = "date-subtitle";
                     subtitle.innerText = tagInfo.subtitle || "";
-                    dateCell.appendChild(subtitle);
+                    contentContainer.appendChild(subtitle);
                 }
 
                 // 绑定单元格点击事件（标记/编辑副标题）
@@ -626,6 +695,7 @@
             // 无活跃标记：编辑副标题（已有标记的单元格）
             if (tagInfo.type) {
                 const cell = this;
+                const contentContainer = cell.querySelector(".date-content");
                 const currentSubtitle = tagInfo.subtitle || "";
 
                 // 创建输入框
@@ -633,6 +703,11 @@
                 input.className = "subtitle-input";
                 input.value = currentSubtitle;
                 input.setAttribute("maxlength", "50");
+
+                // 清空内容容器，添加输入框
+                contentContainer.innerHTML = "";
+                contentContainer.appendChild(input);
+                input.focus();
 
                 // 输入框失去焦点时保存
                 input.addEventListener("blur", () => {
@@ -645,11 +720,6 @@
                 input.addEventListener("keydown", (e) => {
                     if (e.key === "Enter") input.blur();
                 });
-
-                // 添加输入框并聚焦
-                cell.innerHTML = "";
-                cell.appendChild(input);
-                input.focus();
             }
         }
 
@@ -700,91 +770,23 @@
             document.getElementById("meet-days").innerText = Math.max(0, meetDays);
             document.getElementById("love-days").innerText = Math.max(0, loveDays);
 
-            // 查找最近的纪念日和生日
-            updateNextAnniversary(now);
-            updateNextBirthday(now);
+            // 更新二人的生日倒计时
+            updateBirthdayTips(now);
         }
 
-        // 更新最近的纪念日提示
-        function updateNextAnniversary(now) {
-            let nextAnniversary = null;
-            let minDays = Infinity;
+        // 更新二人的生日倒计时
+        function updateBirthdayTips(now) {
+            // 千代的生日
+            const chiyoBirthday = new Date(now.getFullYear(), BIRTHDAYS.chiyo.month, BIRTHDAYS.chiyo.day);
+            if (chiyoBirthday < now) chiyoBirthday.setFullYear(now.getFullYear() + 1);
+            const chiyoDays = Math.floor((chiyoBirthday - now) / (1000 * 60 * 60 * 24)) + 1;
+            document.getElementById("next-chiyo-birthday").innerText = `距离 ${BIRTHDAYS.chiyo.name}的生日 还有 ${chiyoDays} 天`;
 
-            // 遍历所有纪念日标记
-            Object.entries(calendarData.tags).forEach(([dateStr, tagInfo]) => {
-                if (tagInfo.type !== "anniversary") return;
-
-                // 解析日期
-                const [year, month, day] = dateStr.split("-").map(Number);
-                let anniversaryDate = new Date(now.getFullYear(), month - 1, day);
-
-                // 若今年已过，取明年
-                if (anniversaryDate < now) {
-                    anniversaryDate = new Date(now.getFullYear() + 1, month - 1, day);
-                }
-
-                // 计算距离天数
-                const days = Math.floor((anniversaryDate - now) / (1000 * 60 * 60 * 24)) + 1;
-
-                // 更新最近的纪念日
-                if (days < minDays) {
-                    minDays = days;
-                    nextAnniversary = {
-                        date: anniversaryDate,
-                        subtitle: tagInfo.subtitle || "首次相遇",
-                        days: days
-                    };
-                }
-            });
-
-            // 更新页面显示
-            const tipEl = document.getElementById("next-anniversary");
-            if (nextAnniversary) {
-                tipEl.innerText = `距离 纪念日：${nextAnniversary.subtitle} 还有 ${nextAnniversary.days} 天`;
-            } else {
-                tipEl.innerText = "距离 纪念日：暂无 还有 0 天";
-            }
-        }
-
-        // 更新最近的生日提示
-        function updateNextBirthday(now) {
-            let nextBirthday = null;
-            let minDays = Infinity;
-
-            // 遍历所有生日标记
-            Object.entries(calendarData.tags).forEach(([dateStr, tagInfo]) => {
-                if (tagInfo.type !== "birthday") return;
-
-                // 解析日期
-                const [year, month, day] = dateStr.split("-").map(Number);
-                let birthdayDate = new Date(now.getFullYear(), month - 1, day);
-
-                // 若今年已过，取明年
-                if (birthdayDate < now) {
-                    birthdayDate = new Date(now.getFullYear() + 1, month - 1, day);
-                }
-
-                // 计算距离天数
-                const days = Math.floor((birthdayDate - now) / (1000 * 60 * 60 * 24)) + 1;
-
-                // 更新最近的生日
-                if (days < minDays) {
-                    minDays = days;
-                    nextBirthday = {
-                        date: birthdayDate,
-                        subtitle: tagInfo.subtitle || "未知",
-                        days: days
-                    };
-                }
-            });
-
-            // 更新页面显示
-            const tipEl = document.getElementById("next-birthday");
-            if (nextBirthday) {
-                tipEl.innerText = `距离 ${nextBirthday.subtitle} 的生日 还有 ${nextBirthday.days} 天`;
-            } else {
-                tipEl.innerText = "距离 生日：暂无 还有 0 天";
-            }
+            // 小德的生日
+            const xiaodeBirthday = new Date(now.getFullYear(), BIRTHDAYS.xiaode.month, BIRTHDAYS.xiaode.day);
+            if (xiaodeBirthday < now) xiaodeBirthday.setFullYear(now.getFullYear() + 1);
+            const xiaodeDays = Math.floor((xiaodeBirthday - now) / (1000 * 60 * 60 * 24)) + 1;
+            document.getElementById("next-xiaode-birthday").innerText = `距离 ${BIRTHDAYS.xiaode.name}的生日 还有 ${xiaodeDays} 天`;
         }
 
         // ========== 数据存储 ==========
