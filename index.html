@@ -15,7 +15,9 @@
       --accent: #b7a8ff;
       --border-light: rgba(255,255,255,0.18);
       --bg-btn: rgba(255,255,255,0.03);
-      --btn-backdrop-blur: 8px;
+      --btn-backdrop-blur: 12px; /* 增加模糊度提升高级感 */
+      --btn-shadow: 0 4px 20px rgba(0, 0, 0, 0.08); /* 新增按钮阴影 */
+      --btn-hover-shadow: 0 8px 30px rgba(0, 0, 0, 0.12); /* 新增hover阴影 */
     }
 
     * {
@@ -66,7 +68,8 @@
       font-size: 46px;
       letter-spacing: 4px;
       margin-bottom: 12px;
-      transition: color 1s ease-in-out;
+      transition: color 1s ease-in-out, text-shadow 1s ease-in-out; /* 新增文字阴影过渡 */
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); /* 新增文字阴影提升质感 */
     }
 
     .subtitle {
@@ -74,7 +77,8 @@
       letter-spacing: 6px;
       color: var(--muted);
       margin-bottom: 30px;
-      transition: color 1s ease-in-out;
+      transition: color 1s ease-in-out, text-shadow 1s ease-in-out;
+      text-shadow: 0 1px 5px rgba(0, 0, 0, 0.08); /* 新增文字阴影 */
     }
 
     /* 日历 + 主按钮 并排容器 */
@@ -92,12 +96,13 @@
       width: 220px;
       border: 1px solid var(--border-light);
       backdrop-filter: blur(var(--btn-backdrop-blur));
-      border-radius: 8px;
+      border-radius: 12px; /* 增大圆角更柔和 */
       overflow: hidden;
       flex-shrink: 0;
       position: relative;
       z-index: 1;
-      transition: background 1s ease-in-out, border-color 1s ease-in-out, color 1s ease-in-out;
+      transition: background 1s ease-in-out, border-color 1s ease-in-out, color 1s ease-in-out, box-shadow 0.3s ease;
+      box-shadow: var(--btn-shadow); /* 新增日历阴影 */
     }
 
     .calendar-header {
@@ -132,6 +137,7 @@
     .calendar-days span.current {
       color: var(--accent);
       font-weight: 500;
+      text-shadow: 0 0 8px rgba(183, 168, 255, 0.5); /* 新增今日日期发光效果 */
     }
 
     /* 核心按钮布局 */
@@ -143,11 +149,12 @@
       backdrop-filter: blur(var(--btn-backdrop-blur));
       cursor: pointer;
       overflow: hidden;
-      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out;
-      border-radius: 12px;
+      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out, box-shadow 0.3s ease;
+      border-radius: 12px; /* 增大圆角 */
       flex: 1;
       min-width: 300px;
       z-index: 1;
+      box-shadow: var(--btn-shadow); /* 新增按钮阴影 */
     }
 
     .secondary-buttons {
@@ -165,10 +172,11 @@
       backdrop-filter: blur(var(--btn-backdrop-blur));
       cursor: pointer;
       overflow: hidden;
-      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out;
-      border-radius: 12px;
+      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out, box-shadow 0.3s ease;
+      border-radius: 12px; /* 增大圆角 */
       width: 100%;
       z-index: 1;
+      box-shadow: var(--btn-shadow); /* 新增按钮阴影 */
     }
 
     .side-by-side {
@@ -185,13 +193,14 @@
       backdrop-filter: blur(var(--btn-backdrop-blur));
       cursor: pointer;
       overflow: hidden;
-      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out;
-      border-radius: 12px;
+      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out, box-shadow 0.3s ease;
+      border-radius: 12px; /* 增大圆角 */
       flex: 1;
       display: flex;
       flex-direction: column;
       justify-content: center;
       z-index: 1;
+      box-shadow: var(--btn-shadow); /* 新增按钮阴影 */
     }
 
     .food-area {
@@ -211,13 +220,14 @@
       backdrop-filter: blur(var(--btn-backdrop-blur));
       cursor: pointer;
       overflow: hidden;
-      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out;
-      border-radius: 12px;
+      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out, box-shadow 0.3s ease;
+      border-radius: 12px; /* 增大圆角 */
       width: 100%;
       display: flex;
       flex-direction: column;
       justify-content: center;
       z-index: 1;
+      box-shadow: var(--btn-shadow); /* 新增按钮阴影 */
     }
 
     .food-rank-link {
@@ -226,7 +236,7 @@
       text-decoration: underline;
       text-decoration-color: var(--border-light);
       cursor: pointer;
-      transition: color 0.3s ease, text-decoration-color 0.3s ease;
+      transition: color 0.3s ease, text-decoration-color 0.3s ease, text-shadow 0.3s ease;
       align-self: center;
       z-index: 1;
     }
@@ -234,6 +244,7 @@
     .food-rank-link:hover {
       color: var(--accent);
       text-decoration-color: var(--accent);
+      text-shadow: 0 0 6px rgba(255, 152, 0, 0.3); /* 新增链接hover发光 */
     }
 
     /* 按钮光斑效果 */
@@ -258,19 +269,22 @@
     .main-btn:hover, .health-btn:hover, .wish-btn:hover, .food-prefer-btn:hover {
       transform: translateY(-5px);
       border-color: var(--accent);
+      box-shadow: var(--btn-hover-shadow); /* hover时增强阴影 */
     }
 
     .main-btn:active, .health-btn:active, .wish-btn:active, .food-prefer-btn:active {
       transform: scale(0.97);
+      box-shadow: var(--btn-shadow); /* 点击时恢复原阴影 */
     }
 
     .btn-title {
       font-family: "Noto Serif SC", serif;
       font-size: 22px;
       margin-bottom: 10px;
-      transition: color 1s ease-in-out;
+      transition: color 1s ease-in-out, text-shadow 1s ease-in-out;
       z-index: 1;
       position: relative;
+      text-shadow: 0 1px 6px rgba(0, 0, 0, 0.08); /* 新增按钮标题阴影 */
     }
 
     .main-btn .btn-title {
@@ -281,9 +295,10 @@
       font-size: 13px;
       color: var(--muted);
       line-height: 1.7;
-      transition: color 1s ease-in-out;
+      transition: color 1s ease-in-out, text-shadow 1s ease-in-out;
       z-index: 1;
       position: relative;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.05); /* 新增按钮描述阴影 */
     }
 
     footer {
@@ -295,7 +310,8 @@
       color: var(--muted);
       letter-spacing: 3px;
       z-index: 1;
-      transition: color 1s ease-in-out;
+      transition: color 1s ease-in-out, text-shadow 1s ease-in-out;
+      text-shadow: 0 1px 5px rgba(0, 0, 0, 0.08); /* 新增页脚文字阴影 */
     }
 
     @media (max-width: 640px) {
@@ -516,15 +532,16 @@
           root.style.setProperty("--bg-btn", "rgba(255,255,255,0.03)");
           break;
         case SEASONS.SUMMER:
+          // 夏日背景：顶部粉红色 → 浅蓝色 → 沙滩黄（渐变更有层次）
           body.style.background = `
-            linear-gradient(180deg, #87ceeb, #f5deb3),
-            linear-gradient(to bottom, #00bfff 0%, #fffacd 100%)
+            linear-gradient(180deg, #ffc0cb, #87ceeb, #f5deb3),
+            linear-gradient(to bottom, #ffc0cb 0%, #87ceeb 50%, #fffacd 100%)
           `;
-          root.style.setProperty("--fg", "#1e3a8a");
-          root.style.setProperty("--muted", "#3b5998");
-          root.style.setProperty("--accent", "#ff9800");
-          root.style.setProperty("--border-light", "rgba(30,58,138,0.2)");
-          root.style.setProperty("--bg-btn", "rgba(255,255,255,0.12)");
+          root.style.setProperty("--fg", "#1a365d"); // 加深文字颜色，更高级
+          root.style.setProperty("--muted", "#4a6fa5"); // 调整浅文字颜色，提升对比度
+          root.style.setProperty("--accent", "#ff7f7f"); // 改为粉橙色，贴合夏日渐变
+          root.style.setProperty("--border-light", "rgba(26, 54, 93, 0.2)"); // 边框贴合文字颜色
+          root.style.setProperty("--bg-btn", "rgba(255, 255, 255, 0.18)"); // 提高按钮透明度，更通透
           break;
       }
 
@@ -644,7 +661,13 @@
         drop.y += drop.speed * 0.5;
         drop.vx *= 0.98;
         drop.x += drop.vx;
-        if (drop.alpha <= 0 || drop.y > h) drops.splice(i, 1);
+
+        // 限制水珠不超过屏幕一半高度，且不与波浪重合
+        const maxDropY = h / 2; // 屏幕一半高度为上限
+        const minDropY = waves[0].y - 100; // 最上方海浪上方100px为下限（避免重合）
+        if (drop.alpha <= 0 || drop.y > maxDropY || drop.y < minDropY) {
+          drops.splice(i, 1);
+        }
       }
     }
 
@@ -652,9 +675,17 @@
       DROP_TYPES.forEach(type => {
         const count = Math.floor(Math.random() * (type.count[1] - type.count[0]) + type.count[0]);
         for (let i = 0; i < count; i++) {
+          // 限定水珠生成区域：
+          // 1. X轴：全屏范围
+          // 2. Y轴：最上方海浪上方20px 到 屏幕一半高度（h/2），且不低于海浪上方
+          const topWaveY = waves[0].y; // 最上方海浪的Y坐标
+          const minY = topWaveY - 20; // 海浪上方20px（避免重合）
+          const maxY = h / 2; // 屏幕一半高度（不超过顶部半屏）
+          const dropY = Math.random() * (maxY - minY) + minY;
+
           drops.push({
             x: Math.random() * w,
-            y: Math.random() * h * 0.6,
+            y: dropY,
             size: type.size,
             speed: Math.random() * 0.3 + 0.1,
             vx: (Math.random() - 0.5) * 1.5,
