@@ -267,6 +267,7 @@ body {
     background-color: rgba(201, 138, 138, 0.05);
 }
 
+/* 日历标题（可点击编辑） */
 .calendar-title {
     font-size: 1.8rem;
     font-weight: 600;
@@ -275,6 +276,27 @@ body {
     border-bottom: 1px solid var(--color-bg-tertiary);
     color: var(--color-text-primary);
     text-align: center;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: var(--transition-default);
+}
+
+.calendar-title:hover {
+    color: var(--color-accent);
+}
+
+/* 年月编辑输入框样式 - 法式精致 */
+.month-edit-input {
+    width: 220px;
+    padding: 12px 16px;
+    border: 1px solid var(--color-accent);
+    border-radius: var(--radius-sm);
+    outline: none;
+    font-size: 1.2rem;
+    text-align: center;
+    background-color: rgba(255, 255, 255, 0.95);
+    box-shadow: var(--shadow-sm);
+    color: var(--color-text-primary);
     letter-spacing: 1px;
 }
 
@@ -546,10 +568,13 @@ body {
         font-size: 1.6rem;
         margin-bottom: 20px;
     }
+    .month-edit-input {
+        width: 180px;
+        font-size: 1rem;
+        padding: 10px 12px;
+    }
 }
-
 </style>
-
 </head>
 <body>
     <!-- 顶部统计区域 -->
@@ -666,10 +691,7 @@ body {
 
             // 非初始化状态下，按「新日期在上」排序（年月倒序）
             if (!isInit) {
-                calendarData.calendars.sort((a, b) => {
-                    if (a.year !== b.year) return b.year - a.year;
-                    return b.month - a.month;
-                });
+                sortCalendars();
             }
 
             // 保存本地并渲染
@@ -727,6 +749,127 @@ body {
             alert(`${year}年${month + 1}月 日历已成功删除！`);
         }
 
+        // 日历列表排序（年月倒序，新日期在上）
+        function sortCalendars() {
+            calendarData.calendars.sort((a, b) => {
+                if (a.year !== b.year) return b.year - a.year;
+                return b.month - a.month;
+            });
+        }
+
+        // 编辑日历年月（核心新增功能）
+        function editCalendarMonth(oldYear, oldMonth) {
+            // 1. 创建输入框并替换标题
+            const titleElement = document.querySelector(`.calendar-panel[data-year="${oldYear}"][data-month="${oldMonth}"] .calendar-title`);
+            if (!titleElement) return;
+
+            // 保存原标题内容，创建输入框
+            const originalText = titleElement.innerText;
+            const input = document.createElement("input");
+            input.className = "month-edit-input";
+            input.placeholder = "请输入 2025年10月 格式";
+            input.value = originalText;
+            titleElement.innerHTML = "";
+            titleElement.appendChild(input);
+            input.focus();
+
+            // 2. 输入框失去焦点/回车时处理
+            const handleConfirm = () => {
+                const inputValue = input.value.trim();
+                if (!inputValue) {
+                    // 无输入，恢复原标题
+                    titleElement.innerText = originalText;
+                    return;
+                }
+
+                // 3. 解析输入内容（匹配 年年年年年月份 格式，如 2025年6月、2026年12月）
+                const monthRegex = /^(\d{4})年(\d{1,2})月$/;
+                const matchResult = inputValue.match(monthRegex);
+                if (!matchResult) {
+                    alert("输入格式错误！请输入如「2025年10月」的格式");
+                    titleElement.innerText = originalText;
+                    return;
+                }
+
+                // 4. 提取并验证年月
+                const newYear = parseInt(matchResult[1]);
+                const newMonth = parseInt(matchResult[2]) - 1; // 转为0开始的月份索引
+
+                // 验证月份有效性
+                if (newMonth < 0 || newMonth > 11) {
+                    alert("月份无效！请输入1-12月");
+                    titleElement.innerText = originalText;
+                    return;
+                }
+
+                // 验证年份合理性（防止极端年份）
+                if (newYear < 2020 || newYear > 2100) {
+                    alert("年份无效！请输入2020-2100之间的年份");
+                    titleElement.innerText = originalText;
+                    return;
+                }
+
+                // 5. 检查新年月是否已存在
+                const isExists = calendarData.calendars.some(c => 
+                    c.year === newYear && c.month === newMonth && !(c.year === oldYear && c.month === oldMonth)
+                );
+                if (isExists) {
+                    alert(`${newYear}年${newMonth + 1}月的日历已存在！`);
+                    titleElement.innerText = originalText;
+                    return;
+                }
+
+                // 6. 更新日历数据（修改年月）
+                const calendarIndex = calendarData.calendars.findIndex(c => c.year === oldYear && c.month === oldMonth);
+                if (calendarIndex === -1) return;
+
+                // 6.1 更新日历对象的年月
+                calendarData.calendars[calendarIndex].year = newYear;
+                calendarData.calendars[calendarIndex].month = newMonth;
+
+                // 6.2 更新该月所有标记的日期前缀（旧日期→新日期）
+                const oldMonthStr = String(oldMonth + 1).padStart(2, "0");
+                const newMonthStr = String(newMonth + 1).padStart(2, "0");
+                const oldDatePrefix = `${oldYear}-${oldMonthStr}-`;
+                const newDatePrefix = `${newYear}-${newMonthStr}-`;
+
+                // 遍历标记，替换对应日期
+                const newTags = {};
+                Object.entries(calendarData.tags).forEach(([dateStr, tagInfo]) => {
+                    if (dateStr.startsWith(oldDatePrefix)) {
+                        // 替换日期前缀，保留日期部分
+                        const dayPart = dateStr.slice(oldDatePrefix.length);
+                        const newDateStr = `${newDatePrefix}${dayPart}`;
+
+                        // 验证新日期是否有效（当月是否有该天）
+                        const day = parseInt(dayPart);
+                        const maxDay = new Date(newYear, newMonth + 1, 0).getDate();
+                        if (day <= maxDay) {
+                            newTags[newDateStr] = tagInfo;
+                        }
+                    } else {
+                        newTags[dateStr] = tagInfo;
+                    }
+                });
+                calendarData.tags = newTags;
+
+                // 7. 重新排序、保存并渲染
+                sortCalendars();
+                saveToLocal();
+                renderAllCalendars();
+                updateStats();
+                alert(`日历已成功修改为 ${newYear}年${newMonth + 1}月！`);
+            };
+
+            // 绑定回车事件
+            input.addEventListener("keydown", (e) => {
+                if (e.key === "Enter") handleConfirm();
+            });
+
+            // 绑定失去焦点事件
+            input.addEventListener("blur", handleConfirm);
+        }
+
         // 渲染所有日历
         function renderAllCalendars() {
             const wrapper = document.getElementById("calendar-wrapper");
@@ -739,7 +882,7 @@ body {
             });
         }
 
-        // 创建单个日历面板（新增月删除按钮）
+        // 创建单个日历面板（新增年月编辑绑定）
         function createCalendarPanel(calendar) {
             const { year, month, dates } = calendar;
             const monthName = new Date(year, month).toLocaleDateString("zh-CN", { year: "numeric", month: "long" });
@@ -759,10 +902,13 @@ body {
             });
             panel.appendChild(calendarCloseBtn);
 
-            // 2. 日历标题
+            // 2. 日历标题（绑定点击编辑事件）
             const title = document.createElement("h2");
             title.className = "calendar-title";
             title.innerText = monthName;
+            title.addEventListener("click", () => {
+                editCalendarMonth(year, month);
+            });
             panel.appendChild(title);
 
             // 3. 日历表格
