@@ -15,6 +15,7 @@
       --accent: #b7a8ff;
       --border-light: rgba(255,255,255,0.18);
       --bg-btn: rgba(255,255,255,0.03);
+      --season-btn-size: 40px;
     }
 
     * {
@@ -28,10 +29,38 @@
       overflow: auto;
       color: var(--fg);
       font-family: Inter, sans-serif;
+      /* 默认星空背景，后续通过JS切换 */
       background:
         radial-gradient(1200px 800px at 20% 10%, #1b1f3b 0%, transparent 60%),
         radial-gradient(1000px 700px at 80% 20%, #2a174a 0%, transparent 65%),
         linear-gradient(180deg, #090b16, #05060c);
+      transition: background 1s ease-in-out;
+    }
+
+    /* 季节切换按钮样式 */
+    .season-switch-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: var(--season-btn-size);
+      height: var(--season-btn-size);
+      border-radius: 50%;
+      border: 1px solid var(--border-light);
+      background: var(--bg-btn);
+      backdrop-filter: blur(8px);
+      color: var(--fg);
+      font-size: 16px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+
+    .season-switch-btn:hover {
+      transform: scale(1.1);
+      border-color: var(--accent);
     }
 
     canvas {
@@ -70,6 +99,7 @@
       letter-spacing: 6px;
       color: var(--muted);
       margin-bottom: 30px;
+      transition: color 1s ease-in-out;
     }
 
     /* ===== 日历 + 主按钮 并排容器 ===== */
@@ -90,12 +120,16 @@
       border-radius: 8px;
       overflow: hidden;
       flex-shrink: 0; /* 防止日历被压缩 */
+      /* 用于积雪/花瓣/树叶堆积的容器参考 */
+      position: relative;
+      z-index: 1;
     }
 
     .calendar-header {
       padding: 8px;
       background: rgba(255,255,255,0.05);
       border-bottom: 1px solid var(--border-light);
+      transition: background 1s ease-in-out, border-color 1s ease-in-out;
     }
 
     .calendar-week, .calendar-days {
@@ -107,6 +141,7 @@
       padding: 6px;
       font-size: 12px;
       text-align: center;
+      transition: color 1s ease-in-out;
     }
 
     .calendar-week span {
@@ -134,10 +169,11 @@
       backdrop-filter: blur(8px);
       cursor: pointer;
       overflow: hidden;
-      transition: transform 0.3s ease, border-color 0.3s ease;
+      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out;
       border-radius: 12px;
       flex: 1; /* 占据剩余宽度 */
       min-width: 300px; /* 保证按钮最小宽度 */
+      z-index: 1;
     }
 
     /* 下方：健康生活 + 左右布局容器 */
@@ -157,9 +193,10 @@
       backdrop-filter: blur(8px);
       cursor: pointer;
       overflow: hidden;
-      transition: transform 0.3s ease, border-color 0.3s ease;
+      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out;
       border-radius: 12px;
       width: 100%;
+      z-index: 1;
     }
 
     /* 左右布局：愿望清单 | 美食区域（美食偏好 + 下方链接） */
@@ -178,21 +215,23 @@
       backdrop-filter: blur(8px);
       cursor: pointer;
       overflow: hidden;
-      transition: transform 0.3s ease, border-color 0.3s ease;
+      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out;
       border-radius: 12px;
       flex: 1; /* 与美食区域等宽 */
       display: flex;
       flex-direction: column;
       justify-content: center;
+      z-index: 1;
     }
 
-    /* 右侧：美食区域（美食偏好按钮 + 下方排名链接） */
+    /* 右侧：美食区域（美食偏好按钮 + 下方链接） */
     .food-area {
       flex: 1; /* 与愿望清单等宽 */
       display: flex;
       flex-direction: column;
       align-items: center; /* 链接居中对齐按钮 */
       gap: 16px; /* 按钮与链接的间距 */
+      z-index: 1;
     }
 
     /* 美食偏好（右侧，等宽） */
@@ -204,12 +243,13 @@
       backdrop-filter: blur(8px);
       cursor: pointer;
       overflow: hidden;
-      transition: transform 0.3s ease, border-color 0.3s ease;
+      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out;
       border-radius: 12px;
       width: 100%; /* 填满美食区域宽度 */
       display: flex;
       flex-direction: column;
       justify-content: center;
+      z-index: 1;
     }
 
     /* 美食排名下划线链接（按钮外部正下方） */
@@ -219,8 +259,9 @@
       text-decoration: underline;
       text-decoration-color: var(--border-light);
       cursor: pointer;
-      transition: color 0.3s ease, text-decoration-color 0.3s ease;
+      transition: color 0.3s ease, text-decoration-color 0.3s ease, color 1s ease-in-out;
       align-self: center; /* 水平居中 */
+      z-index: 1;
     }
 
     .food-rank-link:hover {
@@ -240,6 +281,7 @@
       );
       opacity: 0;
       transition: opacity 0.3s;
+      z-index: 0;
     }
 
     .main-btn:hover::before, .health-btn:hover::before, .wish-btn:hover::before, .food-prefer-btn:hover::before {
@@ -261,6 +303,9 @@
       font-family: "Noto Serif SC", serif;
       font-size: 22px;
       margin-bottom: 10px;
+      transition: color 1s ease-in-out;
+      z-index: 1;
+      position: relative;
     }
 
     .main-btn .btn-title {
@@ -271,6 +316,9 @@
       font-size: 13px;
       color: var(--muted);
       line-height: 1.7;
+      transition: color 1s ease-in-out;
+      z-index: 1;
+      position: relative;
     }
 
     footer {
@@ -282,6 +330,14 @@
       color: var(--muted);
       letter-spacing: 3px;
       z-index: 1;
+      transition: color 1s ease-in-out;
+    }
+
+    /* 用于检测元素顶部/底部位置（积雪/花瓣/树叶堆积） */
+    .element-bounds {
+      position: absolute;
+      pointer-events: none;
+      z-index: 0;
     }
 
     @media (max-width: 640px) {
@@ -302,228 +358,826 @@
       .wish-btn, .food-prefer-btn {
         padding: 30px 26px;
       }
+      .season-switch-btn {
+        width: calc(var(--season-btn-size) - 10px);
+        height: calc(var(--season-btn-size) - 10px);
+        font-size: 14px;
+      }
     }
   </style>
 </head>
 
 <body>
+  <!-- 季节切换按钮 -->
+  <button class="season-switch-btn" id="seasonSwitchBtn">🌌</button>
 
-<canvas id="bg"></canvas>
+  <canvas id="bg"></canvas>
 
-<main>
-  <div class="container">
-    <!-- 恢复大标题：千代 × 小德 -->
-    <h1>千代 × 小德</h1>
-    <div class="subtitle">我们的记录</div>
+  <main>
+    <div class="container">
+      <!-- 恢复大标题：千代 × 小德 -->
+      <h1>千代 × 小德</h1>
+      <div class="subtitle">我们的记录</div>
 
-    <!-- 日历 + 主按钮 并排容器 -->
-    <div class="calendar-main-wrap">
-      <!-- 小型日历表格（改为空容器，由JS动态生成） -->
-      <div class="mini-calendar" id="dynamic-mini-calendar"></div>
-
-      <!-- 主按钮：我们的每一天（按钮标题） -->
-      <div class="main-btn" onclick="location.href='https://kanbedruid.github.io/days/'">
-        <div class="btn-title">我们的每一天</div>
-        <div class="btn-desc">记忆中的重要时光</div>
-      </div>
-    </div>
-
-    <!-- 下方二级按钮区域 -->
-    <div class="secondary-buttons">
-      <!-- 健康生活按钮 -->
-      <div class="health-btn" onclick="location.href='https://kanbedruid.github.io/weight/'">
-        <div class="btn-title">健康生活</div>
-        <div class="btn-desc">调整作息 赢得积分</div>
-      </div>
-
-      <!-- 左右布局：愿望清单 | 美食区域 -->
-      <div class="side-by-side">
-        <!-- 左侧：愿望清单 -->
-        <div class="wish-btn" onclick="location.href='https://kanbedruid.github.io/list'">
-          <div class="btn-title">愿望清单</div>
-          <div class="btn-desc">写下想要的东西 总有一天会实现</div>
-        </div>
-
-        <!-- 右侧：美食区域（美食偏好按钮 + 下方排名链接） -->
-        <div class="food-area">
-          <!-- 美食偏好按钮 -->
-          <div class="food-prefer-btn" onclick="location.href='https://kanbedruid.github.io/like'">
-            <div class="btn-title">美食偏好</div>
-            <div class="btn-desc">想想今天吃什么</div>
+      <!-- 日历 + 主按钮 并排容器 -->
+      <div class="calendar-main-wrap">
+        <!-- 小型日历表格 -->
+        <div class="mini-calendar" id="miniCalendar">
+          <div class="calendar-header">
+            <span style="font-size: 14px; letter-spacing: 2px;">2026 · 01</span>
           </div>
-          <!-- 美食排名下划线链接（按钮外部正下方） -->
-          <div class="food-rank-link" onclick="location.href='https://kanbedruid.github.io/food/'">→ 小德的饭店排名</div>
+          <div class="calendar-week">
+            <span>日</span>
+            <span>一</span>
+            <span>二</span>
+            <span>三</span>
+            <span>四</span>
+            <span>五</span>
+            <span>六</span>
+          </div>
+          <div class="calendar-days">
+            <span></span>
+            <span></span>
+            <span></span>
+            <span></span>
+            <span>1</span>
+            <span>2</span>
+            <span>3</span>
+          </div>
+          <div class="calendar-days">
+            <span>4</span>
+            <span>5</span>
+            <span>6</span>
+            <span>7</span>
+            <span>8</span>
+            <span>9</span>
+            <span>10</span>
+          </div>
+          <div class="calendar-days">
+            <span>11</span>
+            <span>12</span>
+            <span>13</span>
+            <span class="current">14</span>
+            <span>15</span>
+            <span>16</span>
+            <span>17</span>
+          </div>
+          <div class="calendar-days">
+            <span>18</span>
+            <span>19</span>
+            <span>20</span>
+            <span>21</span>
+            <span>22</span>
+            <span>23</span>
+            <span>24</span>
+          </div>
+          <div class="calendar-days">
+            <span>25</span>
+            <span>26</span>
+            <span>27</span>
+            <span>28</span>
+            <span>29</span>
+            <span>30</span>
+            <span>31</span>
+          </div>
+        </div>
+
+        <!-- 主按钮：我们的每一天（按钮标题） -->
+        <div class="main-btn" onclick="location.href='https://kanbedruid.github.io/days/'">
+          <div class="btn-title">我们的每一天</div>
+          <div class="btn-desc">记忆中的重要时光</div>
+        </div>
+      </div>
+
+      <!-- 下方二级按钮区域 -->
+      <div class="secondary-buttons">
+        <!-- 健康生活按钮 -->
+        <div class="health-btn" onclick="location.href='https://kanbedruid.github.io/weight/'">
+          <div class="btn-title">健康生活</div>
+          <div class="btn-desc">调整作息 赢得积分</div>
+        </div>
+
+        <!-- 左右布局：愿望清单 | 美食区域 -->
+        <div class="side-by-side">
+          <!-- 左侧：愿望清单 -->
+          <div class="wish-btn" onclick="location.href='https://kanbedruid.github.io/list'">
+            <div class="btn-title">愿望清单</div>
+            <div class="btn-desc">写下想要的东西 总有一天会实现</div>
+          </div>
+
+          <!-- 右侧：美食区域（美食偏好按钮 + 下方链接） -->
+          <div class="food-area">
+            <!-- 美食偏好按钮 -->
+            <div class="food-prefer-btn" onclick="location.href='https://kanbedruid.github.io/like'">
+              <div class="btn-title">美食偏好</div>
+              <div class="btn-desc">想想今天吃什么</div>
+            </div>
+            <!-- 美食排名下划线链接（按钮外部正下方） -->
+            <div class="food-rank-link" onclick="location.href='https://kanbedruid.github.io/food/'">→ 小德的饭店排名</div>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-</main>
+  </main>
 
-<footer>
-一起走向未来
-</footer>
+  <footer>
+    一起走向未来
+  </footer>
 
-<script>
-  const canvas = document.getElementById("bg");
-  const ctx = canvas.getContext("2d");
+  <script>
+    // === 全局配置 ===
+    const canvas = document.getElementById("bg");
+    const ctx = canvas.getContext("2d");
+    const seasonSwitchBtn = document.getElementById("seasonSwitchBtn");
+    let w, h;
 
-  let w, h;
-  function resize() {
-    w = canvas.width = window.innerWidth;
-    h = canvas.height = window.innerHeight;
-  }
-  window.addEventListener("resize", resize);
-  resize();
+    // 季节枚举（0:星空, 1:冬天, 2:春天, 3:夏天, 4:秋天）
+    const SEASONS = {
+      STARRY: 0,
+      WINTER: 1,
+      SPRING: 2,
+      SUMMER: 3,
+      AUTUMN: 4
+    };
+    let currentSeason = SEASONS.STARRY;
+    const seasonIcons = ["🌌", "❄️", "🌸", "☀️", "🍂"];
+    const seasonNames = ["星空", "冬天", "春天", "夏天", "秋天"];
 
-  /* ===== 浮动星点（数量增加） ===== */
-  const points = Array.from({ length: 140 }, () => ({
-    x: Math.random() * w,
-    y: Math.random() * h,
-    r: Math.random() * 1.8 + 0.6,
-    vx: (Math.random() - 0.5) * 0.25,
-    vy: (Math.random() - 0.5) * 0.25
-  }));
+    // 元素边界缓存（用于积雪/花瓣/树叶堆积检测）
+    let elementBounds = [];
 
-  /* ===== 极光尾迹 ===== */
-  const trails = [];
+    // === 季节资源配置 ===
+    // 星空配置
+    let stars = [];
+    const STAR_COUNT = 140;
 
-  window.addEventListener("mousemove", e => {
-    trails.push({
-      x: e.clientX,
-      y: e.clientY,
-      life: 60
-    });
-  });
+    // 冬天配置（雪花）
+    let snowflakes = [];
+    const SNOW_COUNT = 200;
+    const SNOW_SIZE_RANGE = [1, 5];
+    const SNOW_SPEED_RANGE = [0.5, 2];
 
-  function draw() {
-    ctx.clearRect(0, 0, w, h);
+    // 春天配置（樱花）
+    let sakuras = [];
+    const SAKURA_COUNT = 150;
+    const SAKURA_SIZE_RANGE = [2, 6];
+    const SAKURA_SPEED_RANGE = [0.3, 1.5];
 
-    // 星点
-    for (const p of points) {
-      p.x += p.vx;
-      p.y += p.vy;
+    // 夏天配置（海浪、水珠）
+    let waves = [];
+    let drops = [];
+    const WAVE_COUNT = 3;
+    const DROP_COUNT_MAX = 80;
+    let lastWaveTime = 0;
+    const WAVE_INTERVAL_RANGE = [3000, 7000];
+    const DROP_FADE_TIME = 5000;
 
-      if (p.x < 0 || p.x > w) p.vx *= -1;
-      if (p.y < 0 || p.y > h) p.vy *= -1;
+    // 秋天配置（树叶）
+    let leaves = [];
+    const LEAF_COUNT = 120;
+    const LEAF_SIZE_RANGE = [3, 7];
+    const LEAF_SPEED_RANGE = [0.4, 1.8];
 
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-      ctx.fillStyle = "rgba(200,190,255,0.5)";
-      ctx.fill();
+    // 鼠标状态
+    const mouse = { x: w / 2, y: h / 2, prevX: w / 2, prevY: h / 2, speedX: 0, speedY: 0 };
+
+    // === 初始化 ===
+    function init() {
+      resize();
+      cacheElementBounds();
+      initSeasonResources();
+      animate();
     }
 
-    // 极光尾迹
-    for (let i = trails.length - 1; i >= 0; i--) {
-      const t = trails[i];
-      t.life--;
-
-      const alpha = t.life / 60;
-      ctx.beginPath();
-      ctx.arc(t.x, t.y, 18 * alpha, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(150,200,255,${alpha * 0.35})`;
-      ctx.fill();
-
-      if (t.life <= 0) trails.splice(i, 1);
+    // === 画布调整 ===
+    function resize() {
+      w = canvas.width = window.innerWidth;
+      h = canvas.height = window.innerHeight;
+      mouse.x = w / 2;
+      mouse.y = h / 2;
+      cacheElementBounds();
+      resetSeasonResources();
     }
 
-    requestAnimationFrame(draw);
-  }
-
-  draw();
-
-  /* 按钮光斑跟随（适配所有新按钮） */
-  document.querySelectorAll(".main-btn, .health-btn, .wish-btn, .food-prefer-btn").forEach(btn => {
-    btn.addEventListener("mousemove", e => {
-      const rect = btn.getBoundingClientRect();
-      btn.style.setProperty("--x", `${e.clientX - rect.left}px`);
-      btn.style.setProperty("--y", `${e.clientY - rect.top}px`);
-    });
-  });
-
-  /* ===== 核心：动态生成迷你日历（自动更新年月和当天日期） ===== */
-  function generateMiniCalendar() {
-    // 1. 获取当前日期信息
-    const now = new Date();
-    const currentYear = now.getFullYear(); // 当前年份（如2026）
-    const currentMonth = now.getMonth(); // 当前月份（0-11，0=1月）
-    const currentDate = now.getDate(); // 当天日期（1-31）
-
-    // 2. 格式化日历头部标题（如 2026 · 01）
-    const formattedMonth = String(currentMonth + 1).padStart(2, "0"); // 月份补零（1→01，12→12）
-    const calendarHeader = `
-      <div class="calendar-header">
-        <span style="font-size: 14px; letter-spacing: 2px;">${currentYear} · ${formattedMonth}</span>
-      </div>
-    `;
-
-    // 3. 生成星期头部（日、一、二、三、四、五、六）
-    const weekHeader = `
-      <div class="calendar-week">
-        <span>日</span>
-        <span>一</span>
-        <span>二</span>
-        <span>三</span>
-        <span>四</span>
-        <span>五</span>
-        <span>六</span>
-      </div>
-    `;
-
-    // 4. 计算当月日历数据
-    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 当月1号是星期几（0=周日）
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate(); // 当月总天数
-
-    // 5. 生成日期格子（填充空白前置格子 + 当月日期 + 按7个一行分组）
-    let dateCells = "";
-    let dayCounter = 1;
-    let currentRow = [];
-
-    // 先填充月初空白格子（当月1号之前的空位）
-    for (let i = 0; i < firstDayOfMonth; i++) {
-      currentRow.push("<span></span>");
+    // === 缓存元素边界（按钮、日历等，用于堆积检测） ===
+    function cacheElementBounds() {
+      elementBounds = [];
+      const elements = document.querySelectorAll(".mini-calendar, .main-btn, .health-btn, .wish-btn, .food-prefer-btn");
+      elements.forEach(el => {
+        const rect = el.getBoundingClientRect();
+        elementBounds.push({
+          x: rect.left,
+          y: rect.top,
+          width: rect.width,
+          height: rect.height,
+          top: rect.top,
+          bottom: rect.bottom,
+          left: rect.left,
+          right: rect.right
+        });
+      });
+      // 添加页面底部边界（地面）
+      elementBounds.push({
+        x: 0,
+        y: h,
+        width: w,
+        height: 10,
+        top: h,
+        bottom: h + 10,
+        left: 0,
+        right: w
+      });
     }
 
-    // 填充当月所有日期
-    for (let day = 1; day <= daysInMonth; day++) {
-      currentRow.push(
-        day === currentDate 
-          ? `<span class="current">${day}</span>` // 当天日期添加current类，高亮显示
-          : `<span>${day}</span>`
-      );
+    // === 季节资源初始化 ===
+    function initSeasonResources() {
+      // 初始化星空
+      stars = Array.from({ length: STAR_COUNT }, () => ({
+        x: Math.random() * w,
+        y: Math.random() * h,
+        r: Math.random() * 1.8 + 0.6,
+        vx: (Math.random() - 0.5) * 0.25,
+        vy: (Math.random() - 0.5) * 0.25
+      }));
 
-      // 每7个格子组成一行，生成日历行
-      if (currentRow.length === 7 || day === daysInMonth) {
-        // 若最后一行不足7个格子，填充空白后置格子
-        while (currentRow.length < 7) {
-          currentRow.push("<span></span>");
+      // 初始化冬天雪花
+      snowflakes = Array.from({ length: SNOW_COUNT }, () => createSnowflake());
+
+      // 初始化春天樱花
+      sakuras = Array.from({ length: SAKURA_COUNT }, () => createSakura());
+
+      // 初始化夏天海浪
+      waves = Array.from({ length: WAVE_COUNT }, (_, i) => ({
+        y: h - 100 - i * 30,
+        amplitude: 20 + i * 10,
+        frequency: 0.01 - i * 0.002,
+        speed: 0.02 + i * 0.005,
+        phase: Math.random() * Math.PI * 2
+      }));
+
+      // 初始化秋天树叶
+      leaves = Array.from({ length: LEAF_COUNT }, () => createLeaf());
+    }
+
+    // === 重置季节资源（窗口大小变化时） ===
+    function resetSeasonResources() {
+      switch (currentSeason) {
+        case SEASONS.STARRY:
+          stars = Array.from({ length: STAR_COUNT }, () => ({
+            x: Math.random() * w,
+            y: Math.random() * h,
+            r: Math.random() * 1.8 + 0.6,
+            vx: (Math.random() - 0.5) * 0.25,
+            vy: (Math.random() - 0.5) * 0.25
+          }));
+          break;
+        case SEASONS.WINTER:
+          snowflakes = Array.from({ length: SNOW_COUNT }, () => createSnowflake());
+          break;
+        case SEASONS.SPRING:
+          sakuras = Array.from({ length: SAKURA_COUNT }, () => createSakura());
+          break;
+        case SEASONS.SUMMER:
+          waves = Array.from({ length: WAVE_COUNT }, (_, i) => ({
+            y: h - 100 - i * 30,
+            amplitude: 20 + i * 10,
+            frequency: 0.01 - i * 0.002,
+            speed: 0.02 + i * 0.005,
+            phase: Math.random() * Math.PI * 2
+          }));
+          drops = [];
+          break;
+        case SEASONS.AUTUMN:
+          leaves = Array.from({ length: LEAF_COUNT }, () => createLeaf());
+          break;
+      }
+    }
+
+    // === 季节切换逻辑 ===
+    function switchSeason() {
+      currentSeason = (currentSeason + 1) % 5;
+      seasonSwitchBtn.textContent = seasonIcons[currentSeason];
+      updateSeasonStyle();
+      resetSeasonResources();
+      console.log(`当前季节：${seasonNames[currentSeason]}`);
+    }
+
+    // === 更新季节样式（背景、颜色等） ===
+    function updateSeasonStyle() {
+      const body = document.body;
+      const root = document.documentElement;
+      const subtitle = document.querySelector(".subtitle");
+      const footers = document.querySelector("footer");
+
+      switch (currentSeason) {
+        case SEASONS.STARRY:
+          // 星空样式
+          body.style.background = `
+            radial-gradient(1200px 800px at 20% 10%, #1b1f3b 0%, transparent 60%),
+            radial-gradient(1000px 700px at 80% 20%, #2a174a 0%, transparent 65%),
+            linear-gradient(180deg, #090b16, #05060c)
+          `;
+          root.style.setProperty("--fg", "#e8e8f0");
+          root.style.setProperty("--muted", "#a0a0b8");
+          root.style.setProperty("--accent", "#b7a8ff");
+          break;
+        case SEASONS.WINTER:
+          // 冬天样式（法式高级色调）
+          body.style.background = `
+            linear-gradient(180deg, #f0f4f8, #d9e2ec),
+            linear-gradient(to right, #bcccdc, #9fb3c8)
+          `;
+          root.style.setProperty("--fg", "#2d3748");
+          root.style.setProperty("--muted", "#4a5568");
+          root.style.setProperty("--accent", "#2b6cb0");
+          break;
+        case SEASONS.SPRING:
+          // 春天样式（嫩绿青草 + 蓝天）
+          body.style.background = `
+            linear-gradient(180deg, #87ceeb, #90ee90),
+            linear-gradient(to bottom, #7ccd7c 0%, #5f9ea0 100%)
+          `;
+          root.style.setProperty("--fg", "#2f4f2f");
+          root.style.setProperty("--muted", "#4f6f4f");
+          root.style.setProperty("--accent", "#ff69b4");
+          break;
+        case SEASONS.SUMMER:
+          // 夏天样式（沙滩 + 玻璃海）
+          body.style.background = `
+            linear-gradient(180deg, #87ceeb, #f5deb3),
+            linear-gradient(to bottom, #00bfff 0%, #fffacd 100%)
+          `;
+          root.style.setProperty("--fg", "#1e3a8a");
+          root.style.setProperty("--muted", "#3b5998");
+          root.style.setProperty("--accent", "#ff4500");
+          break;
+        case SEASONS.AUTUMN:
+          // 秋天样式（红叶黄叶林道）
+          body.style.background = `
+            linear-gradient(180deg, #cd5c5c, #daa520),
+            linear-gradient(to bottom, #b8860b 0%, #dc143c 100%)
+          `;
+          root.style.setProperty("--fg", "#fff8dc");
+          root.style.setProperty("--muted", "#f5f5dc");
+          root.style.setProperty("--accent", "#ff8c00");
+          break;
+      }
+
+      // 更新文字颜色过渡
+      subtitle.style.color = getComputedStyle(root).getPropertyValue("--muted");
+      footers.style.color = getComputedStyle(root).getPropertyValue("--muted");
+    }
+
+    // === 冬天：创建雪花 ===
+    function createSnowflake() {
+      const size = Math.random() * (SNOW_SIZE_RANGE[1] - SNOW_SIZE_RANGE[0]) + SNOW_SIZE_RANGE[0];
+      return {
+        x: Math.random() * w,
+        y: Math.random() * -h,
+        size,
+        speed: Math.random() * (SNOW_SPEED_RANGE[1] - SNOW_SPEED_RANGE[0]) + SNOW_SPEED_RANGE[0],
+        vx: (Math.random() - 0.5) * 0.5,
+        vy: 0,
+        mass: size / 5,
+        stacked: false,
+        stackY: h
+      };
+    }
+
+    // === 冬天：更新雪花 ===
+    function updateSnowflakes() {
+      for (let i = 0; i < snowflakes.length; i++) {
+        const snow = snowflakes[i];
+
+        if (!snow.stacked) {
+          // 应用鼠标风力（鼠标移动速度影响）
+          snow.vx += mouse.speedX * 0.001 * (1 - snow.mass);
+          snow.vy = snow.speed;
+
+          // 更新位置
+          snow.x += snow.vx;
+          snow.y += snow.vy;
+
+          // 边界检测（左右）
+          if (snow.x < 0) snow.x = w;
+          if (snow.x > w) snow.x = 0;
+
+          // 堆积检测（元素顶部/地面）
+          let isStacked = false;
+          for (const bound of elementBounds) {
+            if (
+              snow.x > bound.left &&
+              snow.x < bound.right &&
+              snow.y + snow.size >= bound.top &&
+              snow.y < bound.top + 10
+            ) {
+              snow.stacked = true;
+              snow.stackY = bound.top;
+              isStacked = true;
+              break;
+            }
+          }
+
+          // 地面堆积
+          if (!isStacked && snow.y + snow.size >= h) {
+            snow.stacked = true;
+            snow.stackY = h;
+          }
+        } else {
+          // 已堆积，保持位置
+          snow.y = snow.stackY - snow.size;
+
+          // 轻微晃动（模拟积雪）
+          snow.x += Math.sin(Date.now() * 0.001 + i) * 0.1;
         }
-        dateCells += `<div class="calendar-days">${currentRow.join("")}</div>`;
-        currentRow = [];
+
+        // 重置雪花（超出可视区域）
+        if (snow.y > h + snow.size) {
+          snowflakes[i] = createSnowflake();
+        }
       }
     }
 
-    // 6. 拼接完整日历HTML，插入到页面容器中
-    const calendarContainer = document.getElementById("dynamic-mini-calendar");
-    calendarContainer.innerHTML = calendarHeader + weekHeader + dateCells;
-  }
-
-  // 7. 页面加载时生成日历，后续可定时更新（可选）
-  window.onload = function() {
-    generateMiniCalendar();
-
-    // 可选：每天凌晨自动更新日历（避免页面一直打开时不更新）
-    setInterval(() => {
-      const now = new Date();
-      // 当时间为 00:00:00 时，重新生成日历
-      if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) {
-        generateMiniCalendar();
+    // === 冬天：绘制雪花 ===
+    function drawSnowflakes() {
+      ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
+      for (const snow of snowflakes) {
+        ctx.beginPath();
+        ctx.arc(snow.x, snow.y, snow.size, 0, Math.PI * 2);
+        ctx.fill();
       }
-    }, 1000); // 每秒检查一次
-  };
-</script>
+    }
 
+    // === 春天：创建樱花 ===
+    function createSakura() {
+      const size = Math.random() * (SAKURA_SIZE_RANGE[1] - SAKURA_SIZE_RANGE[0]) + SAKURA_SIZE_RANGE[0];
+      return {
+        x: Math.random() * w,
+        y: Math.random() * -h,
+        size,
+        speed: Math.random() * (SAKURA_SPEED_RANGE[1] - SAKURA_SPEED_RANGE[0]) + SAKURA_SPEED_RANGE[0],
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: 0,
+        angle: Math.random() * Math.PI * 2,
+        rotateSpeed: (Math.random() - 0.5) * 0.02,
+        stacked: false,
+        stackY: h
+      };
+    }
+
+    // === 春天：更新樱花 ===
+    function updateSakuras() {
+      for (let i = 0; i < sakuras.length; i++) {
+        const sakura = sakuras[i];
+
+        if (!sakura.stacked) {
+          // 应用鼠标风力
+          sakura.vx += mouse.speedX * 0.0008;
+          sakura.vy = sakura.speed;
+
+          // 更新位置和旋转
+          sakura.x += sakura.vx + Math.sin(Date.now() * 0.001 + i) * 0.2;
+          sakura.y += sakura.vy;
+          sakura.angle += sakura.rotateSpeed;
+
+          // 边界检测
+          if (sakura.x < 0) sakura.x = w;
+          if (sakura.x > w) sakura.x = 0;
+
+          // 堆积检测
+          let isStacked = false;
+          for (const bound of elementBounds) {
+            if (
+              sakura.x > bound.left &&
+              sakura.x < bound.right &&
+              sakura.y + sakura.size >= bound.top &&
+              sakura.y < bound.top + 10
+            ) {
+              sakura.stacked = true;
+              sakura.stackY = bound.top;
+              isStacked = true;
+              break;
+            }
+          }
+
+          // 地面堆积
+          if (!isStacked && sakura.y + sakura.size >= h) {
+            sakura.stacked = true;
+            sakura.stackY = h;
+          }
+        } else {
+          // 已堆积，保持位置
+          sakura.y = sakura.stackY - sakura.size;
+        }
+
+        // 重置樱花
+        if (sakura.y > h + sakura.size) {
+          sakuras[i] = createSakura();
+        }
+      }
+    }
+
+    // === 春天：绘制樱花 ===
+    function drawSakuras() {
+      for (const sakura of sakuras) {
+        ctx.save();
+        ctx.translate(sakura.x, sakura.y);
+        ctx.rotate(sakura.angle);
+        ctx.fillStyle = "rgba(255, 105, 180, 0.8)";
+        ctx.beginPath();
+        ctx.ellipse(0, 0, sakura.size, sakura.size * 0.8, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // === 夏天：更新海浪和水珠 ===
+    function updateSummer() {
+      const now = Date.now();
+
+      // 更新海浪
+      for (const wave of waves) {
+        wave.phase += wave.speed;
+      }
+
+      // 生成海浪（3-7秒一次）
+      if (now - lastWaveTime > Math.random() * (WAVE_INTERVAL_RANGE[1] - WAVE_INTERVAL_RANGE[0]) + WAVE_INTERVAL_RANGE[0]) {
+        generateDrops();
+        lastWaveTime = now;
+      }
+
+      // 更新水珠
+      for (let i = drops.length - 1; i >= 0; i--) {
+        const drop = drops[i];
+        drop.age += 16; // 约60fps
+        drop.alpha = 1 - (drop.age / DROP_FADE_TIME);
+
+        // 水珠下落/消散
+        drop.y += drop.speed;
+        drop.vx *= 0.99;
+        drop.x += drop.vx;
+
+        // 移除过期水珠
+        if (drop.alpha <= 0 || drop.y > h) {
+          drops.splice(i, 1);
+        }
+      }
+    }
+
+    // === 夏天：生成水珠 ===
+    function generateDrops() {
+      const dropCount = Math.floor(Math.random() * DROP_COUNT_MAX / 2) + DROP_COUNT_MAX / 2;
+      for (let i = 0; i < dropCount; i++) {
+        const size = Math.random() * 3 + 1;
+        drops.push({
+          x: Math.random() * w,
+          y: h - 100 + Math.random() * 50,
+          size,
+          speed: Math.random() * 0.5 + 0.1,
+          vx: (Math.random() - 0.5) * 2,
+          alpha: 1,
+          age: 0
+        });
+      }
+    }
+
+    // === 夏天：绘制海浪和水珠 ===
+    function drawSummer() {
+      // 绘制海浪
+      for (let i = 0; i < waves.length; i++) {
+        const wave = waves[i];
+        ctx.beginPath();
+        ctx.moveTo(0, wave.y);
+        for (let x = 0; x <= w; x += 5) {
+          const y = wave.y + Math.sin(x * wave.frequency + wave.phase) * wave.amplitude;
+          ctx.lineTo(x, y);
+        }
+        ctx.lineTo(w, h);
+        ctx.lineTo(0, h);
+        ctx.closePath();
+        const opacity = 0.3 - (i * 0.1);
+        ctx.fillStyle = `rgba(0, 191, 255, ${opacity})`;
+        ctx.fill();
+      }
+
+      // 绘制水珠
+      ctx.fillStyle = "rgba(255, 255, 255, 0.8)";
+      for (const drop of drops) {
+        ctx.globalAlpha = drop.alpha;
+        ctx.beginPath();
+        ctx.arc(drop.x, drop.y, drop.size, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+    }
+
+    // === 秋天：创建树叶 ===
+    function createLeaf() {
+      const size = Math.random() * (LEAF_SIZE_RANGE[1] - LEAF_SIZE_RANGE[0]) + LEAF_SIZE_RANGE[0];
+      const colors = ["#cd5c5c", "#daa520", "#b8860b", "#dc143c", "#ff8c00"];
+      return {
+        x: Math.random() * w,
+        y: Math.random() * -h,
+        size,
+        speed: Math.random() * (LEAF_SPEED_RANGE[1] - LEAF_SPEED_RANGE[0]) + LEAF_SPEED_RANGE[0],
+        vx: (Math.random() - 0.5) * 0.4,
+        vy: 0,
+        angle: Math.random() * Math.PI * 2,
+        rotateSpeed: (Math.random() - 0.5) * 0.03,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        stacked: false,
+        stackY: h
+      };
+    }
+
+    // === 秋天：更新树叶 ===
+    function updateLeaves() {
+      for (let i = 0; i < leaves.length; i++) {
+        const leaf = leaves[i];
+
+        if (!leaf.stacked) {
+          // 应用鼠标风力
+          leaf.vx += mouse.speedX * 0.0009;
+          leaf.vy = leaf.speed;
+
+          // 更新位置和旋转
+          leaf.x += leaf.vx + Math.sin(Date.now() * 0.0005 + i) * 0.3;
+          leaf.y += leaf.vy;
+          leaf.angle += leaf.rotateSpeed;
+
+          // 边界检测
+          if (leaf.x < 0) leaf.x = w;
+          if (leaf.x > w) leaf.x = 0;
+
+          // 堆积检测
+          let isStacked = false;
+          for (const bound of elementBounds) {
+            if (
+              leaf.x > bound.left &&
+              leaf.x < bound.right &&
+              leaf.y + leaf.size >= bound.top &&
+              leaf.y < bound.top + 10
+            ) {
+              leaf.stacked = true;
+              leaf.stackY = bound.top;
+              isStacked = true;
+              break;
+            }
+          }
+
+          // 地面堆积
+          if (!isStacked && leaf.y + leaf.size >= h) {
+            leaf.stacked = true;
+            leaf.stackY = h;
+          }
+        } else {
+          // 已堆积，保持位置
+          leaf.y = leaf.stackY - leaf.size;
+        }
+
+        // 重置树叶
+        if (leaf.y > h + leaf.size) {
+          leaves[i] = createLeaf();
+        }
+      }
+    }
+
+    // === 秋天：绘制树叶 ===
+    function drawLeaves() {
+      for (const leaf of leaves) {
+        ctx.save();
+        ctx.translate(leaf.x, leaf.y);
+        ctx.rotate(leaf.angle);
+        ctx.fillStyle = leaf.color;
+        ctx.beginPath();
+        ctx.moveTo(0, -leaf.size);
+        ctx.lineTo(leaf.size / 2, leaf.size / 2);
+        ctx.lineTo(0, leaf.size);
+        ctx.lineTo(-leaf.size / 2, leaf.size / 2);
+        ctx.closePath();
+        ctx.fill();
+        ctx.restore();
+      }
+    }
+
+    // === 星空：更新和绘制 ===
+    function updateStars() {
+      for (const star of stars) {
+        star.x += star.vx;
+        star.y += star.vy;
+
+        if (star.x < 0 || star.x > w) star.vx *= -1;
+        if (star.y < 0 || star.y > h) star.vy *= -1;
+      }
+    }
+
+    function drawStars() {
+      for (const star of stars) {
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.r, 0, Math.PI * 2);
+        ctx.fillStyle = "rgba(200,190,255,0.5)";
+        ctx.fill();
+      }
+    }
+
+    // === 鼠标状态更新 ===
+    function updateMouse(e) {
+      mouse.prevX = mouse.x;
+      mouse.prevY = mouse.y;
+      mouse.x = e.clientX;
+      mouse.y = e.clientY;
+
+      // 计算鼠标移动速度（风力）
+      mouse.speedX = (mouse.x - mouse.prevX) * 0.5;
+      mouse.speedY = (mouse.y - mouse.prevY) * 0.5;
+    }
+
+    // === 极光尾迹（仅星空样式） ===
+    const trails = [];
+    function updateTrails() {
+      if (currentSeason !== SEASONS.STARRY) return;
+
+      trails.push({
+        x: mouse.x,
+        y: mouse.y,
+        life: 60
+      });
+
+      for (let i = trails.length - 1; i >= 0; i--) {
+        const t = trails[i];
+        t.life--;
+
+        if (t.life <= 0) trails.splice(i, 1);
+      }
+    }
+
+    function drawTrails() {
+      if (currentSeason !== SEASONS.STARRY) return;
+
+      for (const t of trails) {
+        const alpha = t.life / 60;
+        ctx.beginPath();
+        ctx.arc(t.x, t.y, 18 * alpha, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(150,200,255,${alpha * 0.35})`;
+        ctx.fill();
+      }
+    }
+
+    // === 主动画循环 ===
+    function animate() {
+      // 清空画布
+      ctx.clearRect(0, 0, w, h);
+
+      // 更新对应季节元素
+      switch (currentSeason) {
+        case SEASONS.STARRY:
+          updateStars();
+          updateTrails();
+          drawStars();
+          drawTrails();
+          break;
+        case SEASONS.WINTER:
+          updateSnowflakes();
+          drawSnowflakes();
+          break;
+        case SEASONS.SPRING:
+          updateSakuras();
+          drawSakuras();
+          break;
+        case SEASONS.SUMMER:
+          updateSummer();
+          drawSummer();
+          break;
+        case SEASONS.AUTUMN:
+          updateLeaves();
+          drawLeaves();
+          break;
+      }
+
+      // 按钮光斑跟随
+      document.querySelectorAll(".main-btn, .health-btn, .wish-btn, .food-prefer-btn").forEach(btn => {
+        btn.addEventListener("mousemove", e => {
+          const rect = btn.getBoundingClientRect();
+          btn.style.setProperty("--x", `${e.clientX - rect.left}px`);
+          btn.style.setProperty("--y", `${e.clientY - rect.top}px`);
+        });
+      });
+
+      // 请求下一帧
+      requestAnimationFrame(animate);
+    }
+
+    // === 事件监听 ===
+    window.addEventListener("resize", resize);
+    window.addEventListener("mousemove", updateMouse);
+    seasonSwitchBtn.addEventListener("click", switchSeason);
+
+    // === 初始化执行 ===
+    window.onload = init;
+  </script>
 </body>
 </html>
+
 
 
 
