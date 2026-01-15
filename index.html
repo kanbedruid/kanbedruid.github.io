@@ -16,6 +16,7 @@
       --border-light: rgba(255,255,255,0.18);
       --bg-btn: rgba(255,255,255,0.03);
       --season-btn-size: 40px;
+      --btn-backdrop-blur: 8px; /* 按钮毛玻璃模糊度 */
     }
 
     * {
@@ -35,6 +36,7 @@
         radial-gradient(1000px 700px at 80% 20%, #2a174a 0%, transparent 65%),
         linear-gradient(180deg, #090b16, #05060c);
       transition: background 1s ease-in-out;
+      scroll-behavior: smooth;
     }
 
     /* 季节切换按钮样式 */
@@ -47,7 +49,7 @@
       border-radius: 50%;
       border: 1px solid var(--border-light);
       background: var(--bg-btn);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(var(--btn-backdrop-blur));
       color: var(--fg);
       font-size: 16px;
       cursor: pointer;
@@ -55,7 +57,7 @@
       align-items: center;
       justify-content: center;
       z-index: 10;
-      transition: transform 0.3s ease, border-color 0.3s ease;
+      transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out, color 1s ease-in-out;
     }
 
     .season-switch-btn:hover {
@@ -92,6 +94,7 @@
       font-size: 46px;
       letter-spacing: 4px;
       margin-bottom: 12px;
+      transition: color 1s ease-in-out;
     }
 
     .subtitle {
@@ -116,18 +119,18 @@
     .mini-calendar {
       width: 220px;
       border: 1px solid var(--border-light);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(var(--btn-backdrop-blur));
       border-radius: 8px;
       overflow: hidden;
       flex-shrink: 0; /* 防止日历被压缩 */
-      /* 用于积雪/花瓣/树叶堆积的容器参考 */
       position: relative;
       z-index: 1;
+      transition: background 1s ease-in-out, border-color 1s ease-in-out, color 1s ease-in-out;
     }
 
     .calendar-header {
       padding: 8px;
-      background: rgba(255,255,255,0.05);
+      background: var(--bg-btn);
       border-bottom: 1px solid var(--border-light);
       transition: background 1s ease-in-out, border-color 1s ease-in-out;
     }
@@ -166,7 +169,7 @@
       padding: 40px 26px;
       border: 1px solid var(--border-light);
       background: var(--bg-btn);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(var(--btn-backdrop-blur));
       cursor: pointer;
       overflow: hidden;
       transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out;
@@ -190,7 +193,7 @@
       padding: 30px 26px;
       border: 1px solid var(--border-light);
       background: var(--bg-btn);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(var(--btn-backdrop-blur));
       cursor: pointer;
       overflow: hidden;
       transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out;
@@ -212,7 +215,7 @@
       padding: 60px 26px;
       border: 1px solid var(--border-light);
       background: var(--bg-btn);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(var(--btn-backdrop-blur));
       cursor: pointer;
       overflow: hidden;
       transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out;
@@ -240,7 +243,7 @@
       padding: 60px 26px;
       border: 1px solid var(--border-light);
       background: var(--bg-btn);
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(var(--btn-backdrop-blur));
       cursor: pointer;
       overflow: hidden;
       transition: transform 0.3s ease, border-color 0.3s ease, background 1s ease-in-out;
@@ -331,13 +334,6 @@
       letter-spacing: 3px;
       z-index: 1;
       transition: color 1s ease-in-out;
-    }
-
-    /* 用于检测元素顶部/底部位置（积雪/花瓣/树叶堆积） */
-    .element-bounds {
-      position: absolute;
-      pointer-events: none;
-      z-index: 0;
     }
 
     @media (max-width: 640px) {
@@ -503,7 +499,12 @@
     const seasonIcons = ["🌌", "❄️", "🌸", "☀️", "🍂"];
     const seasonNames = ["星空", "冬天", "春天", "夏天", "秋天"];
 
-    // 元素边界缓存（用于积雪/花瓣/树叶堆积检测）
+    // 自动切换配置
+    const AUTO_SWITCH_INTERVAL = 15000; // 15秒自动切换
+    let autoSwitchTimer = null;
+    let isFading = false; // 防止渐变过程中重复切换
+
+    // 元素边界缓存（用于积雪/花瓣堆积检测）
     let elementBounds = [];
 
     // === 季节资源配置 ===
@@ -511,21 +512,21 @@
     let stars = [];
     const STAR_COUNT = 140;
 
-    // 冬天配置（雪花）- 优化：降低速度、增加对比度、持续生成
+    // 冬天配置（雪花）
     let snowflakes = [];
-    const SNOW_COUNT = 300; // 增加雪花数量，保证持续效果
+    const SNOW_COUNT = 300;
     const SNOW_SIZE_RANGE = [1, 4];
-    const SNOW_SPEED_RANGE = [0.1, 0.5]; // 大幅降低速度（羽毛级）
-    const SNOW_FLOAT_CHANCE = 0.02; // 偶尔往上飞的概率
+    const SNOW_SPEED_RANGE = [0.1, 0.5];
+    const SNOW_FLOAT_CHANCE = 0.02;
 
-    // 春天配置（樱花）- 优化：降低速度、持续生成
+    // 春天配置（樱花）- 优化：淡粉色
     let sakuras = [];
-    const SAKURA_COUNT = 250; // 增加樱花数量
+    const SAKURA_COUNT = 250;
     const SAKURA_SIZE_RANGE = [2, 5];
-    const SAKURA_SPEED_RANGE = [0.08, 0.4]; // 大幅降低速度
-    const SAKURA_FLOAT_CHANCE = 0.03; // 偶尔往上飞的概率
+    const SAKURA_SPEED_RANGE = [0.08, 0.4];
+    const SAKURA_FLOAT_CHANCE = 0.03;
 
-    // 夏天配置（海浪、水珠）- 优化：海浪速度减半、水珠分类
+    // 夏天配置（海浪、水珠）
     let waves = [];
     let drops = [];
     const WAVE_COUNT = 3;
@@ -537,12 +538,13 @@
     let lastWaveTime = 0;
     const WAVE_INTERVAL_RANGE = [3000, 7000];
 
-    // 秋天配置（树叶）- 优化：不堆积、慢速飘动
+    // 秋天配置（树叶）- 优化：更大、更慢、更少、3种颜色
     let leaves = [];
-    const LEAF_COUNT = 200;
-    const LEAF_SIZE_RANGE = [3, 7];
-    const LEAF_SPEED_RANGE = [0.1, 0.6]; // 慢速飘动
-    const LEAF_FLOAT_CHANCE = 0.025; // 偶尔往上飞
+    const LEAF_COUNT = 80; // 数量减少（原200→80）
+    const LEAF_SIZE_RANGE = [6, 12]; // 尺寸增大（原3-7→6-12）
+    const LEAF_SPEED_RANGE = [0.05, 0.3]; // 速度更慢（原0.1-0.6→0.05-0.3）
+    const LEAF_FLOAT_CHANCE = 0.025;
+    const LEAF_COLORS = ["#cd5c5c", "#daa520", "#b8860b"]; // 3种颜色固定
 
     // 鼠标状态
     const mouse = { x: w / 2, y: h / 2, prevX: w / 2, prevY: h / 2, speedX: 0, speedY: 0 };
@@ -552,6 +554,7 @@
       resize();
       cacheElementBounds();
       initSeasonResources();
+      startAutoSwitchTimer(); // 启动自动切换定时器
       animate();
     }
 
@@ -565,12 +568,12 @@
       resetSeasonResources();
     }
 
-    // === 缓存元素边界（按钮、日历等，用于堆积检测） ===
+    // === 缓存元素边界（实时更新，修复滚动BUG） ===
     function cacheElementBounds() {
       elementBounds = [];
       const elements = document.querySelectorAll(".mini-calendar, .main-btn, .health-btn, .wish-btn, .food-prefer-btn");
       elements.forEach(el => {
-        const rect = el.getBoundingClientRect();
+        const rect = el.getBoundingClientRect(); // 实时获取元素视口位置
         elementBounds.push({
           x: rect.left,
           y: rect.top,
@@ -579,7 +582,8 @@
           top: rect.top,
           bottom: rect.bottom,
           left: rect.left,
-          right: rect.right
+          right: rect.right,
+          el: el // 关联元素，便于后续验证
         });
       });
       // 添加页面底部边界（地面）
@@ -595,6 +599,44 @@
       });
     }
 
+    // === 启动自动切换定时器 ===
+    function startAutoSwitchTimer() {
+      clearInterval(autoSwitchTimer);
+      autoSwitchTimer = setInterval(() => {
+        if (!isFading) {
+          smoothSwitchSeason(); // 平滑切换下一个季节
+        }
+      }, AUTO_SWITCH_INTERVAL);
+    }
+
+    // === 平滑切换季节（渐变过渡） ===
+    function smoothSwitchSeason() {
+      isFading = true;
+      // 第一步：渐隐当前季节元素（降低透明度，耗时500ms）
+      const fadeOutTimer = setTimeout(() => {
+        // 第二步：切换季节数据
+        currentSeason = (currentSeason + 1) % 5;
+        seasonSwitchBtn.textContent = seasonIcons[currentSeason];
+        updateSeasonStyle();
+        resetSeasonResources();
+        // 第三步：渐显新季节元素（耗时500ms）
+        const fadeInTimer = setTimeout(() => {
+          isFading = false;
+          clearTimeout(fadeInTimer);
+        }, 500);
+        clearTimeout(fadeOutTimer);
+      }, 500);
+      // 重启定时器（避免切换过程中累计时间偏差）
+      startAutoSwitchTimer();
+    }
+
+    // === 手动切换季节（兼容平滑过渡） ===
+    function switchSeason() {
+      if (!isFading) {
+        smoothSwitchSeason();
+      }
+    }
+
     // === 季节资源初始化 ===
     function initSeasonResources() {
       // 初始化星空
@@ -606,13 +648,13 @@
         vy: (Math.random() - 0.5) * 0.25
       }));
 
-      // 初始化冬天雪花（直接填充满数量）
+      // 初始化冬天雪花
       snowflakes = Array.from({ length: SNOW_COUNT }, () => createSnowflake());
 
       // 初始化春天樱花
       sakuras = Array.from({ length: SAKURA_COUNT }, () => createSakura());
 
-      // 初始化夏天海浪（速度减半）
+      // 初始化夏天海浪
       waves = Array.from({ length: WAVE_COUNT }, (_, i) => ({
         y: h - 100 - i * 30,
         amplitude: 20 + i * 10,
@@ -648,7 +690,7 @@
             y: h - 100 - i * 30,
             amplitude: 20 + i * 10,
             frequency: 0.01 - i * 0.002,
-            speed: (0.02 + i * 0.005) / 2, // 速度减半
+            speed: (0.02 + i * 0.005) / 2,
             phase: Math.random() * Math.PI * 2
           }));
           drops = [];
@@ -659,25 +701,18 @@
       }
     }
 
-    // === 季节切换逻辑 ===
-    function switchSeason() {
-      currentSeason = (currentSeason + 1) % 5;
-      seasonSwitchBtn.textContent = seasonIcons[currentSeason];
-      updateSeasonStyle();
-      resetSeasonResources();
-      console.log(`当前季节：${seasonNames[currentSeason]}`);
-    }
-
-    // === 更新季节样式（背景、颜色等）- 优化冬天对比度 ===
+    // === 更新季节样式（优化各季节按钮颜色，保证区分度） ===
     function updateSeasonStyle() {
       const body = document.body;
       const root = document.documentElement;
+      const h1 = document.querySelector("h1");
       const subtitle = document.querySelector(".subtitle");
-      const footers = document.querySelector("footer");
+      const footer = document.querySelector("footer");
+      const allButtons = document.querySelectorAll(".main-btn, .health-btn, .wish-btn, .food-prefer-btn, .mini-calendar");
 
       switch (currentSeason) {
         case SEASONS.STARRY:
-          // 星空样式
+          // 星空样式：深色背景 + 浅紫按钮
           body.style.background = `
             radial-gradient(1200px 800px at 20% 10%, #1b1f3b 0%, transparent 60%),
             radial-gradient(1000px 700px at 80% 20%, #2a174a 0%, transparent 65%),
@@ -686,9 +721,11 @@
           root.style.setProperty("--fg", "#e8e8f0");
           root.style.setProperty("--muted", "#a0a0b8");
           root.style.setProperty("--accent", "#b7a8ff");
+          root.style.setProperty("--border-light", "rgba(255,255,255,0.18)");
+          root.style.setProperty("--bg-btn", "rgba(255,255,255,0.03)");
           break;
         case SEASONS.WINTER:
-          // 冬天样式（优化对比度：深灰蓝背景，突出白色雪花）
+          // 冬天样式：深灰蓝背景 + 浅蓝按钮
           body.style.background = `
             linear-gradient(180deg, #2c3e50, #34495e),
             linear-gradient(to right, #1a2530, #2c3e50)
@@ -696,42 +733,55 @@
           root.style.setProperty("--fg", "#ecf0f1");
           root.style.setProperty("--muted", "#bdc3c7");
           root.style.setProperty("--accent", "#3498db");
+          root.style.setProperty("--border-light", "rgba(255,255,255,0.25)");
+          root.style.setProperty("--bg-btn", "rgba(255,255,255,0.08)");
           break;
         case SEASONS.SPRING:
-          // 春天样式（嫩绿青草 + 蓝天）
+          // 春天样式：嫩绿蓝天 + 淡粉按钮
           body.style.background = `
             linear-gradient(180deg, #87ceeb, #90ee90),
             linear-gradient(to bottom, #7ccd7c 0%, #5f9ea0 100%)
           `;
           root.style.setProperty("--fg", "#2f4f2f");
           root.style.setProperty("--muted", "#4f6f4f");
-          root.style.setProperty("--accent", "#ff69b4");
+          root.style.setProperty("--accent", "#ffb6c1");
+          root.style.setProperty("--border-light", "rgba(47,79,47,0.2)");
+          root.style.setProperty("--bg-btn", "rgba(255,255,255,0.15)");
           break;
         case SEASONS.SUMMER:
-          // 夏天样式（沙滩 + 玻璃海）
+          // 夏天样式：沙滩蓝海 + 橙黄按钮
           body.style.background = `
             linear-gradient(180deg, #87ceeb, #f5deb3),
             linear-gradient(to bottom, #00bfff 0%, #fffacd 100%)
           `;
           root.style.setProperty("--fg", "#1e3a8a");
           root.style.setProperty("--muted", "#3b5998");
-          root.style.setProperty("--accent", "#ff4500");
+          root.style.setProperty("--accent", "#ff9800");
+          root.style.setProperty("--border-light", "rgba(30,58,138,0.2)");
+          root.style.setProperty("--bg-btn", "rgba(255,255,255,0.12)");
           break;
         case SEASONS.AUTUMN:
-          // 秋天样式（红叶黄叶林道）
+          // 秋天样式：红叶黄叶 + 深橙按钮
           body.style.background = `
             linear-gradient(180deg, #cd5c5c, #daa520),
             linear-gradient(to bottom, #b8860b 0%, #dc143c 100%)
           `;
           root.style.setProperty("--fg", "#fff8dc");
           root.style.setProperty("--muted", "#f5f5dc");
-          root.style.setProperty("--accent", "#ff8c00");
+          root.style.setProperty("--accent", "#ff7f50");
+          root.style.setProperty("--border-light", "rgba(255,248,220,0.25)");
+          root.style.setProperty("--bg-btn", "rgba(0,0,0,0.1)");
           break;
       }
 
-      // 更新文字颜色过渡
+      // 更新所有文字和按钮样式过渡
+      h1.style.color = getComputedStyle(root).getPropertyValue("--fg");
       subtitle.style.color = getComputedStyle(root).getPropertyValue("--muted");
-      footers.style.color = getComputedStyle(root).getPropertyValue("--muted");
+      footer.style.color = getComputedStyle(root).getPropertyValue("--muted");
+      allButtons.forEach(btn => {
+        btn.style.borderColor = getComputedStyle(root).getPropertyValue("--border-light");
+        btn.style.background = getComputedStyle(root).getPropertyValue("--bg-btn");
+      });
     }
 
     // === 冬天：创建雪花 ===
@@ -739,30 +789,34 @@
       const size = Math.random() * (SNOW_SIZE_RANGE[1] - SNOW_SIZE_RANGE[0]) + SNOW_SIZE_RANGE[0];
       return {
         x: Math.random() * w,
-        y: Math.random() * -h, // 从顶部生成
+        y: Math.random() * -h,
         size,
         speed: Math.random() * (SNOW_SPEED_RANGE[1] - SNOW_SPEED_RANGE[0]) + SNOW_SPEED_RANGE[0],
-        vx: (Math.random() - 0.5) * 0.3, // 横向速度减慢
+        vx: (Math.random() - 0.5) * 0.3,
         vy: 0,
         stacked: false,
-        stackY: h
+        stackY: h,
+        stackX: Math.random() * w
       };
     }
 
-    // === 冬天：更新雪花 - 优化持续生成、慢速、偶尔上浮、堆积后不飘动 ===
+    // === 冬天：更新雪花 - 修复滚动跟随BUG ===
     function updateSnowflakes() {
+      // 实时更新元素边界（解决滚动问题）
+      cacheElementBounds();
+
       for (let i = 0; i < snowflakes.length; i++) {
         const snow = snowflakes[i];
 
         if (!snow.stacked) {
-          // 偶尔往上飞（羽毛漂浮感）
+          // 偶尔往上飞
           if (Math.random() < SNOW_FLOAT_CHANCE) {
-            snow.vy = -snow.speed * 0.8; // 向上飞的速度
+            snow.vy = -snow.speed * 0.8;
           } else {
-            snow.vy = snow.speed; // 正常下落
+            snow.vy = snow.speed;
           }
 
-          // 应用鼠标风力（减弱风力影响，保持缓慢）
+          // 应用鼠标风力
           snow.vx += mouse.speedX * 0.0003;
 
           // 更新位置
@@ -784,7 +838,7 @@
             ) {
               snow.stacked = true;
               snow.stackY = bound.top;
-              snow.x = Math.max(bound.left + snow.size, Math.min(bound.right - snow.size, snow.x)); // 固定在元素顶部
+              snow.stackX = snow.x; // 记录堆积时的X坐标
               isStacked = true;
               break;
             }
@@ -794,23 +848,40 @@
           if (!isStacked && snow.y + snow.size >= h) {
             snow.stacked = true;
             snow.stackY = h;
-            snow.x = Math.max(snow.size, Math.min(w - snow.size, snow.x)); // 固定在地面
+            snow.stackX = snow.x;
           }
 
-          // 持续生成新雪花（当雪花落到屏幕下方时重置）
+          // 持续生成新雪花
           if (snow.y > h + snow.size) {
             snowflakes[i] = createSnowflake();
           }
         } else {
-          // 已堆积，完全固定位置，不再飘动
+          // 已堆积：跟随元素实时位置更新（修复滚动BUG）
           snow.y = snow.stackY - snow.size;
+          snow.x = snow.stackX;
+
+          // 验证堆积边界是否仍有效，无效则取消堆积
+          let boundValid = false;
+          for (const bound of elementBounds) {
+            if (
+              snow.stackX > bound.left &&
+              snow.stackX < bound.right &&
+              snow.stackY === bound.top
+            ) {
+              snow.stackY = bound.top; // 同步元素最新top位置
+              boundValid = true;
+              break;
+            }
+          }
+          if (!boundValid && snow.stackY !== h) {
+            snow.stacked = false; // 元素消失则重新飘落
+          }
         }
       }
     }
 
-    // === 冬天：绘制雪花 - 优化对比度 ===
+    // === 冬天：绘制雪花 ===
     function drawSnowflakes() {
-      // 雪花用纯白色，增加透明度，与深灰蓝背景形成强烈对比
       ctx.fillStyle = "rgba(255, 255, 255, 0.9)";
       for (const snow of snowflakes) {
         ctx.beginPath();
@@ -819,41 +890,45 @@
       }
     }
 
-    // === 春天：创建樱花 ===
+    // === 春天：创建樱花 - 优化：淡粉色 ===
     function createSakura() {
       const size = Math.random() * (SAKURA_SIZE_RANGE[1] - SAKURA_SIZE_RANGE[0]) + SAKURA_SIZE_RANGE[0];
       return {
         x: Math.random() * w,
-        y: Math.random() * -h, // 从顶部生成
+        y: Math.random() * -h,
         size,
         speed: Math.random() * (SAKURA_SPEED_RANGE[1] - SAKURA_SPEED_RANGE[0]) + SAKURA_SPEED_RANGE[0],
-        vx: (Math.random() - 0.5) * 0.2, // 横向速度减慢
+        vx: (Math.random() - 0.5) * 0.2,
         vy: 0,
         angle: Math.random() * Math.PI * 2,
-        rotateSpeed: (Math.random() - 0.5) * 0.01, // 旋转减慢
+        rotateSpeed: (Math.random() - 0.5) * 0.01,
         stacked: false,
-        stackY: h
+        stackY: h,
+        stackX: Math.random() * w
       };
     }
 
-    // === 春天：更新樱花 - 优化持续生成、慢速、偶尔上浮、堆积后不飘动 ===
+    // === 春天：更新樱花 - 修复滚动跟随BUG ===
     function updateSakuras() {
+      // 实时更新元素边界（解决滚动问题）
+      cacheElementBounds();
+
       for (let i = 0; i < sakuras.length; i++) {
         const sakura = sakuras[i];
 
         if (!sakura.stacked) {
-          // 偶尔往上飞（羽毛漂浮感）
+          // 偶尔往上飞
           if (Math.random() < SAKURA_FLOAT_CHANCE) {
-            sakura.vy = -sakura.speed * 0.7; // 向上飞
+            sakura.vy = -sakura.speed * 0.7;
           } else {
-            sakura.vy = sakura.speed; // 正常下落
+            sakura.vy = sakura.speed;
           }
 
-          // 应用鼠标风力（减弱）
+          // 应用鼠标风力
           sakura.vx += mouse.speedX * 0.0002;
 
           // 更新位置和旋转
-          sakura.x += sakura.vx + Math.sin(Date.now() * 0.0003 + i) * 0.1; // 横向飘动减慢
+          sakura.x += sakura.vx + Math.sin(Date.now() * 0.0003 + i) * 0.1;
           sakura.y += sakura.vy;
           sakura.angle += sakura.rotateSpeed;
 
@@ -872,7 +947,7 @@
             ) {
               sakura.stacked = true;
               sakura.stackY = bound.top;
-              sakura.x = Math.max(bound.left + sakura.size, Math.min(bound.right - sakura.size, sakura.x));
+              sakura.stackX = sakura.x;
               isStacked = true;
               break;
             }
@@ -882,7 +957,7 @@
           if (!isStacked && sakura.y + sakura.size >= h) {
             sakura.stacked = true;
             sakura.stackY = h;
-            sakura.x = Math.max(sakura.size, Math.min(w - sakura.size, sakura.x));
+            sakura.stackX = sakura.x;
           }
 
           // 持续生成新樱花
@@ -890,20 +965,38 @@
             sakuras[i] = createSakura();
           }
         } else {
-          // 已堆积，固定位置
+          // 已堆积：跟随元素实时位置更新（修复滚动BUG）
           sakura.y = sakura.stackY - sakura.size;
+          sakura.x = sakura.stackX;
+
+          // 验证堆积边界是否仍有效
+          let boundValid = false;
+          for (const bound of elementBounds) {
+            if (
+              sakura.stackX > bound.left &&
+              sakura.stackX < bound.right &&
+              sakura.stackY === bound.top
+            ) {
+              sakura.stackY = bound.top;
+              boundValid = true;
+              break;
+            }
+          }
+          if (!boundValid && sakura.stackY !== h) {
+            sakura.stacked = false;
+          }
         }
       }
     }
 
-    // === 春天：绘制樱花 ===
+    // === 春天：绘制樱花 - 优化：淡粉色 ===
     function drawSakuras() {
       for (const sakura of sakuras) {
         ctx.save();
         ctx.translate(sakura.x, sakura.y);
         ctx.rotate(sakura.angle);
-        // 樱花颜色加深，增加对比度
-        ctx.fillStyle = "rgba(255, 85, 155, 0.9)";
+        // 淡粉色：降低不透明度，调浅色调
+        ctx.fillStyle = "rgba(255, 182, 193, 0.7)";
         ctx.beginPath();
         ctx.ellipse(0, 0, sakura.size, sakura.size * 0.8, 0, 0, Math.PI * 2);
         ctx.fill();
@@ -911,11 +1004,11 @@
       }
     }
 
-    // === 夏天：更新海浪和水珠 - 优化海浪速度、水珠分类 ===
+    // === 夏天：更新海浪和水珠 ===
     function updateSummer() {
       const now = Date.now();
 
-      // 更新海浪（速度已在初始化时减半）
+      // 更新海浪
       for (const wave of waves) {
         wave.phase += wave.speed;
       }
@@ -929,7 +1022,7 @@
       // 更新水珠
       for (let i = drops.length - 1; i >= 0; i--) {
         const drop = drops[i];
-        drop.age += 16; // 约60fps
+        drop.age += 16;
         drop.alpha = 1 - (drop.age / drop.fadeTime);
 
         // 水珠下落（速度减慢）
@@ -944,16 +1037,16 @@
       }
     }
 
-    // === 夏天：生成水珠 - 优化分类（大/中/小） ===
+    // === 夏天：生成水珠 ===
     function generateDrops() {
       DROP_TYPES.forEach(type => {
         const count = Math.floor(Math.random() * (type.count[1] - type.count[0]) + type.count[0]);
         for (let i = 0; i < count; i++) {
           drops.push({
-            x: Math.random() * w, // 整个屏幕分布
-            y: Math.random() * h * 0.6, // 从屏幕上半部分生成
+            x: Math.random() * w,
+            y: Math.random() * h * 0.6,
             size: type.size,
-            speed: Math.random() * 0.3 + 0.1, // 下落速度减慢
+            speed: Math.random() * 0.3 + 0.1,
             vx: (Math.random() - 0.5) * 1.5,
             alpha: 1,
             age: 0,
@@ -993,24 +1086,23 @@
       }
     }
 
-    // === 秋天：创建树叶 ===
+    // === 秋天：创建树叶 - 优化：更大、更慢、3种颜色 ===
     function createLeaf() {
       const size = Math.random() * (LEAF_SIZE_RANGE[1] - LEAF_SIZE_RANGE[0]) + LEAF_SIZE_RANGE[0];
-      const colors = ["#cd5c5c", "#daa520", "#b8860b", "#dc143c", "#ff8c00"];
       return {
         x: Math.random() * w,
-        y: Math.random() * -h, // 从顶部生成
+        y: Math.random() * -h,
         size,
         speed: Math.random() * (LEAF_SPEED_RANGE[1] - LEAF_SPEED_RANGE[0]) + LEAF_SPEED_RANGE[0],
         vx: (Math.random() - 0.5) * 0.3,
         vy: 0,
         angle: Math.random() * Math.PI * 2,
-        rotateSpeed: (Math.random() - 0.5) * 0.015, // 旋转减慢
-        color: colors[Math.floor(Math.random() * colors.length)]
+        rotateSpeed: (Math.random() - 0.5) * 0.015,
+        color: LEAF_COLORS[Math.floor(Math.random() * LEAF_COLORS.length)] // 仅3种颜色
       };
     }
 
-    // === 秋天：更新树叶 - 优化不堆积、慢速、偶尔上浮 ===
+    // === 秋天：更新树叶 - 优化：更大、更慢、不堆积 ===
     function updateLeaves() {
       for (let i = 0; i < leaves.length; i++) {
         const leaf = leaves[i];
@@ -1022,7 +1114,7 @@
           leaf.vy = leaf.speed;
         }
 
-        // 应用鼠标风力（减弱）
+        // 应用鼠标风力
         leaf.vx += mouse.speedX * 0.00025;
 
         // 更新位置和旋转
@@ -1034,7 +1126,6 @@
         if (leaf.x < 0) leaf.x = w;
         if (leaf.x > w) leaf.x = 0;
         if (leaf.y > h + leaf.size) {
-          // 落到屏幕下方后重置到顶部
           leaves[i] = createLeaf();
         } else if (leaf.y < -leaf.size) {
           leaf.y = -leaf.size;
@@ -1170,6 +1261,10 @@
     // === 事件监听 ===
     window.addEventListener("resize", resize);
     window.addEventListener("mousemove", updateMouse);
+    window.addEventListener("scroll", () => {
+      // 滚动时强制更新元素边界，确保雪花/樱花跟随
+      cacheElementBounds();
+    });
     seasonSwitchBtn.addEventListener("click", switchSeason);
 
     // === 初始化执行 ===
@@ -1177,7 +1272,3 @@
   </script>
 </body>
 </html>
-
-
-
-
