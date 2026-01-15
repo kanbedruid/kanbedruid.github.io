@@ -318,66 +318,8 @@
 
     <!-- 日历 + 主按钮 并排容器 -->
     <div class="calendar-main-wrap">
-      <!-- 小型日历表格 -->
-      <div class="mini-calendar">
-        <div class="calendar-header">
-          <span style="font-size: 14px; letter-spacing: 2px;">2026 · 01</span>
-        </div>
-        <div class="calendar-week">
-          <span>日</span>
-          <span>一</span>
-          <span>二</span>
-          <span>三</span>
-          <span>四</span>
-          <span>五</span>
-          <span>六</span>
-        </div>
-        <div class="calendar-days">
-          <span></span>
-          <span></span>
-          <span></span>
-          <span></span>
-          <span>1</span>
-          <span>2</span>
-          <span>3</span>
-        </div>
-        <div class="calendar-days">
-          <span>4</span>
-          <span>5</span>
-          <span>6</span>
-          <span>7</span>
-          <span>8</span>
-          <span>9</span>
-          <span>10</span>
-        </div>
-        <div class="calendar-days">
-          <span>11</span>
-          <span>12</span>
-          <span>13</span>
-          <span class="current">14</span>
-          <span>15</span>
-          <span>16</span>
-          <span>17</span>
-        </div>
-        <div class="calendar-days">
-          <span>18</span>
-          <span>19</span>
-          <span>20</span>
-          <span>21</span>
-          <span>22</span>
-          <span>23</span>
-          <span>24</span>
-        </div>
-        <div class="calendar-days">
-          <span>25</span>
-          <span>26</span>
-          <span>27</span>
-          <span>28</span>
-          <span>29</span>
-          <span>30</span>
-          <span>31</span>
-        </div>
-      </div>
+      <!-- 小型日历表格（改为空容器，由JS动态生成） -->
+      <div class="mini-calendar" id="dynamic-mini-calendar"></div>
 
       <!-- 主按钮：我们的每一天（按钮标题） -->
       <div class="main-btn" onclick="location.href='https://kanbedruid.github.io/days/'">
@@ -497,9 +439,91 @@
       btn.style.setProperty("--y", `${e.clientY - rect.top}px`);
     });
   });
+
+  /* ===== 核心：动态生成迷你日历（自动更新年月和当天日期） ===== */
+  function generateMiniCalendar() {
+    // 1. 获取当前日期信息
+    const now = new Date();
+    const currentYear = now.getFullYear(); // 当前年份（如2026）
+    const currentMonth = now.getMonth(); // 当前月份（0-11，0=1月）
+    const currentDate = now.getDate(); // 当天日期（1-31）
+
+    // 2. 格式化日历头部标题（如 2026 · 01）
+    const formattedMonth = String(currentMonth + 1).padStart(2, "0"); // 月份补零（1→01，12→12）
+    const calendarHeader = `
+      <div class="calendar-header">
+        <span style="font-size: 14px; letter-spacing: 2px;">${currentYear} · ${formattedMonth}</span>
+      </div>
+    `;
+
+    // 3. 生成星期头部（日、一、二、三、四、五、六）
+    const weekHeader = `
+      <div class="calendar-week">
+        <span>日</span>
+        <span>一</span>
+        <span>二</span>
+        <span>三</span>
+        <span>四</span>
+        <span>五</span>
+        <span>六</span>
+      </div>
+    `;
+
+    // 4. 计算当月日历数据
+    const firstDayOfMonth = new Date(currentYear, currentMonth, 1).getDay(); // 当月1号是星期几（0=周日）
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate(); // 当月总天数
+
+    // 5. 生成日期格子（填充空白前置格子 + 当月日期 + 按7个一行分组）
+    let dateCells = "";
+    let dayCounter = 1;
+    let currentRow = [];
+
+    // 先填充月初空白格子（当月1号之前的空位）
+    for (let i = 0; i < firstDayOfMonth; i++) {
+      currentRow.push("<span></span>");
+    }
+
+    // 填充当月所有日期
+    for (let day = 1; day <= daysInMonth; day++) {
+      currentRow.push(
+        day === currentDate 
+          ? `<span class="current">${day}</span>` // 当天日期添加current类，高亮显示
+          : `<span>${day}</span>`
+      );
+
+      // 每7个格子组成一行，生成日历行
+      if (currentRow.length === 7 || day === daysInMonth) {
+        // 若最后一行不足7个格子，填充空白后置格子
+        while (currentRow.length < 7) {
+          currentRow.push("<span></span>");
+        }
+        dateCells += `<div class="calendar-days">${currentRow.join("")}</div>`;
+        currentRow = [];
+      }
+    }
+
+    // 6. 拼接完整日历HTML，插入到页面容器中
+    const calendarContainer = document.getElementById("dynamic-mini-calendar");
+    calendarContainer.innerHTML = calendarHeader + weekHeader + dateCells;
+  }
+
+  // 7. 页面加载时生成日历，后续可定时更新（可选）
+  window.onload = function() {
+    generateMiniCalendar();
+
+    // 可选：每天凌晨自动更新日历（避免页面一直打开时不更新）
+    setInterval(() => {
+      const now = new Date();
+      // 当时间为 00:00:00 时，重新生成日历
+      if (now.getHours() === 0 && now.getMinutes() === 0 && now.getSeconds() === 0) {
+        generateMiniCalendar();
+      }
+    }, 1000); // 每秒检查一次
+  };
 </script>
 
 </body>
 </html>
+
 
 
