@@ -27,27 +27,34 @@
             background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
             color: var(--dark-color);
             min-height: 100vh;
-            padding: 10px;
-            line-height: 1.5;
-            font-size: 16px;
+            padding: 1.5vh;
+            line-height: 1.4;
+            font-size: 3.5vw;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
         }
         
         .container {
             max-width: 1000px;
             margin: 0 auto;
             width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
         }
         
         header {
             text-align: center;
-            margin-bottom: 20px;
-            padding: 10px;
+            margin-bottom: 2vh;
+            padding: 1vh;
+            flex-shrink: 0;
         }
         
         h1 {
             color: var(--primary-color);
-            font-size: clamp(1.8rem, 5vw, 2.8rem);
-            margin-bottom: 8px;
+            font-size: 5vw;
+            margin-bottom: 0.5vh;
             background: linear-gradient(to right, var(--primary-color), var(--accent-color));
             -webkit-background-clip: text;
             background-clip: text;
@@ -57,7 +64,7 @@
         }
         
         .subtitle {
-            font-size: clamp(1rem, 3vw, 1.2rem);
+            font-size: 3vw;
             color: #666;
             max-width: 600px;
             margin: 0 auto;
@@ -66,18 +73,19 @@
         .progress-container {
             background-color: white;
             border-radius: var(--border-radius);
-            padding: 15px;
-            margin-bottom: 20px;
+            padding: 1.5vh;
+            margin-bottom: 2vh;
             box-shadow: var(--shadow);
             display: none;
+            flex-shrink: 0;
         }
         
         .progress-bar {
-            height: 8px;
+            height: 1vh;
             background-color: #e0e0e0;
-            border-radius: 4px;
+            border-radius: 0.5vh;
             overflow: hidden;
-            margin-bottom: 8px;
+            margin-bottom: 0.8vh;
         }
         
         .progress-fill {
@@ -92,45 +100,47 @@
             justify-content: space-between;
             font-weight: 600;
             color: var(--primary-color);
-            font-size: 0.9rem;
+            font-size: 2.8vw;
         }
         
         .question-container {
             background-color: white;
             border-radius: var(--border-radius);
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 2vh;
+            margin-bottom: 2vh;
             box-shadow: var(--shadow);
             display: none;
+            flex-grow: 1;
+            overflow-y: auto;
         }
         
         .question-title {
-            font-size: clamp(1.2rem, 4vw, 1.5rem);
-            margin-bottom: 15px;
+            font-size: 4vw;
+            margin-bottom: 2vh;
             color: var(--primary-color);
             display: flex;
             align-items: center;
         }
         
         .question-title i {
-            margin-right: 8px;
+            margin-right: 1vh;
             color: var(--accent-color);
-            font-size: 1.2rem;
+            font-size: 3.5vw;
         }
         
         .options-container {
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 1.2vh;
         }
         
         .option {
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            padding: 1.8vh;
+            border: 0.3vh solid #e0e0e0;
+            border-radius: 1vh;
             cursor: pointer;
             transition: all 0.3s ease;
-            font-size: clamp(0.95rem, 3vw, 1.05rem);
+            font-size: 3.2vw;
             display: flex;
             align-items: center;
         }
@@ -138,7 +148,7 @@
         .option:hover {
             border-color: var(--secondary-color);
             background-color: rgba(109, 157, 197, 0.05);
-            transform: translateY(-2px);
+            transform: translateY(-0.2vh);
         }
         
         .option.selected {
@@ -151,14 +161,14 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 28px;
-            height: 28px;
+            width: 5vh;
+            height: 5vh;
             background-color: var(--secondary-color);
             color: white;
             border-radius: 50%;
-            margin-right: 12px;
+            margin-right: 1.5vh;
             flex-shrink: 0;
-            font-size: 0.9rem;
+            font-size: 3vw;
         }
         
         .option.selected .option-label {
@@ -168,15 +178,16 @@
         .buttons-container {
             display: flex;
             justify-content: space-between;
-            margin-top: 20px;
-            gap: 10px;
+            margin-top: 2.5vh;
+            gap: 1vh;
+            flex-shrink: 0;
         }
         
         .btn {
-            padding: 12px 20px;
+            padding: 1.5vh 2.5vh;
             border: none;
-            border-radius: 8px;
-            font-size: clamp(1rem, 3vw, 1.1rem);
+            border-radius: 1vh;
+            font-size: 3.5vw;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
@@ -187,8 +198,8 @@
         }
         
         .btn i {
-            margin-right: 6px;
-            font-size: 1rem;
+            margin-right: 0.8vh;
+            font-size: 3.5vw;
         }
         
         .btn-primary {
@@ -198,7 +209,7 @@
         
         .btn-primary:hover {
             background-color: #3a5a8a;
-            transform: translateY(-2px);
+            transform: translateY(-0.2vh);
         }
         
         .btn-secondary {
@@ -219,32 +230,34 @@
         .result-container {
             background-color: white;
             border-radius: var(--border-radius);
-            padding: 20px;
-            margin-bottom: 20px;
+            padding: 2vh;
+            margin-bottom: 2vh;
             box-shadow: var(--shadow);
             display: none;
+            flex-grow: 1;
+            overflow-y: auto;
         }
         
         .result-title {
             text-align: center;
-            font-size: clamp(1.6rem, 5vw, 2.2rem);
+            font-size: 4.5vw;
             color: var(--primary-color);
-            margin-bottom: 20px;
+            margin-bottom: 2vh;
         }
         
         .player-stats {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2vh;
+            margin-bottom: 3vh;
         }
         
         .stat-card {
             background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
+            border-radius: 1vh;
+            padding: 1.5vh;
             text-align: center;
-            border-left: 4px solid var(--secondary-color);
+            border-left: 0.5vh solid var(--secondary-color);
         }
         
         .stat-card.highlight {
@@ -253,64 +266,64 @@
         }
         
         .stat-name {
-            font-size: clamp(1rem, 3vw, 1.2rem);
+            font-size: 3vw;
             font-weight: 600;
             color: var(--primary-color);
-            margin-bottom: 8px;
+            margin-bottom: 0.8vh;
         }
         
         .stat-value {
-            font-size: clamp(1.6rem, 4vw, 2.2rem);
+            font-size: 5vw;
             font-weight: 700;
             color: var(--dark-color);
         }
         
         .match-result {
             background-color: #f8f9fa;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
+            border-radius: 1vh;
+            padding: 2vh;
+            margin-bottom: 2vh;
             text-align: center;
         }
         
         .match-title {
-            font-size: clamp(1.4rem, 4vw, 1.8rem);
+            font-size: 4vw;
             color: var(--primary-color);
-            margin-bottom: 15px;
+            margin-bottom: 1.5vh;
         }
         
         .character-name {
-            font-size: clamp(1.8rem, 5vw, 2.5rem);
+            font-size: 5vw;
             color: var(--accent-color);
             font-weight: 800;
-            margin-bottom: 8px;
+            margin-bottom: 0.8vh;
             word-wrap: break-word;
         }
         
         .character-info {
-            font-size: clamp(1rem, 3vw, 1.1rem);
+            font-size: 3vw;
             color: #666;
-            margin-bottom: 15px;
+            margin-bottom: 1.5vh;
         }
         
         .similarity {
-            font-size: clamp(1.2rem, 3vw, 1.4rem);
+            font-size: 3.5vw;
             color: var(--primary-color);
             font-weight: 600;
         }
         
         .similarity-percent {
-            font-size: clamp(1.6rem, 4vw, 2rem);
+            font-size: 5vw;
             color: var(--accent-color);
             font-weight: 800;
-            margin-top: 5px;
+            margin-top: 0.5vh;
         }
         
         .dimensions-comparison {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
+            gap: 1.5vh;
+            margin-top: 2vh;
         }
         
         .dimension-bar {
@@ -320,22 +333,22 @@
         
         .dimension-name {
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 0.5vh;
             color: var(--primary-color);
-            font-size: 0.9rem;
+            font-size: 2.8vw;
         }
         
         .dimension-value {
-            font-size: clamp(1rem, 2.5vw, 1.2rem);
+            font-size: 3.2vw;
             font-weight: 700;
-            margin-bottom: 5px;
+            margin-bottom: 0.5vh;
         }
         
         .bar-container {
-            height: 120px;
-            width: 24px;
+            height: 12vh;
+            width: 3.5vh;
             background-color: #e0e0e0;
-            border-radius: 12px;
+            border-radius: 1.5vh;
             margin: 0 auto;
             position: relative;
             overflow: hidden;
@@ -346,7 +359,7 @@
             bottom: 0;
             width: 100%;
             background-color: var(--secondary-color);
-            border-radius: 12px;
+            border-radius: 1.5vh;
             transition: height 1s ease;
         }
         
@@ -356,59 +369,63 @@
         
         .restart-btn {
             display: block;
-            margin: 20px auto 0;
-            padding: 12px 30px;
+            margin: 2vh auto 0;
+            padding: 1.5vh 3vh;
             background-color: var(--primary-color);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: clamp(1.1rem, 3vw, 1.2rem);
+            border-radius: 1vh;
+            font-size: 3.5vw;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             width: 100%;
-            max-width: 300px;
+            max-width: 30vh;
         }
         
         .restart-btn:hover {
             background-color: #3a5a8a;
-            transform: translateY(-3px);
+            transform: translateY(-0.3vh);
         }
         
         .welcome-container {
             background-color: white;
             border-radius: var(--border-radius);
-            padding: 20px;
+            padding: 2vh;
             text-align: center;
             box-shadow: var(--shadow);
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow-y: auto;
         }
         
         .welcome-title {
-            font-size: clamp(1.6rem, 5vw, 2.2rem);
+            font-size: 4.5vw;
             color: var(--primary-color);
-            margin-bottom: 15px;
+            margin-bottom: 1.5vh;
         }
         
         .welcome-text {
-            font-size: clamp(1rem, 3vw, 1.1rem);
+            font-size: 3.2vw;
             color: #666;
-            max-width: 700px;
-            margin: 0 auto 20px;
-            line-height: 1.6;
+            margin: 0 auto 2vh;
+            line-height: 1.5;
         }
         
         .dimensions-list {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin-bottom: 25px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.2vh;
+            margin-bottom: 2.5vh;
         }
         
         .dimension-intro {
             background-color: #f8f9fa;
-            border-radius: 8px;
-            padding: 15px;
-            border-top: 4px solid var(--secondary-color);
+            border-radius: 1vh;
+            padding: 1.5vh;
+            border-top: 0.5vh solid var(--secondary-color);
         }
         
         .dimension-intro:nth-child(4) {
@@ -424,61 +441,64 @@
         }
         
         .dimension-intro-title {
-            font-size: clamp(1.1rem, 3vw, 1.3rem);
+            font-size: 3.5vw;
             color: var(--primary-color);
-            margin-bottom: 8px;
+            margin-bottom: 0.8vh;
             display: flex;
             align-items: center;
             justify-content: center;
         }
         
         .dimension-intro-title i {
-            margin-right: 6px;
-            font-size: 1.1rem;
+            margin-right: 0.6vh;
+            font-size: 3.5vw;
         }
         
         .dimension-intro-desc {
             color: #666;
-            font-size: 0.9rem;
+            font-size: 2.8vw;
         }
         
         .start-btn {
-            padding: 15px 30px;
+            padding: 1.8vh 3vh;
             background-color: var(--accent-color);
             color: white;
             border: none;
-            border-radius: 8px;
-            font-size: clamp(1.2rem, 3.5vw, 1.3rem);
+            border-radius: 1vh;
+            font-size: 3.8vw;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 4px 0 rgba(255, 126, 95, 0.3);
+            box-shadow: 0 0.6vh 0 rgba(255, 126, 95, 0.3);
             width: 100%;
-            max-width: 300px;
+            max-width: 30vh;
+            margin: 0 auto;
         }
         
         .start-btn:hover {
             background-color: #ff6a4a;
-            transform: translateY(-3px);
-            box-shadow: 0 6px 0 rgba(255, 126, 95, 0.3);
+            transform: translateY(-0.3vh);
+            box-shadow: 0 0.9vh 0 rgba(255, 126, 95, 0.3);
         }
         
         .footer {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 2vh;
             color: #888;
-            font-size: 0.85rem;
-            padding: 0 10px;
+            font-size: 2.5vw;
+            padding: 0 1vh;
+            flex-shrink: 0;
         }
         
         /* 超小屏幕（小于400px）的优化 */
         @media (max-width: 400px) {
             body {
-                padding: 8px;
+                font-size: 4vw;
+                padding: 1vh;
             }
             
             .player-stats, .dimensions-list {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(2, 1fr);
             }
             
             .dimensions-comparison {
@@ -486,27 +506,27 @@
             }
             
             .question-container, .result-container, .welcome-container {
-                padding: 15px;
+                padding: 1.5vh;
             }
             
             .option {
-                padding: 12px 10px;
+                padding: 1.2vh 1vh;
             }
             
             .option-label {
-                width: 24px;
-                height: 24px;
-                margin-right: 8px;
-                font-size: 0.8rem;
+                width: 4vh;
+                height: 4vh;
+                margin-right: 0.8vh;
+                font-size: 2.8vw;
             }
             
             .btn {
-                padding: 10px 15px;
+                padding: 1vh 1.5vh;
             }
             
             .bar-container {
-                height: 100px;
-                width: 20px;
+                height: 10vh;
+                width: 3vh;
             }
         }
         
@@ -517,12 +537,17 @@
             }
             
             .player-stats, .dimensions-list {
-                grid-template-columns: repeat(2, 1fr);
+                grid-template-columns: repeat(3, 1fr);
             }
         }
         
         /* 大屏幕（768px以上）的优化 */
         @media (min-width: 768px) {
+            body {
+                font-size: 16px;
+                padding: 20px;
+            }
+            
             .player-stats, .dimensions-list {
                 grid-template-columns: repeat(3, 1fr);
             }
@@ -593,6 +618,18 @@
             -webkit-tap-highlight-color: transparent;
             touch-action: manipulation;
         }
+        
+        /* 强制隐藏滚动条 */
+        .welcome-container, .question-container, .result-container {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        
+        .welcome-container::-webkit-scrollbar,
+        .question-container::-webkit-scrollbar,
+        .result-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari and Opera */
+        }
     </style>
 </head>
 <body>
@@ -604,36 +641,38 @@
         
         <!-- 欢迎页面 -->
         <div class="welcome-container" id="welcome-container">
-            <h2 class="welcome-title">探索你的历史人物匹配度</h2>
-            <p class="welcome-text">
-                本测试将从<strong>体质、智力、意志、魅力、颜值、运气</strong>六个维度评估你的特质。
-                通过一系列选择题，系统会为你生成个性化评分，并与上百位历史人物的六维属性进行匹配，找出与你最相似的历史人物。
-            </p>
-            
-            <div class="dimensions-list">
-                <div class="dimension-intro">
-                    <div class="dimension-intro-title"><i class="fas fa-heartbeat"></i> 体质</div>
-                    <p class="dimension-intro-desc">衡量身体健康水平、运动能力和体能状况</p>
-                </div>
-                <div class="dimension-intro">
-                    <div class="dimension-intro-title"><i class="fas fa-brain"></i> 智力</div>
-                    <p class="dimension-intro-desc">评估认知能力、学习能力和创造性思维</p>
-                </div>
-                <div class="dimension-intro">
-                    <div class="dimension-intro-title"><i class="fas fa-fist-raised"></i> 意志</div>
-                    <p class="dimension-intro-desc">反映精神力量、情绪稳定性和坚韧程度</p>
-                </div>
-                <div class="dimension-intro">
-                    <div class="dimension-intro-title"><i class="fas fa-users"></i> 魅力</div>
-                    <p class="dimension-intro-desc">衡量人际交往能力、领导力和影响力</p>
-                </div>
-                <div class="dimension-intro">
-                    <div class="dimension-intro-title"><i class="fas fa-star"></i> 颜值</div>
-                    <p class="dimension-intro-desc">评估外貌吸引力、气质和形象表现力</p>
-                </div>
-                <div class="dimension-intro">
-                    <div class="dimension-intro-title"><i class="fas fa-clover"></i> 运气</div>
-                    <p class="dimension-intro-desc">反映机遇把握能力、命运眷顾程度</p>
+            <div>
+                <h2 class="welcome-title">探索你的历史人物匹配度</h2>
+                <p class="welcome-text">
+                    本测试将从<strong>体质、智力、意志、魅力、颜值、运气</strong>六个维度评估你的特质。
+                    通过一系列选择题，系统会为你生成个性化评分，并与上百位历史人物的六维属性进行匹配，找出与你最相似的历史人物。
+                </p>
+                
+                <div class="dimensions-list">
+                    <div class="dimension-intro">
+                        <div class="dimension-intro-title"><i class="fas fa-heartbeat"></i> 体质</div>
+                        <p class="dimension-intro-desc">衡量身体健康水平、运动能力和体能状况</p>
+                    </div>
+                    <div class="dimension-intro">
+                        <div class="dimension-intro-title"><i class="fas fa-brain"></i> 智力</div>
+                        <p class="dimension-intro-desc">评估认知能力、学习能力和创造性思维</p>
+                    </div>
+                    <div class="dimension-intro">
+                        <div class="dimension-intro-title"><i class="fas fa-fist-raised"></i> 意志</div>
+                        <p class="dimension-intro-desc">反映精神力量、情绪稳定性和坚韧程度</p>
+                    </div>
+                    <div class="dimension-intro">
+                        <div class="dimension-intro-title"><i class="fas fa-users"></i> 魅力</div>
+                        <p class="dimension-intro-desc">衡量人际交往能力、领导力和影响力</p>
+                    </div>
+                    <div class="dimension-intro">
+                        <div class="dimension-intro-title"><i class="fas fa-star"></i> 颜值</div>
+                        <p class="dimension-intro-desc">评估外貌吸引力、气质和形象表现力</p>
+                    </div>
+                    <div class="dimension-intro">
+                        <div class="dimension-intro-title"><i class="fas fa-clover"></i> 运气</div>
+                        <p class="dimension-intro-desc">反映机遇把握能力、命运眷顾程度</p>
+                    </div>
                 </div>
             </div>
             
@@ -1087,6 +1126,7 @@
                 
                 similarity = (similarity / 60) * 100; // 转换为百分比
                 
+               
                 if (similarity > bestSimilarity) {
                     bestSimilarity = similarity;
                     bestMatch = figure;
