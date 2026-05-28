@@ -231,7 +231,11 @@ function render(data) {
     return;
   }
 
-  const headers = Object.keys(data[0]).filter(isValidHeader);
+  /* ===== 隐藏 L 列及其右侧所有列 ===== */
+  const MAX_COL_INDEX = 11; // L 列（A=0）
+  const headers = Object.keys(data[0])
+    .filter((_, index) => index < MAX_COL_INDEX)
+    .filter(isValidHeader);
 
   const table = document.createElement("table");
   const thead = document.createElement("thead");
