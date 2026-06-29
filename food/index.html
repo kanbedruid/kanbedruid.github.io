@@ -294,7 +294,7 @@ function applyFilter() {
 
   const filtered = originalData.filter(row => {
     const nameMatch = name
-      ? String(row["饭店"] || "").includes(name)   // ← 列名按你 Excel 实际改
+      ? String(row["饭店名"] || "").includes(name)   // ← 列名按你 Excel 实际改
       : true;
     const locationMatch = loc
       ? String(row["位置"] || "").includes(loc)
