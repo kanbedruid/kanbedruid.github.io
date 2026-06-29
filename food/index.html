@@ -185,6 +185,8 @@ tbody tr:hover {
 <h1>小德的饭店排名</h1>
 
 <div class="controls">
+  名字：
+  <input id="filter-name" placeholder="如：麦当劳">
   位置：
   <input id="filter-location" placeholder="如：南京">
   类别：
@@ -279,25 +281,28 @@ document.getElementById("filter-location").addEventListener("input", applyFilter
 document.getElementById("filter-category").addEventListener("input", applyFilter);
 
 document.getElementById("reset").addEventListener("click", () => {
+  document.getElementById("filter-name").value = "";
   document.getElementById("filter-location").value = "";
   document.getElementById("filter-category").value = "";
   render(originalData);
 });
 
 function applyFilter() {
-  const loc = document.getElementById("filter-location").value.trim();
-  const cat = document.getElementById("filter-category").value.trim();
+  const name = document.getElementById("filter-name").value.trim();
+  const loc  = document.getElementById("filter-location").value.trim();
+  const cat  = document.getElementById("filter-category").value.trim();
 
   const filtered = originalData.filter(row => {
+    const nameMatch = name
+      ? String(row["饭店"] || "").includes(name)   // ← 列名按你 Excel 实际改
+      : true;
     const locationMatch = loc
       ? String(row["位置"] || "").includes(loc)
       : true;
-
     const categoryMatch = cat
       ? String(row["类别"] || "").includes(cat)
       : true;
-
-    return locationMatch && categoryMatch;
+    return nameMatch && locationMatch && categoryMatch;
   });
 
   render(filtered);
