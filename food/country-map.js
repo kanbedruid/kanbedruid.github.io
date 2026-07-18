@@ -1,55 +1,344 @@
-// Chinese country name -> ISO numeric code (as used by world-atlas countries-110m)
-// Extend freely for future countries.
-window.COUNTRY_CN2ISO = {
-  "中国": "156", "中华人民共和国": "156", "China": "156",
-  "日本": "392", "Japan": "392",
-  "韩国": "410", "南韩": "410", "大韩民国": "410", "Korea": "410",
-  "朝鲜": "408", "北韩": "408",
-  "美国": "840", "美利坚": "840", "USA": "840", "US": "840",
-  "加拿大": "124", "墨西哥": "484",
-  "英国": "826", "UK": "826", "英格兰": "826",
-  "法国": "250", "德国": "276", "意大利": "380", "西班牙": "724",
-  "葡萄牙": "620", "荷兰": "528", "比利时": "056", "瑞士": "756",
-  "奥地利": "040", "瑞典": "752", "挪威": "578", "丹麦": "208",
-  "芬兰": "246", "冰岛": "352", "爱尔兰": "372",
-  "俄罗斯": "643", "波兰": "616", "捷克": "203", "希腊": "300",
-  "土耳其": "792", "以色列": "376", "阿联酋": "784", "沙特": "682", "沙特阿拉伯": "682",
-  "泰国": "764", "越南": "704", "新加坡": "702", "马来西亚": "458",
-  "印度尼西亚": "360", "印尼": "360", "菲律宾": "608", "柬埔寨": "116",
-  "老挝": "418", "缅甸": "104", "印度": "356", "尼泊尔": "524",
-  "斯里兰卡": "144", "巴基斯坦": "586", "孟加拉": "050", "蒙古": "496",
-  "澳大利亚": "036", "澳洲": "036", "新西兰": "554",
-  "巴西": "076", "阿根廷": "032", "智利": "152", "秘鲁": "604",
-  "哥伦比亚": "170", "古巴": "192",
-  "埃及": "818", "摩洛哥": "504", "南非": "710", "肯尼亚": "404",
-  "尼日利亚": "566", "埃塞俄比亚": "231",
-  // Common Chinese cities => China
-};
+// ========================================
+// Xiaode Guide
+// World Map Renderer
+// ========================================
 
-// Chinese cities (省会 + 主要城市 + 特别行政区) that mean 中国 when they appear without a country
-window.CN_CITIES = new Set([
-  "北京","上海","天津","重庆","广州","深圳","杭州","南京","苏州","成都","武汉",
-  "西安","长沙","青岛","大连","厦门","宁波","无锡","佛山","东莞","郑州","济南",
-  "沈阳","哈尔滨","长春","昆明","贵阳","南宁","福州","南昌","合肥","太原","石家庄",
-  "呼和浩特","乌鲁木齐","兰州","西宁","银川","拉萨","海口","三亚","珠海","中山",
-  "扬州","徐州","温州","绍兴","嘉兴","泉州","漳州","潮州","汕头",
-  "香港","澳门","台北","高雄","台中","台南",
-  "全国"
-]);
 
-// Reverse: ISO -> Chinese display name
-window.ISO2CN = {
-  "156":"中国","392":"日本","410":"韩国","408":"朝鲜",
-  "840":"美国","124":"加拿大","484":"墨西哥",
-  "826":"英国","250":"法国","276":"德国","380":"意大利","724":"西班牙",
-  "620":"葡萄牙","528":"荷兰","056":"比利时","756":"瑞士","040":"奥地利",
-  "752":"瑞典","578":"挪威","208":"丹麦","246":"芬兰","352":"冰岛","372":"爱尔兰",
-  "643":"俄罗斯","616":"波兰","203":"捷克","300":"希腊","792":"土耳其",
-  "376":"以色列","784":"阿联酋","682":"沙特阿拉伯",
-  "764":"泰国","704":"越南","702":"新加坡","458":"马来西亚","360":"印度尼西亚",
-  "608":"菲律宾","116":"柬埔寨","418":"老挝","104":"缅甸","356":"印度",
-  "524":"尼泊尔","144":"斯里兰卡","586":"巴基斯坦","050":"孟加拉","496":"蒙古",
-  "036":"澳大利亚","554":"新西兰",
-  "076":"巴西","032":"阿根廷","152":"智利","604":"秘鲁","170":"哥伦比亚","192":"古巴",
-  "818":"埃及","504":"摩洛哥","710":"南非","404":"肯尼亚","566":"尼日利亚","231":"埃塞俄比亚"
-};
+let mapSvg;
+let mapGroup;
+
+let mapScale = 1;
+
+
+
+// 初始化地图
+
+function initWorldMap(){
+
+
+    mapSvg =
+    document.getElementById("world-map");
+
+
+    if(!mapSvg){
+        return;
+    }
+
+
+
+    fetch("./lib/countries-110m.json")
+
+    .then(r=>r.json())
+
+    .then(data=>{
+
+
+        drawWorld(data);
+
+
+    })
+
+    .catch(err=>{
+
+
+        console.error(
+            "地图加载失败",
+            err
+        );
+
+
+    });
+
+
+
+}
+
+
+
+
+
+function drawWorld(world){
+
+
+
+    const svgNS =
+    "http://www.w3.org/2000/svg";
+
+
+
+    mapSvg.innerHTML="";
+
+
+
+    mapGroup =
+    document.createElementNS(
+        svgNS,
+        "g"
+    );
+
+
+
+    mapGroup.setAttribute(
+        "class",
+        "map-group"
+    );
+
+
+
+    mapSvg.appendChild(
+        mapGroup
+    );
+
+
+
+
+
+    const countries =
+    topojson.feature(
+        world,
+        world.objects.countries
+    );
+
+
+
+
+
+    countries.features.forEach(country=>{
+
+
+        const path =
+        document.createElementNS(
+            svgNS,
+            "path"
+        );
+
+
+
+        path.setAttribute(
+            "d",
+            geoPath(country)
+        );
+
+
+        path.classList.add(
+            "country"
+        );
+
+
+        path.dataset.country =
+        country.properties.name;
+
+
+
+
+        const stats =
+        getCountryStats(
+            path.dataset.country
+        );
+
+
+
+        if(stats){
+
+
+            path.classList.add(
+                "active"
+            );
+
+
+            path.style.fill =
+            getMapColor(
+                stats.average
+            );
+
+
+
+            path.onclick=function(){
+
+
+                showCountry(
+                    path.dataset.country
+                );
+
+
+            };
+
+
+        }
+
+
+
+        mapGroup.appendChild(
+            path
+        );
+
+
+    });
+
+
+
+}
+
+
+
+
+// ===============================
+// 简化地图投影
+// ===============================
+
+
+function geoPath(feature){
+
+
+    const coordinates =
+    feature.geometry.coordinates;
+
+
+
+    return convertGeo(
+        coordinates
+    );
+
+
+}
+
+
+
+
+function convertGeo(coords){
+
+
+    let result="";
+
+
+
+    function walk(arr){
+
+
+        if(
+            typeof arr[0][0]
+            ===
+            "number"
+        ){
+
+
+            arr.forEach(
+                p=>{
+
+
+                    const x =
+                    (p[0]+180)
+                    *
+                    2.7;
+
+
+                    const y =
+                    (90-p[1])
+                    *
+                    2.7;
+
+
+
+                    result +=
+                    (result?
+                    "L":"M")
+                    +
+                    x
+                    +" "
+                    +
+                    y;
+
+
+                }
+            );
+
+
+        }
+
+        else{
+
+
+            arr.forEach(
+                walk
+            );
+
+
+        }
+
+
+    }
+
+
+
+    walk(coords);
+
+
+
+    return result;
+
+
+}
+
+
+
+
+function getMapColor(score){
+
+
+score =
+Number(score);
+
+
+
+if(score>=90)
+return "#e85d5d";
+
+
+if(score>=80)
+return "#f39b38";
+
+
+if(score>=70)
+return "#9b70d6";
+
+
+if(score>=60)
+return "#4d9de0";
+
+
+return "#ddd";
+
+
+}
+
+
+
+
+
+// 缩放
+
+function zoomMap(value){
+
+
+mapScale += value;
+
+
+if(mapScale<0.5)
+mapScale=0.5;
+
+
+if(mapScale>3)
+mapScale=3;
+
+
+
+if(mapGroup){
+
+
+mapGroup.style.transform =
+`scale(${mapScale})`;
+
+}
+
+
+}
