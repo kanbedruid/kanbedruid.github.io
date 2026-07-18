@@ -109,7 +109,7 @@ function init(){
     initTabs();
 
 
-    initMap();
+    initWorldMap();
 
 
 
