@@ -437,53 +437,31 @@ main {
 ===================== */
 
 
-.restaurant-card {
+.restaurant-card{
 
+    background:#fff;
 
-    background:white;
+    border-radius:12px;
 
+    padding:12px 18px;
 
-    border-radius:
+    margin-bottom:10px;
 
-    var(--radius);
+    box-shadow:0 2px 8px rgba(0,0,0,.05);
 
-
-    padding:
-
-    28px;
-
-
-    margin-bottom:
-
-    20px;
-
-
-    box-shadow:
-
-    var(--shadow);
-
-
-    transition:
-
-    .2s;
-
+    transition:.15s;
 
 }
 
 
 
+.restaurant-card:hover{
 
-.restaurant-card:hover {
+    transform:translateY(-2px);
 
-
-    transform:
-
-    translateY(-4px);
-
+    box-shadow:0 5px 15px rgba(0,0,0,.08);
 
 }
-
-
 
 
 
@@ -505,57 +483,43 @@ main {
 
 
 
-.restaurant-title h2 {
-
+.restaurant-title h2{
 
     margin:0;
 
+    font-size:18px;
 
-    font-size:
-
-    24px;
-
+    font-weight:600;
 
 }
 
 
 
 
-.location {
+.location{
 
+    margin-top:2px;
 
-    color:
+    color:#777;
 
-    var(--sub);
-
-
-    margin-top:
-
-    8px;
-
+    font-size:13px;
 
 }
 
 
 
 
+.score-total{
 
-.score-total {
+    font-size:26px;
 
+    font-weight:700;
 
-    font-size:
+    min-width:60px;
 
-    32px;
-
-
-    font-weight:
-
-    700;
-
+    text-align:right;
 
 }
-
-
 
 
 
@@ -564,91 +528,51 @@ main {
 ===================== */
 
 
-.score-grid {
+.score-grid{
 
+    display:flex;
 
-    display:grid;
+    gap:10px;
 
-
-    grid-template-columns:
-
-    repeat(4,1fr);
-
-
-    gap:
-
-    12px;
-
-
-    margin-top:
-
-    25px;
-
+    margin-top:10px;
 
 }
 
 
 
 
-.score-item {
+.score-item{
 
+    padding:6px 12px;
 
-    padding:
+    border-radius:8px;
 
-    14px;
-
-
-    border-radius:
-
-    12px;
-
+    min-width:72px;
 
     text-align:center;
 
-
-    background:#f5f5f5;
-
-
 }
 
 
 
-
-.score-item span {
-
+.score-item span{
 
     display:block;
 
+    font-size:11px;
 
-    color:
+    color:#777;
 
-    var(--sub);
-
-
-    font-size:
-
-    12px;
-
-
-    margin-bottom:
-
-    5px;
-
+    margin-bottom:2px;
 
 }
 
 
+.score-item b{
 
-.score-item b {
-
-
-    font-size:
-
-    22px;
-
+    font-size:16px;
 
 }
-
 
 
 
