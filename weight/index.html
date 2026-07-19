@@ -400,11 +400,18 @@ function renderChart(){
       plugins:{legend:{position:"top"}},
       scales:{
         y:{
-          min:min-0.1,
-          max:max+0.1,
-          ticks:{stepSize:0.1},
-          title:{display:true,text:"体重"}
-        }
+    min:min-0.1,
+    max:max+0.1,
+    ticks:{
+        stepSize:0.1,
+        autoSkip:false,
+        maxTicksLimit:100
+    },
+    title:{
+        display:true,
+        text:"体重"
+    }
+}
       }
     }
   });
