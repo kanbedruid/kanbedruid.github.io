@@ -390,15 +390,42 @@ function renderChart(){
   chart=new Chart(document.getElementById("chart"),{
     type:"line",
     data:{labels,datasets},
-    options:{
-      responsive:true,
-      plugins:{legend:{position:"top"}},
-      scales:{y:{
-    min:60,
-    max:80,
-    title:{display:true,text:"体重"}
-}}
+   // 计算所有体重数据
+const weights = data
+  .filter(r => r.weight !== "")
+  .map(r => Number(r.weight));
+
+const min = Math.min(...weights);
+const max = Math.max(...weights);
+
+// 给上下各留一点边距
+const padding = 0.3;   // 可以改成0.2、0.5等
+
+...
+
+options:{
+  responsive:true,
+  maintainAspectRatio:false,
+  plugins:{
+    legend:{position:"top"}
+  },
+  scales:{
+    y:{
+      title:{
+        display:true,
+        text:"体重"
+      },
+
+      // 关键修改
+      min: Math.floor((min - padding) * 10) / 10,
+      max: Math.ceil((max + padding) * 10) / 10,
+
+      ticks:{
+        stepSize:0.2
+      }
     }
+  }
+}
   });
 }
 
