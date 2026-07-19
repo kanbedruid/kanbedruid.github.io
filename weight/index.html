@@ -176,7 +176,7 @@ button:hover {
 
 /* ===== 图表 ===== */
 canvas {
-  height: 520px !important;
+  height: 780px !important;
   max-height: none;
   border-radius: var(--radius-md);
   padding: 8px;
@@ -400,13 +400,9 @@ function renderChart(){
       plugins:{legend:{position:"top"}},
       scales:{
         y:{
-    min:min-0.05,
-    max:max+0.05,
-    ticks:{
-        stepSize:0.1,
-        autoSkip:false,
-        maxTicksLimit:100
-    },
+    min:min-0.2,
+    max:max+0.2,
+   
     title:{
         display:true,
         text:"体重"
