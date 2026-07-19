@@ -395,13 +395,6 @@ const weights = data
   .filter(r => r.weight !== "")
   .map(r => Number(r.weight));
 
-const min = Math.min(...weights);
-const max = Math.max(...weights);
-
-// 给上下各留一点边距
-const padding = 0.3;   // 可以改成0.2、0.5等
-
-...
 
 options:{
   responsive:true,
