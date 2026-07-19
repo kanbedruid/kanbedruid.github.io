@@ -176,7 +176,8 @@ button:hover {
 
 /* ===== 图表 ===== */
 canvas {
-  max-height: 260px;
+  height: 520px !important;
+  max-height: none;
   border-radius: var(--radius-md);
   padding: 8px;
   background: rgba(255, 255, 255, 0.6);
@@ -378,47 +379,34 @@ function renderChart(){
     if(!ds[r.name]) ds[r.name]={};
     ds[r.name][r.date]=Number(r.weight);
   });
-
   const datasets=Object.entries(ds).map(([name,map])=>({
     label:name,
     data:labels.map(d=>map[d]??null),
     spanGaps:true,
-    borderWidth:2
+    borderWidth:4,
+    pointRadius:5,
+    tension:0.35
   }));
-
+  const weights=data.filter(r=>r.weight!=="").map(r=>Number(r.weight));
+  const min=Math.min(...weights);
+  const max=Math.max(...weights);
   if(chart) chart.destroy();
   chart=new Chart(document.getElementById("chart"),{
     type:"line",
     data:{labels,datasets},
-   // 计算所有体重数据
-const weights = data
-  .filter(r => r.weight !== "")
-  .map(r => Number(r.weight));
-
-
-options:{
-  responsive:true,
-  maintainAspectRatio:false,
-  plugins:{
-    legend:{position:"top"}
-  },
-  scales:{
-    y:{
-      title:{
-        display:true,
-        text:"体重"
-      },
-
-      // 关键修改
-      min: Math.floor((min - padding) * 10) / 10,
-      max: Math.ceil((max + padding) * 10) / 10,
-
-      ticks:{
-        stepSize:0.2
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{position:"top"}},
+      scales:{
+        y:{
+          min:min-0.2,
+          max:max+0.2,
+          ticks:{stepSize:0.2},
+          title:{display:true,text:"体重"}
+        }
       }
     }
-  }
-}
   });
 }
 
