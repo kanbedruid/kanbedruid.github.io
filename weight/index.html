@@ -393,7 +393,11 @@ function renderChart(){
     options:{
       responsive:true,
       plugins:{legend:{position:"top"}},
-      scales:{y:{title:{display:true,text:"体重"}}}
+      scales:{y:{
+    min:66,
+    max:73,
+    title:{display:true,text:"体重"}
+}}
     }
   });
 }
