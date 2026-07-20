@@ -378,6 +378,9 @@ function generateUnifiedCardHTML(c, canvasId, isSidebar) {
             <div style="font-size:12px; color:#94a3b8; margin-bottom:12px;">${c.rarity} / ${sizeName} / ${c.personality} / ${c.movePattern}</div>
             
             <div style="font-size:12px; color:#e2e8f0; text-align:left; line-height:1.6; display:grid; grid-template-columns: 1fr 1fr; gap:6px; background:rgba(0,0,0,0.4); padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid rgba(255,255,255,0.05);">
+                <div style="grid-column: span 2; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 4px; margin-bottom: 4px;">
+                    ☠️击杀数: <span style="color:#ff7675; font-weight:bold; font-size:14px;">${c.kills || 0}</span>
+                </div>
                 <div>💗生命: <span style="color:#2ecc71;">${c.hp}/${c.maxHp}</span></div>
                 <div>⚔️攻击: <span style="color:#e74c3c;">${c.atk}</span></div>
                 <div>🛡️防御: <span style="color:#3498db;">${c.def}</span></div>
@@ -1148,6 +1151,7 @@ const Game = {
                                     this.addFloatingText(c.x, c.y, `-${p.damage}(射线)`, p.color, 16);
                                     if(c.hp <= 0) {
                                         this.triggerTalent('onKill', owner, c, 0);
+                                        attacker.kills = (attacker.kills || 0) + 1; // 增加这行！
                                         this.logEvent(`💀 震惊！<span style="color:${c.color}">[${c.name}]</span> 被射线灰飞烟灭！`);
                                         this.die(c);
                                     }
@@ -1199,6 +1203,7 @@ const Game = {
                     } else if (c.hp <= 0 && p.damage > 0) {
                         if (attacker) {
                             this.triggerTalent('onKill', attacker, c, 0);
+                            attacker.kills = (attacker.kills || 0) + 1; // 增加这行！
                             if(p.lifesteal) {
                                 attacker.hp = Math.min(attacker.maxHp, attacker.hp + p.damage);
                                 this.addFloatingText(attacker.x, attacker.y, '吸血', '#8e44ad');
@@ -1564,6 +1569,7 @@ const Game = {
         
         if(defender.hp <= 0) {
             this.triggerTalent('onKill', attacker, defender, 0); 
+            attacker.kills = (attacker.kills || 0) + 1; // 增加这行！
             this.logEvent(`💀 震惊！${getColoredName(defender)} 惨死于 ${getColoredName(attacker)} 之手！`);
             attacker.enemyTarget = null;
             this.die(defender); 
@@ -1913,18 +1919,33 @@ const CreatureFactory = {
         let cyOffset = (maxY + minY) / 2 + 0.5;
 
         let movePattern = MOVE_PATTERNS[Math.floor(Math.random() * MOVE_PATTERNS.length)];
+
+        // --- 核心修改：寻找全场最高击杀数，并进行属性倍增 ---
+        let maxKills = 1; 
+        if (Game.creatures && Game.creatures.length > 0) {
+            Game.creatures.forEach(c => {
+                if (!c._isDead && c.kills && c.kills > maxKills) {
+                    maxKills = c.kills;
+                }
+            });
+        }
+        
+        let finalHp = hp * maxKills;
+        let finalAtk = atk * maxKills;
+        let finalDef = def * maxKills;
+        // ----------------------------------------------------
         
         return {
-            id: this.guid++, x: 0, y: 0, spawnX: 0, spawnY: 0, cxOffset: cxOffset, cyOffset: cyOffset,
+            id: this.guid++, isCultivator: false, x: 0, y: 0, spawnX: 0, spawnY: 0, cxOffset: cxOffset, cyOffset: cyOffset,
             name: name, sizeLevel: sizeLvl, pixels: pixels, rarity: rarityStr,
-            maxHp: hp, hp: hp, atk: atk, def: def, critRate: critRate,
+            maxHp: finalHp, hp: finalHp, atk: finalAtk, def: finalDef, critRate: critRate,
             dayVision: dayVis, nightVision: Math.floor(dayVis * 0.5),
             personality: pers, moveType: moveType, movePattern: movePattern,
             baseSpeed: mSpd, atkSpeed: aSpd,  
             actionCooldown: 0, enemyTarget: null, 
             migDir: Math.random() * Math.PI * 2, migTicks: 0, 
             unpState: 0, unpTicks: 0, unpDir: 0, territoryTarget: null,
-            color: color, talents: talents || []
+            color: color, talents: talents || [], kills: 0 // 初始化击杀数为 0
         };
     }
 };
