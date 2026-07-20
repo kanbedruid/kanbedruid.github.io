@@ -1149,9 +1149,9 @@ const Game = {
                                     p.hitTargets.push(c.id);
                                     c.hp -= p.damage;
                                     this.addFloatingText(c.x, c.y, `-${p.damage}(射线)`, p.color, 16);
-                                    if(c.hp <= 0) {
+                                  if(c.hp <= 0) {
                                         this.triggerTalent('onKill', owner, c, 0);
-                                        attacker.kills = (attacker.kills || 0) + 1; // 增加这行！
+                                        owner.kills = (owner.kills || 0) + 1; // 激光的主人叫 owner
                                         this.logEvent(`💀 震惊！<span style="color:${c.color}">[${c.name}]</span> 被射线灰飞烟灭！`);
                                         this.die(c);
                                     }
@@ -1200,10 +1200,10 @@ const Game = {
                             if(!c.enemyTarget) c.actionCooldown = 0;
                             c.enemyTarget = attacker;
                         }
-                    } else if (c.hp <= 0 && p.damage > 0) {
+                  } else if (c.hp <= 0 && p.damage > 0) {
                         if (attacker) {
                             this.triggerTalent('onKill', attacker, c, 0);
-                            attacker.kills = (attacker.kills || 0) + 1; // 增加这行！
+                            attacker.kills = (attacker.kills || 0) + 1; // 子弹的主人叫 attacker
                             if(p.lifesteal) {
                                 attacker.hp = Math.min(attacker.maxHp, attacker.hp + p.damage);
                                 this.addFloatingText(attacker.x, attacker.y, '吸血', '#8e44ad');
@@ -1567,9 +1567,9 @@ const Game = {
         let txtStr = `-${finalDmg}${isCrit ? '!' : ''}`;
         this.addFloatingText(defender.x, defender.y + minY, txtStr, isCrit ? "#ff9f43" : "#ff4757", isCrit ? 22 : 16);
         
-        if(defender.hp <= 0) {
+       if(defender.hp <= 0) {
             this.triggerTalent('onKill', attacker, defender, 0); 
-            attacker.kills = (attacker.kills || 0) + 1; // 增加这行！
+            attacker.kills = (attacker.kills || 0) + 1; // 近战的攻击者叫 attacker
             this.logEvent(`💀 震惊！${getColoredName(defender)} 惨死于 ${getColoredName(attacker)} 之手！`);
             attacker.enemyTarget = null;
             this.die(defender); 
