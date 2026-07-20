@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>山海经模拟器</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --bg-base: #07090e;
+            --panel-bg: rgba(18, 24, 38, 0.75);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --accent-gold: #f59e0b;
+            --accent-cyan: #06b6d4;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: rgba(0,0,0,0.2); }
+        ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.4); }
+
+        body { 
+            margin: 0; 
+            font-family: 'Microsoft YaHei', sans-serif; 
+            background: radial-gradient(circle at top, #1e293b, var(--bg-base)); 
+            color: var(--text-main); 
+            display: flex; 
+            height: 100vh; 
+            overflow: hidden; 
+            flex-direction: row; 
+        }
+        
+        .sidebar { 
+            background: var(--panel-bg); 
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 20px; 
+            box-sizing: border-box; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            overflow-y: auto;
+            border: 1px solid var(--panel-border);
+            box-shadow: var(--glass-shadow);
+            z-index: 20;
+        }
+        #sidebar-left { width: 300px; min-width: 300px; border-right: 1px solid var(--panel-border); }
+        #sidebar-right { width: 300px; min-width: 300px; border-left: 1px solid var(--panel-border); padding: 15px; }
+        
+        #main-view { flex: 1; display: flex; flex-direction: column; position: relative; overflow: hidden; }
+        
+        #topbar-hud { 
+            position: absolute; 
+            top: 20px; 
+            right: 20px; 
+            background: rgba(10, 15, 25, 0.6);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--panel-border);
+            border-radius: 30px;
+            padding: 8px 20px;
+            display: flex; 
+            align-items: center; 
+            gap: 15px;
+            z-index: 10;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        #canvas-wrapper { flex: 1; position: absolute; width: 100%; height: 100%; background: #0c1821; cursor: grab; overflow: hidden; touch-action: none; } 
+        #canvas-wrapper.drawing { cursor: crosshair; }
+        #canvas-wrapper.placing { cursor: none; }
+        #canvas-wrapper:active:not(.drawing):not(.placing) { cursor: grabbing; }
+        #gameCanvas { image-rendering: pixelated; position: absolute; top:0; left:0; }
+        
+        #action-bar {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 20px;
+            z-index: 100;
+            background: rgba(15, 23, 42, 0.65);
+            padding: 12px 25px;
+            border-radius: 50px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.6);
+        }
+
+        .summon-btn {
+            padding: 12px 35px;
+            font-size: 16px;
+            font-weight: bold;
+            font-family: 'Microsoft YaHei', sans-serif;
+            border-radius: 30px;
+            letter-spacing: 2px;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            cursor: pointer;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: #fff;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .btn-gacha {
+            background: linear-gradient(135deg, #8b5cf6, #6d28d9);
+            box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+        }
+        .btn-random {
+            background: linear-gradient(135deg, #0ea5e9, #0369a1);
+            box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+        }
+        .summon-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255,255,255,0.25);
+            filter: brightness(1.1);
+        }
+        
+        #event-ticker { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); pointer-events: none; display: flex; flex-direction: column; align-items: center; gap: 8px; z-index: 10; width: 80%;}
+        .log-item { background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(5px); border: 1px solid rgba(255,255,255,0.05); padding: 10px 25px; border-radius: 30px; font-size: 16px; font-weight: bold; color: #fff; animation: fadeUp 5s forwards; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3);}
+        @keyframes fadeUp { 0% { opacity: 0; transform: translateY(15px) scale(0.95); } 10% { opacity: 1; transform: translateY(0) scale(1); } 80% { opacity: 1; } 100% { opacity: 0; transform: translateY(-20px); } }
+
+        h1, h2 { font-size: 20px; margin: 0; color: var(--accent-gold); text-align: center; text-shadow: 0 2px 10px rgba(245, 158, 11, 0.2); letter-spacing: 2px;}
+        .author-text { font-size: 12px; color: var(--text-muted); text-align: center; margin-top: 5px; margin-bottom: 10px; letter-spacing: 1px; font-style: italic; opacity: 0.8; }
+        
+        .panel { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid var(--panel-border); }
+        .panel label { display: block; margin-bottom: 8px; font-size: 13px; color: #cbd5e1; font-weight: bold;}
+        
+        input[type="range"] { width: 100%; margin-bottom: 5px; accent-color: var(--accent-cyan); }
+        button.tool-btn { background: rgba(255,255,255,0.05); color: #fff; border: 1px solid rgba(255,255,255,0.1); padding: 10px; border-radius: 8px; cursor: pointer; font-weight: bold; width: 100%; margin-top: 8px; transition: 0.2s;}
+        button.tool-btn:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.3);}
+        button.btn-danger { background: rgba(231, 76, 60, 0.15); border-color: rgba(231, 76, 60, 0.3); color: #ff7675; }
+        button.btn-danger:hover { background: rgba(231, 76, 60, 0.3); border-color: #ff7675;}
+        
+        .terrain-btn { width: 31%; margin: 1%; padding: 10px 0; float: left; border: 1px solid transparent; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; text-align: center; transition: 0.2s; opacity: 0.7;}
+        .terrain-btn:hover { opacity: 0.9; }
+        .terrain-btn.active { border-color: #fff; transform: scale(1.05); opacity: 1; box-shadow: 0 4px 10px rgba(0,0,0,0.3);}
+        .clear { clear: both; }
+        
+        .info-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 13px; }
+        
+        #gacha-modal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 1000; align-items: center; justify-content: center; overflow-y: auto; padding: 20px 0;}
+        .card-container { display: flex; gap: 30px; flex-wrap: wrap; justify-content: center; max-width: 1200px; padding-top: 20px;}
+        
+        .unified-card { padding: 15px; border-radius: 12px; text-align: center; border: 1px solid var(--panel-border); position: relative; display: flex; flex-direction: column; background: rgba(20, 25, 35, 0.8); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); box-sizing: border-box; box-shadow: var(--glass-shadow);}
+        .gacha-mode { width: 280px; cursor: pointer; transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: 2px solid rgba(255,255,255,0.1); }
+        .gacha-mode:hover { transform: translateY(-15px) scale(1.02); box-shadow: 0 15px 35px rgba(245, 158, 11, 0.3); border-color: var(--accent-gold);}
+        .sidebar-mode { width: 100%; padding: 0; border: none; background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none;}
+        
+        .unified-card canvas { margin: 0 auto 15px auto; display: block; background: rgba(0,0,0,0.5); border-radius: 10px; border: 1px solid var(--panel-border); box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);}
+        .rarity-tag { position: absolute; top: -12px; left: 50%; transform: translateX(-50%); padding: 4px 18px; border-radius: 20px; font-weight: bold; font-size: 12px; color: #fff; border: 1px solid rgba(255,255,255,0.3); box-shadow: 0 4px 10px rgba(0,0,0,0.4); letter-spacing: 2px; z-index: 5; text-shadow: 0 1px 2px rgba(0,0,0,0.5);}
+        
+        #tips { position: absolute; bottom: 90px; left: 50%; transform: translateX(-50%); background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); padding: 12px 25px; border-radius: 30px; pointer-events: none; display: none; z-index: 50; color: #f1c40f; font-weight: bold; box-shadow: 0 10px 25px rgba(0,0,0,0.5); letter-spacing: 1px;}
+        
+        .progress-bar-container { width: 100px; height: 8px; background: rgba(0,0,0,0.5); border-radius: 4px; overflow: hidden; display: inline-block; vertical-align: middle; margin: 0 10px;}
+        #time-progress { width: 0%; height: 100%; background: #fbc531; transition: width 0.1s linear; box-shadow: 0 0 10px #fbc531;}
+
+        #creature-list { flex: 1; overflow-y: auto; overflow-x: hidden; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px;}
+        .list-item { background: rgba(0,0,0,0.2); padding: 10px; border-radius: 8px; display: flex; align-items: center; gap: 12px; cursor: pointer; border: 1px solid transparent; transition: 0.2s; }
+        .list-item:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1); }
+        .list-item.active { background: rgba(245, 158, 11, 0.1); border-color: var(--accent-gold); box-shadow: inset 0 0 15px rgba(245, 158, 11, 0.1); }
+        
+        #info-panel-container { flex-shrink: 0; max-height: 55%; overflow-y: auto; background: rgba(0,0,0,0.2); border-radius: 12px; border: 1px solid var(--panel-border); padding: 15px; margin-top: 10px;}
+
+        @media (max-width: 768px) {
+            body { flex-direction: column; overflow-y: auto; background: var(--bg-base); }
+            
+            #sidebar-left { width: 100%; min-width: auto; height: auto; border-right: none; border-bottom: 1px solid var(--panel-border); border-radius: 0; padding: 15px; }
+            h1 { font-size: 22px; }
+            
+            #main-view { height: 50vh; min-height: 400px; flex: none; border-bottom: 1px solid var(--panel-border); }
+            
+            #topbar-hud { top: 10px; right: 10px; padding: 6px 12px; font-size: 12px; border-radius: 20px;}
+            .progress-bar-container { width: 60px; }
+            #pause-btn { padding: 4px 8px; font-size: 11px; }
+
+            #action-bar { bottom: 15px; width: 85%; justify-content: space-around; padding: 10px 15px; gap: 10px; border-radius: 40px;}
+            .summon-btn { padding: 10px 0; font-size: 14px; width: 48%; letter-spacing: 1px; }
+
+            #tips { bottom: 80px; font-size: 13px; padding: 8px 15px; }
+
+            #sidebar-right { width: 100%; min-width: auto; height: auto; border-left: none; padding: 15px; border-radius: 0;}
+            .terrain-btn { width: 22%; margin: 1.5%; }
+            #gacha-modal { align-items: flex-start; }
+            .card-container { gap: 15px; padding-bottom: 40px; }
+        }
+    </style>
+</head>
+<body>
+
+<audio id="bgm-day" src="bgm1.mp3" loop></audio>
+<audio id="bgm-night" src="bgm2.mp3" loop></audio>
+
+<div class="sidebar" id="sidebar-left">
+    <div style="text-align: center;">
+        <h1>山海经模拟器</h1>
+        <div class="author-text">作者：神户小德</div>
+    </div>
+<div class="panel">
+        <label>⚙️ 全局设置</label>
+        <div class="info-row" style="margin-top:5px;"><span class="info-label" style="color:#94a3b8;">音乐音量</span></div>
+        <input type="range" id="volume-slider" min="0" max="100" value="30">
+        <div id="excel-status" style="font-size: 12px; color: #fbc531; margin-top:8px; line-height: 1.4; text-align:center;">正在感知天地法则 (读取中)...</div>
+    </div>
+
+    <div class="panel">
+        <label>🌍 地图生成</label>
+        <button class="tool-btn" onclick="Game.generateMap('noise')">🎲 随机生成地形</button>
+        <button class="tool-btn" onclick="Game.generateMap('grass')" style="opacity: 0.8;">🌱 重置为纯草地</button>
+        <button class="tool-btn btn-danger" onclick="Game.clearCreatures()" style="margin-top: 15px;">🗑️ 抹杀所有生物</button>
+    </div>
+
+    <div class="panel">
+        <label>🖌️ 神笔涂抹</label>
+        <div id="terrain-selector"></div>
+        <div class="clear"></div>
+        <div style="margin-top:10px;">
+            <label style="display:inline-block;">笔刷粗细: <span id="brush-size-txt" style="color:var(--accent-cyan);">2</span></label>
+            <input type="range" id="brush-size" min="1" max="10" value="2" oninput="document.getElementById('brush-size-txt').innerText=this.value; Game.brushSize = parseInt(this.value);">
+        </div>
+    </div>
+    
+    <div class="panel">
+        <label style="display:inline-block;">🔍 视界缩放: <span id="zoom-txt" style="color:var(--accent-cyan);">6</span>x</label>
+        <input type="range" id="zoom" min="2" max="15" value="6" oninput="document.getElementById('zoom-txt').innerText=this.value; Game.zoom = parseInt(this.value); Game.draw();">
+    </div>
+</div>
+
+<div id="main-view">
+    <div id="topbar-hud">
+        <span id="time-txt" style="color: #fbc531; font-weight: bold; font-size: 13px;">☀ 日间</span>
+        <div class="progress-bar-container">
+            <div id="time-progress"></div>
+        </div>
+        <button id="pause-btn" class="tool-btn" onclick="Game.togglePause()" style="margin: 0; padding: 5px 12px; width: auto; font-size:12px; background: rgba(255,255,255,0.1); border:none;">⏸️ 暂停</button>
+    </div>
+    
+    <div id="event-ticker"></div>
+    <div id="canvas-wrapper"><canvas id="gameCanvas"></canvas></div>
+    
+    <div id="action-bar">
+        <button class="summon-btn btn-gacha" onclick="Game.openGacha()">✨ 召唤异兽</button>
+        <button class="summon-btn btn-random" onclick="Game.randomSummon()">⚡ 随机降临</button>
+    </div>
+
+    <div id="tips">正黏在你的指针上，点击左键放置！</div>
+</div>
+
+<div class="sidebar" id="sidebar-right">
+    <h2>灵兽图鉴</h2>
+    <div style="height:10px;"></div>
+    <div id="creature-list"></div>
+    <div id="info-panel-container" style="display:none;"></div>
+</div>
+
+<div id="gacha-modal">
+    <div class="card-container" id="gacha-cards"></div>
+</div>
+
+<script>
+const TERRAIN_TYPES = {
+    0: { name: "水", color: "#2980b9", walkable: ["水栖", "飞行", "水陆", "水空", "水陆空", "陆空"], txtColor: "#fff" },
+    1: { name: "沙地", color: "#e4c580", walkable: ["陆地", "飞行", "水陆", "陆空", "水空", "水陆空"], txtColor: "#333" },
+    2: { name: "草地", color: "#4caf50", walkable: ["陆地", "飞行", "水陆", "陆空", "水空", "水陆空"], txtColor: "#fff" },
+    3: { name: "丛林", color: "#1b5e20", walkable: ["陆地", "飞行", "水陆", "陆空", "水空", "水陆空"], txtColor: "#fff" },
+    4: { name: "土", color: "#b07e54", walkable: ["陆地", "飞行", "水陆", "陆空", "水空", "水陆空"], txtColor: "#fff" },
+    5: { name: "岩石", color: "#7f8c8d", walkable: ["陆地", "飞行", "陆空", "水陆空"], txtColor: "#fff" },
+    6: { name: "雪地", color: "#f1f2f6", walkable: ["陆地", "飞行", "水陆", "陆空", "水空", "水陆空"], txtColor: "#000" },
+    7: { name: "岩浆", color: "#d35400", walkable: ["陆地", "水栖", "飞行", "水陆", "水空", "陆空", "水陆空"], txtColor: "#fff" }
+};
+const MOVE_TYPES = ["陆地", "水栖", "飞行", "水陆", "水空", "陆空", "水陆空"];
+const MOVE_PATTERNS = ["游荡", "领主", "迁徙", "难以预测"];
+const PERSONALITIES = ["凶猛", "凶猛", "凶猛", "凶猛", "贪食", "贪食", "和平", "和平", "胆小", "懒惰"];
+const isAggressive = (pers) => ["凶猛", "贪食"].includes(pers);
+
+const PREFIXES = ["狴","狻","饕","餮","貔","貅","玱","珖","傒","梵","冥","魑","魅","魍","魉","朏","蠪","猼","讙", "幽", "玄", "赤", "苍", "煌", "极", "混沌", "太虚", "九幽", "八荒", "灵", "幻", "煞", "劫", "蛊", "渊", "绝", "孤", "天", "地", "洪", "星", "月"];
+const SUFFIXES = ["狰","驳","蛟","螭","虬","獓","狠","鸢","鳐","蛭","兕","獙","絜","峳","獔","犰","狳", "鹏", "鲲", "猿", "狨", "狐", "虺", "蟒", "鳄", "凰", "鸾", "雀", "枭", "獒", "狮", "豹", "罴", "犀", "象", "蛊", "灵", "魔", "仙", "皇", "帝"];
+
+const RARITY_COLORS = {"传说":"#f1c40f", "超稀有":"#a29bfe", "稀有":"#74b9ff", "普通":"#dcdde1", "专属":"#ff9a9e"};
+
+let DB_TALENTS = [];
+let DB_LEGENDS = [];
+
+const Noise = {
+    seed: Math.random(),
+    hash: function(x, y) {
+        let n = Math.sin(x * 12.9898 + y * 78.233 + this.seed) * 43758.5453123;
+        return n - Math.floor(n);
+    },
+    get: function(x, y, scale = 0.05) {
+        let nx = x * scale, ny = y * scale;
+        let ix = Math.floor(nx), iy = Math.floor(ny);
+        let fx = nx - ix, fy = ny - iy;
+        let i1 = this.hash(ix, iy) * (1 - fx) + this.hash(ix + 1, iy) * fx;
+        let i2 = this.hash(ix, iy + 1) * (1 - fx) + this.hash(ix + 1, iy + 1) * fx;
+        return i1 * (1 - fy) + i2 * fy;
+    }
+};
+
+function getSpeedDesc(val) {
+    if(val >= 9) return "极快";
+    if(val >= 7) return "快";
+    if(val >= 5) return "普通";
+    if(val >= 3) return "慢";
+    return "极慢";
+}
+
+function getAtkSpeedDesc(val) {
+    if(val <= 0.32) return "非常快";
+    if(val <= 0.44) return "快";
+    if(val <= 0.55) return "普通";
+    if(val <= 0.66) return "慢";
+    return "非常慢";
+}
+
+function getColoredName(c) {
+    return `<span style="color:${RARITY_COLORS[c.rarity] || '#fff'}">[${c.name}]</span>`;
+}
+
+function generateUnifiedCardHTML(c, canvasId, isSidebar) {
+    let baseVision = Game.isDay ? c.dayVision : c.nightVision;
+    let actualVision = Game.triggerTalent ? Game.triggerTalent('onVision', c, null, baseVision) : baseVision;
+
+    let bgColor = "transparent", borderColor = "rgba(255,255,255,0.1)", tagHtml = "";
+    
+    if(!isSidebar) {
+        if(c.rarity === '稀有') { borderColor = "rgba(116, 185, 255, 0.5)"; tagHtml = `<div class="rarity-tag" style="background:linear-gradient(90deg, #3498db, #74b9ff);">稀有！</div>`; }
+        else if(c.rarity === '超稀有') { borderColor = "rgba(162, 155, 254, 0.6)"; tagHtml = `<div class="rarity-tag" style="background:linear-gradient(90deg, #9b59b6, #a29bfe);">超稀有！</div>`; }
+        else if(c.rarity === '传说') { borderColor = "rgba(241, 196, 15, 0.8)"; tagHtml = `<div class="rarity-tag" style="background:linear-gradient(90deg, #e67e22, #f1c40f); color:#000;">传说！</div>`; }
+    } else {
+        borderColor = "transparent";
+    }
+
+    let talentHTML = '';
+    if(c.talents.length === 0) {
+        talentHTML = '<div style="color:#7f8fa6;font-size:12px; margin-top:5px; font-style:italic;">暂无天赋</div>';
+    } else {
+        c.talents.forEach(tID => {
+            let tData = DB_TALENTS.find(t => t.TalentID == tID);
+            if(tData) {
+                let tColor = "#dcdde1";
+                if(tData.Rarity === '蓝') tColor = "#3498db";
+                else if(tData.Rarity === '紫') tColor = "#a29bfe";
+                else if(tData.Rarity === '橙') tColor = "#f1c40f";
+                else if(tData.Rarity === '专属') tColor = "#ff7675"; 
+
+                talentHTML += `
+                    <div style="text-align:left; margin-top:6px; padding:8px 10px; background:rgba(0,0,0,0.3); border-left: 3px solid ${tColor}; border-radius: 4px; box-shadow: inset 0 0 10px rgba(0,0,0,0.5);">
+                        <div style="font-weight: bold; font-size:13px; margin-bottom:3px; color:${tColor}; letter-spacing:1px;">${tData.Name}</div>
+                        <div style="font-size:11px; line-height:1.5; color:#cbd5e1; opacity:0.9;">${tData.Description}</div>
+                    </div>`;
+            }
+        });
+    }
+
+    let sizeName = ["小型", "中型", "大型", "巨型"][c.sizeLevel-1];
+    let titleColor = c.rarity === '传说' ? '#f1c40f' : c.color;
+    let titleSize = isSidebar ? '20px' : '18px';
+
+    return `
+        <div class="unified-card ${isSidebar ? 'sidebar-mode' : 'gacha-mode'}" style="border-color: ${borderColor};">
+            ${isSidebar ? '' : tagHtml}
+            <canvas id="${canvasId}" width="100" height="100"></canvas>
+            <h3 style="color:${titleColor}; margin:0 0 5px; font-size:${titleSize}; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">${c.name}</h3>
+            <div style="font-size:12px; color:#94a3b8; margin-bottom:12px;">${c.rarity} / ${sizeName} / ${c.personality} / ${c.movePattern}</div>
+            
+            <div style="font-size:12px; color:#e2e8f0; text-align:left; line-height:1.6; display:grid; grid-template-columns: 1fr 1fr; gap:6px; background:rgba(0,0,0,0.4); padding:12px; border-radius:8px; margin-bottom:10px; border:1px solid rgba(255,255,255,0.05);">
+                <div>💗生命: <span style="color:#2ecc71;">${c.hp}/${c.maxHp}</span></div>
+                <div>⚔️攻击: <span style="color:#e74c3c;">${c.atk}</span></div>
+                <div>🛡️防御: <span style="color:#3498db;">${c.def}</span></div>
+                <div>💥暴击: <span style="color:#f1c40f;">${(c.critRate*100).toFixed(0)}%</span></div>
+                <div>👁️视野: ${actualVision * 100} 米</div>
+                <div>🏃移速: ${getSpeedDesc(c.baseSpeed)}</div>
+                <div>🗡️攻速: ${getAtkSpeedDesc(c.atkSpeed)}</div>
+                <div style="grid-column: span 2;">🌊移动: <span style="color:#00cec9;">${c.moveType}</span></div>
+            </div>
+            <div style="flex:1; overflow-y:auto; text-align:left;">
+                <div style="font-size:13px; color:#fff; margin-bottom:6px; font-weight:bold;">✨ 天赋秘法:</div>
+                ${talentHTML}
+            </div>
+        </div>
+    `;
+}
+
+function getLegendaryGradient(ctx, x, y, width, height) {
+    let grad = ctx.createLinearGradient(x, y, x + width, y + height);
+    grad.addColorStop(0, "#ff9a9e"); 
+    grad.addColorStop(0.3, "#fecfef"); 
+    grad.addColorStop(0.6, "#a1c4fd"); 
+    grad.addColorStop(1, "#c2e9fb"); 
+    return grad;
+}
+
+function drawSingleCreatureShape(ctx, c, renderX, renderY, pixelScale) {
+    let minX=999, minY=999, maxX=-999, maxY=-999;
+    c.pixels.forEach(p => {
+        if(p.x < minX) minX=p.x; if(p.x > maxX) maxX=p.x;
+        if(p.y < minY) minY=p.y; if(p.y > maxY) maxY=p.y;
+    });
+
+    let outlineColor = "rgba(255, 255, 255, 0.2)"; 
+    if (c.rarity === "稀有") outlineColor = "rgba(52, 152, 219, 0.6)"; 
+    else if (c.rarity === "超稀有") outlineColor = "rgba(155, 89, 182, 0.8)"; 
+    else if (c.rarity === "传说") outlineColor = "rgba(241, 196, 15, 1.0)"; 
+
+    ctx.fillStyle = outlineColor;
+    c.pixels.forEach(p => {
+        let neighbors = [[0,-1], [0,1], [-1,0], [1,0]];
+        neighbors.forEach(n => {
+            if (!c.pixels.some(cp => cp.x === p.x + n[0] && cp.y === p.y + n[1])) {
+                let zx = Math.floor((renderX + p.x + n[0]) * pixelScale);
+                let zy = Math.floor((renderY + p.y + n[1]) * pixelScale);
+                let zw = Math.ceil((renderX + p.x + n[0] + 1) * pixelScale) - zx;
+                let zh = Math.ceil((renderY + p.y + n[1] + 1) * pixelScale) - zy;
+                ctx.fillRect(zx, zy, zw, zh);
+            }
+        });
+    });
+
+    if (c.rarity === "传说") {
+        let zx = Math.floor((renderX + minX) * pixelScale);
+        let zy = Math.floor((renderY + minY) * pixelScale);
+        let zw = Math.ceil((renderX + maxX + 1) * pixelScale) - zx;
+        let zh = Math.ceil((renderY + maxY + 1) * pixelScale) - zy;
+        ctx.fillStyle = getLegendaryGradient(ctx, zx, zy, zw, zh);
+    } else {
+        ctx.fillStyle = c.color;
+    }
+
+    c.pixels.forEach(p => {
+        let zx = Math.floor((renderX + p.x) * pixelScale);
+        let zy = Math.floor((renderY + p.y) * pixelScale);
+        let zw = Math.ceil((renderX + p.x + 1) * pixelScale) - zx;
+        let zh = Math.ceil((renderY + p.y + 1) * pixelScale) - zy;
+        ctx.fillRect(zx, zy, zw, zh);
+    });
+}
+
+function drawCreatureMiniature(c, canvasId) {
+    let canvas = document.getElementById(canvasId);
+    if(!canvas) return;
+    let ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    let minX=999, minY=999, maxX=-999, maxY=-999;
+    c.pixels.forEach(p => {
+        if(p.x < minX) minX=p.x; if(p.x > maxX) maxX=p.x;
+        if(p.y < minY) minY=p.y; if(p.y > maxY) maxY=p.y;
+    });
+    
+    let w = maxX - minX + 1;
+    let h = maxY - minY + 1;
+    let scale = Math.min(canvas.width / w, canvas.height / h) * 0.7; 
+    let offsetX = (canvas.width - w * scale) / 2 - minX * scale;
+    let offsetY = (canvas.height - h * scale) / 2 - minY * scale;
+    
+    drawSingleCreatureShape(ctx, c, offsetX / scale, offsetY / scale, scale);
+}
+
+function hexToRgba(hex, alpha) {
+    if(!hex || !hex.startsWith("#")) return "rgba(255,255,255," + alpha + ")";
+    let r = parseInt(hex.slice(1, 3), 16);
+    let g = parseInt(hex.slice(3, 5), 16);
+    let b = parseInt(hex.slice(5, 7), 16);
+    return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+}
+
+const Game = {
+    canvas: document.getElementById('gameCanvas'),
+    wrapper: document.getElementById('canvas-wrapper'),
+    ctx: null,
+    width: 150, 
+    height: 150, 
+    grid: [], 
+    creatures: [],
+    corpses: [],
+    floatingTexts: [],
+    vfxList: [], 
+    projectiles: [], 
+    
+    tickCount: 0,
+    isDay: true,
+    dayDurationTicks: 5 * 60 * 60,   
+    nightDurationTicks: 3.5 * 60 * 60, 
+    isPaused: false, 
+    
+    bgmDay: document.getElementById('bgm-day'),
+    bgmNight: document.getElementById('bgm-night'),
+    
+    zoom: 6,
+    brushSize: 2,
+    selectedTerrain: null, 
+    placingCreature: null, 
+    selectedCreature: null,
+    isDetailExpanded: false,
+    
+    cameraX: 0, cameraY: 0,
+    isDragging: false, isDrawing: false,
+    dragStartX: 0, dragStartY: 0,
+    mouseX: 0, mouseY: 0,
+    
+    init: function() {
+        this.ctx = this.canvas.getContext('2d');
+        this.initUI();
+        this.loadExcel();
+        this.setupAudio();
+        
+        setTimeout(() => {
+            this.generateMap('noise');
+            this.bindEvents();
+            requestAnimationFrame(this.loop.bind(this));
+            
+            setInterval(() => { 
+                if(!this.isPaused) {
+                    this.updateUI(); 
+                }
+            }, 1000); 
+            
+            setInterval(() => { this.updateCreatureList(); }, 1000);
+        }, 100);
+    },
+
+    setupAudio: function() {
+        const slider = document.getElementById('volume-slider');
+        let vol = slider.value / 100;
+        this.bgmDay.volume = this.isDay ? vol : 0;
+        this.bgmNight.volume = this.isDay ? 0 : vol;
+        
+        slider.oninput = (e) => {
+            let target = e.target.value / 100;
+            if (this.isDay) this.bgmDay.volume = target;
+            else this.bgmNight.volume = target;
+        };
+        
+        let interacted = false;
+        document.body.addEventListener('click', () => {
+            if(!interacted && slider.value > 0) {
+                if(this.isDay) this.bgmDay.play().catch(()=>{});
+                else this.bgmNight.play().catch(()=>{});
+                interacted = true;
+            }
+        });
+    },
+    
+    switchBGM: function() {
+        let slider = document.getElementById('volume-slider');
+        let targetVol = slider.value / 100;
+        if(targetVol <= 0) return;
+
+        let outAudio = this.isDay ? this.bgmNight : this.bgmDay;
+        let inAudio = this.isDay ? this.bgmDay : this.bgmNight;
+
+        if (inAudio.paused) inAudio.play().catch(()=>{});
+
+        let steps = 20;
+        let fadeTime = 2000;
+        let stepTime = fadeTime / steps;
+        let volStep = targetVol / steps;
+
+        inAudio.volume = 0;
+
+        let step = 0;
+        let fadeInterval = setInterval(() => {
+            step++;
+            outAudio.volume = Math.max(0, outAudio.volume - volStep);
+            inAudio.volume = Math.min(targetVol, inAudio.volume + volStep);
+            if(step >= steps) {
+                clearInterval(fadeInterval);
+                outAudio.pause();
+                inAudio.volume = document.getElementById('volume-slider').value / 100;
+            }
+        }, stepTime);
+    },
+
+    loadExcel: function() {
+        // 直接从同级目录抓取文件（在 GitHub 上完美运行）
+        fetch('ShanHai_Data.xlsx').then(res => {
+            if(!res.ok) throw new Error("File not found");
+            return res.arrayBuffer();
+        }).then(data => {
+            this.parseExcelData(data);
+            let status = document.getElementById('excel-status');
+            status.innerText = `法则载入成功! (卷宗:${DB_TALENTS.length}篇)`;
+            status.style.color = '#44bd32';
+        }).catch(err => {
+            // 如果 GitHub 上没找到文件，只显示红字提示
+            let status = document.getElementById('excel-status');
+            status.innerText = `⚠️ 读取失败！请确保 ShanHai_Data.xlsx 已上传至 GitHub 同目录`;
+            status.style.color = '#e74c3c';
+        });
+    },
+    parseExcelData: function(dataArrayBuffer) {
+        let workbook = XLSX.read(new Uint8Array(dataArrayBuffer), {type: 'array'});
+        for(let name of workbook.SheetNames) {
+            let sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[name]);
+            if(sheetData.length > 0 && sheetData[0].hasOwnProperty('TalentID')) { DB_TALENTS = sheetData; break; }
+        }
+        for(let name of workbook.SheetNames) {
+            let sheetData = XLSX.utils.sheet_to_json(workbook.Sheets[name]);
+            if(sheetData.length > 0 && sheetData[0].hasOwnProperty('LegendID')) {
+                DB_LEGENDS = sheetData;
+                DB_LEGENDS.forEach(l => { 
+                    if(typeof l.TalentIDs === 'string') l.TalentIDs = l.TalentIDs.split(',').map(Number); 
+                    if(typeof l.TalentIDs === 'number') l.TalentIDs = [l.TalentIDs]; 
+                });
+                break;
+            }
+        }
+    },
+
+    triggerTalent: function(eventStr, selfObj, targetObj, baseValue) {
+        let result = baseValue;
+        if(!selfObj.talents || selfObj.talents.length === 0) return result;
+        
+        selfObj.talents.forEach(tID => {
+            let talentInfo = DB_TALENTS.find(t => t.TalentID == tID);
+            if(talentInfo && talentInfo.ExecCode) {
+                try {
+                    let fn = new Function('event', 'self', 'target', 'value', talentInfo.ExecCode);
+                    let ret = fn(eventStr, selfObj, targetObj, result);
+                    if(ret !== undefined) result = ret; 
+                } catch(err) {
+                    console.error("天赋执行报错:", talentInfo.Name, err);
+                }
+            }
+        });
+        return result;
+    },
+    
+    initUI: function() {
+        const selector = document.getElementById('terrain-selector');
+        for(let id in TERRAIN_TYPES) {
+            let btn = document.createElement('div');
+            btn.className = 'terrain-btn';
+            btn.style.background = TERRAIN_TYPES[id].color;
+            btn.style.color = TERRAIN_TYPES[id].txtColor;
+            btn.innerText = TERRAIN_TYPES[id].name;
+            btn.onclick = () => {
+                if (this.selectedTerrain === parseInt(id)) {
+                    this.selectedTerrain = null;
+                    btn.classList.remove('active');
+                    this.wrapper.classList.remove('drawing');
+                } else {
+                    document.querySelectorAll('.terrain-btn').forEach(b=>b.classList.remove('active'));
+                    btn.classList.add('active');
+                    this.selectedTerrain = parseInt(id);
+                    this.wrapper.classList.add('drawing');
+                }
+            };
+            selector.appendChild(btn);
+        }
+    },
+    
+    logEvent: function(msg) {
+        let ticker = document.getElementById('event-ticker');
+        let span = document.createElement('div');
+        span.className = 'log-item';
+        span.innerHTML = msg; 
+        ticker.appendChild(span);
+        setTimeout(() => span.remove(), 5000);
+    },
+
+    addFloatingText: function(x, y, text, color, size = 14) {
+        this.floatingTexts.push({ x: x, y: y - 0.5, text: text, color: color, size: size, life: 60 });
+    },
+    
+    generateMap: function(type) {
+        this.grid = [];
+        Noise.seed = Math.random();
+        let hasOcean = Math.random() < 0.6; 
+        for(let y=0; y<this.height; y++) {
+            let row = [];
+            for(let x=0; x<this.width; x++) {
+                if(type === 'noise') {
+                    let v = Noise.get(x, y, 0.02); 
+                    let detail = Noise.get(x, y, 0.1) * 0.2; 
+                    v = (v + detail) / 1.2;
+                    
+                    if(hasOcean) {
+                        let nx = Math.abs(x - this.width/2) / (this.width/2);
+                        let ny = Math.abs(y - this.height/2) / (this.height/2);
+                        let edgeDist = Math.max(nx, ny);
+                        if (edgeDist > 0.6) v -= (edgeDist - 0.6) * 1.5; 
+                    }
+                    
+                    let t = 2; 
+                    if(v < 0.25) t = 0; 
+                    else if(v < 0.35) t = 1; 
+                    else if(v < 0.55) t = 2; 
+                    else if(v < 0.70) t = 3; 
+                    else if(v < 0.85) t = 4; 
+                    else if(v < 0.95) t = 5; 
+                    else t = 6; 
+                    
+                    row.push(Math.max(0, t));
+                } else {
+                    row.push(2); 
+                }
+            }
+            this.grid.push(row);
+        }
+        
+        let rect = this.wrapper.getBoundingClientRect();
+        this.canvas.width = rect.width;
+        this.canvas.height = rect.height;
+        this.cameraX = (rect.width - this.width * this.zoom) / 2;
+        this.cameraY = (rect.height - this.height * this.zoom) / 2;
+        
+        this.draw();
+    },
+
+    clearCreatures: function() {
+        if(confirm('警告：此操作将抹杀天地间所有的异兽与残骸，确定执行吗？')) {
+            this.creatures = [];
+            this.corpses = [];
+            this.vfxList = [];
+            this.projectiles = [];
+            this.selectedCreature = null;
+            this.isDetailExpanded = false;
+            this.updateRightSidebar();
+            this.updateCreatureList();
+            this.logEvent("⚠️ 天地肃清，万兽俱灭。");
+        }
+    },
+
+    togglePause: function() {
+        this.isPaused = !this.isPaused;
+        let btn = document.getElementById('pause-btn');
+        btn.innerText = this.isPaused ? "▶️ 恢复" : "⏸️ 暂停";
+        btn.style.background = this.isPaused ? "rgba(243, 156, 18, 0.4)" : "rgba(255,255,255,0.1)";
+        btn.style.color = this.isPaused ? "#f1c40f" : "#fff";
+    },
+
+    randomSummon: function() {
+        this.updateUI();
+        
+        let c = CreatureFactory.generateGachaCreature();
+        c.x = Math.floor(Math.random() * (this.width - 20)) + 10;
+        c.y = Math.floor(Math.random() * (this.height - 20)) + 10;
+        c.spawnX = c.x; c.spawnY = c.y; 
+        
+        this.creatures.push(c);
+        
+        let rColor = RARITY_COLORS[c.rarity] || "#fff";
+        this.vfxList.push({ type: 'pillar', x: c.x + c.cxOffset - 0.5, y: c.y + c.cyOffset - 0.5, color: rColor, life: 60, maxLife: 60 });
+        
+        let rarityTitle = c.rarity === '传说' ? '🌈' : (c.rarity === '超稀有' ? '✨' : '');
+        this.logEvent(`${rarityTitle} 随着天地异象，${getColoredName(c)} 降临了！`);
+        this.updateCreatureList();
+    },
+    
+    bindEvents: function() {
+        this.wrapper.addEventListener('touchstart', (e) => { e.preventDefault(); }, {passive: false});
+        this.wrapper.addEventListener('touchmove', (e) => { e.preventDefault(); }, {passive: false});
+
+        this.wrapper.addEventListener('pointerdown', (e) => {
+            let rect = this.wrapper.getBoundingClientRect();
+            let mouseX = e.clientX - rect.left;
+            let mouseY = e.clientY - rect.top;
+
+            if (this.placingCreature) {
+                let pos = this.getGridPos(mouseX, mouseY);
+                this.placingCreature.x = pos.x;
+                this.placingCreature.y = pos.y;
+                this.placingCreature.spawnX = pos.x; 
+                this.placingCreature.spawnY = pos.y;
+                
+                this.creatures.push(this.placingCreature);
+                
+                let rColor = RARITY_COLORS[this.placingCreature.rarity] || "#fff";
+                this.vfxList.push({ type: 'pillar', x: pos.x + this.placingCreature.cxOffset - 0.5, y: pos.y + this.placingCreature.cyOffset - 0.5, color: rColor, life: 60, maxLife: 60 });
+                
+                let rarityTitle = this.placingCreature.rarity === '传说' ? '🌈' : (this.placingCreature.rarity === '超稀有' ? '✨' : '');
+                this.logEvent(`${rarityTitle} ${getColoredName(this.placingCreature)} 降临了！`);
+                
+                this.placingCreature = null;
+                this.wrapper.classList.remove('placing');
+                document.getElementById('tips').style.display = 'none';
+                this.updateCreatureList();
+                return;
+            }
+
+            this.dragStartX = mouseX;
+            this.dragStartY = mouseY;
+
+            if (this.selectedTerrain !== null) {
+                this.isDrawing = true;
+                this.paintGrid(mouseX, mouseY);
+            } else {
+                this.isDragging = true;
+            }
+        });
+        
+        window.addEventListener('pointerup', (e) => {
+            if(this.isDrawing) this.isDrawing = false;
+            if(this.isDragging) {
+                this.isDragging = false;
+                let rect = this.wrapper.getBoundingClientRect();
+                let mouseX = e.clientX - rect.left;
+                let mouseY = e.clientY - rect.top;
+                if(Math.abs(mouseX - this.dragStartX) < 5 && Math.abs(mouseY - this.dragStartY) < 5) {
+                    this.handleCanvasClick(mouseX, mouseY);
+                }
+            }
+        });
+
+        this.wrapper.addEventListener('pointermove', (e) => {
+            let rect = this.wrapper.getBoundingClientRect();
+            let mouseX = e.clientX - rect.left;
+            let mouseY = e.clientY - rect.top;
+            this.mouseX = mouseX;
+            this.mouseY = mouseY;
+
+            if (this.isDrawing && this.selectedTerrain !== null) {
+                this.paintGrid(mouseX, mouseY);
+            } else if (this.isDragging) {
+                this.cameraX += (mouseX - this.dragStartX);
+                this.cameraY += (mouseY - this.dragStartY);
+                this.dragStartX = mouseX;
+                this.dragStartY = mouseY;
+                this.draw(); 
+            }
+        });
+    },
+
+    handleCanvasClick: function(mx, my) {
+        let pos = this.getGridPos(mx, my);
+        let clickedCreature = null;
+        for(let c of this.creatures) {
+            for(let p of c.pixels) {
+                if(c.x + p.x === pos.x && c.y + p.y === pos.y) {
+                    clickedCreature = c; break;
+                }
+            }
+            if(clickedCreature) break;
+        }
+        
+        if(clickedCreature) {
+            if(this.selectedCreature === clickedCreature) this.isDetailExpanded = !this.isDetailExpanded;
+            else { this.selectedCreature = clickedCreature; this.isDetailExpanded = true; }
+        } else {
+            this.selectedCreature = null; 
+            this.isDetailExpanded = false;
+        }
+        this.updateRightSidebar();
+        this.updateCreatureList();
+    },
+
+    selectCreature: function(id) {
+        let target = this.creatures.find(c => c.id === id);
+        if(!target) return;
+        if (this.selectedCreature === target) this.isDetailExpanded = !this.isDetailExpanded;
+        else { this.selectedCreature = target; this.isDetailExpanded = true; }
+        this.updateRightSidebar();
+        this.updateCreatureList();
+    },
+    
+    getGridPos: function(mx, my) {
+        let x = Math.floor((mx - this.cameraX) / this.zoom);
+        let y = Math.floor((my - this.cameraY) / this.zoom);
+        return {x, y};
+    },
+    
+    paintGrid: function(mx, my) {
+        let pos = this.getGridPos(mx, my);
+        let bs = Math.floor(this.brushSize / 2);
+        for(let dy=-bs; dy<=bs; dy++) {
+            for(let dx=-bs; dx<=bs; dx++) {
+                let px = pos.x + dx, py = pos.y + dy;
+                if(px >= 0 && px < this.width && py >= 0 && py < this.height) {
+                    this.grid[py][px] = this.selectedTerrain;
+                }
+            }
+        }
+    },
+
+    openGacha: function() {
+        this.updateUI();
+        
+        let cards = document.getElementById('gacha-cards');
+        cards.innerHTML = '';
+        
+        for(let i=0; i<3; i++) {
+            let c = CreatureFactory.generateGachaCreature();
+            let div = document.createElement('div');
+            let canvasId = `gacha-canvas-${i}`;
+            
+            div.innerHTML = generateUnifiedCardHTML(c, canvasId, false);
+            div.className = ''; 
+            
+            div.querySelector('.unified-card').onclick = () => {
+                this.placingCreature = c;
+                this.wrapper.classList.add('placing');
+                document.getElementById('gacha-modal').style.display = 'none';
+                document.getElementById('tips').style.display = 'block';
+            };
+            
+            cards.appendChild(div);
+            drawCreatureMiniature(c, canvasId);
+        }
+        document.getElementById('gacha-modal').style.display = 'flex';
+    },
+
+    updateUI: function() {
+        let progTxt = document.getElementById('time-txt');
+        let progBar = document.getElementById('time-progress');
+        progTxt.innerText = this.isDay ? "☀ 日间" : "🌙 夜间";
+        progTxt.style.color = this.isDay ? "#fbc531" : "#a29bfe";
+        
+        let cycleTicks = this.dayDurationTicks + this.nightDurationTicks;
+        let tickInCycle = this.tickCount % cycleTicks;
+        let percent = 0;
+        
+        if (this.isDay) percent = (tickInCycle / this.dayDurationTicks) * 100;
+        else percent = ((tickInCycle - this.dayDurationTicks) / this.nightDurationTicks) * 100;
+
+        progBar.style.width = percent + "%";
+        progBar.style.background = this.isDay ? "#fbc531" : "#a29bfe";
+        progBar.style.boxShadow = this.isDay ? "0 0 10px #fbc531" : "0 0 10px #a29bfe";
+    },
+
+    updateCreatureList: function() {
+        let listDiv = document.getElementById('creature-list');
+        let sorted = [...this.creatures].sort((a, b) => {
+            let rA = {"传说":4, "超稀有":3, "稀有":2, "普通":1}[a.rarity] || 0;
+            let rB = {"传说":4, "超稀有":3, "稀有":2, "普通":1}[b.rarity] || 0;
+            if (rA !== rB) return rB - rA;
+            return b.hp - a.hp; 
+        });
+        
+        let html = '';
+        sorted.forEach(c => {
+            let rColor = RARITY_COLORS[c.rarity];
+            let isActive = (this.selectedCreature === c && this.isDetailExpanded) ? 'active' : '';
+            html += `
+                <div class="list-item ${isActive}" onclick="Game.selectCreature(${c.id})">
+                    <canvas id="list-canvas-${c.id}" width="36" height="36" style="background:rgba(0,0,0,0.5); border-radius:4px; flex-shrink:0;"></canvas>
+                    <div style="flex:1; overflow:hidden;">
+                        <div style="color:${rColor}; font-weight:bold; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.name}</div>
+                        <div style="font-size:11px; color:#94a3b8;">HP: <span style="color:#2ecc71;">${c.hp}</span>/${c.maxHp}</div>
+                    </div>
+                </div>
+            `;
+        });
+        listDiv.innerHTML = html;
+        sorted.forEach(c => drawCreatureMiniature(c, `list-canvas-${c.id}`));
+    },
+
+    updateRightSidebar: function() {
+        const container = document.getElementById('info-panel-container');
+        if(!this.selectedCreature || this.selectedCreature._isDead || !this.isDetailExpanded) {
+            container.style.display = 'none';
+            return;
+        }
+        container.style.display = 'block';
+        let c = this.selectedCreature;
+        let canvasId = 'sidebar-canvas-info';
+        
+        container.innerHTML = generateUnifiedCardHTML(c, canvasId, true);
+        drawCreatureMiniature(c, canvasId);
+    },
+    
+    loop: function() {
+        if (!this.isPaused) {
+            this.tickCount++;
+            let cycleTicks = this.dayDurationTicks + this.nightDurationTicks;
+            let isNowDay = (this.tickCount % cycleTicks) < this.dayDurationTicks;
+            
+            if (this.isDay !== isNowDay) {
+                this.isDay = isNowDay;
+                this.updateUI();
+                this.switchBGM();
+                if(this.isDay) this.logEvent(`☀️ 旭日东升，万物生光辉...`);
+                else this.logEvent(`🌙 夜幕降临，山海之间杀机暗涌...`);
+            }
+            if(this.tickCount % 10 === 0) {
+                this.updateUI();
+                if(this.selectedCreature) this.updateRightSidebar();
+            }
+            this.updateLogic();
+        }
+        this.draw(); 
+        requestAnimationFrame(this.loop.bind(this));
+    },
+    
+    die: function(c) {
+        if (c._isDead) return;
+        c._isDead = true;
+        c.hp = 0; 
+        
+        this.triggerTalent('onDeath', c, null, 0); 
+        
+        this.corpses.push({ 
+            x: c.x, y: c.y, cxOffset: c.cxOffset, cyOffset: c.cyOffset,
+            pixels: JSON.parse(JSON.stringify(c.pixels)), color: '#333',
+            talents: c.talents ? [...c.talents] : [] 
+        });
+        this.vfxList.push({ type: 'skull', x: c.x + c.cxOffset - 0.5, y: c.y + c.cyOffset - 0.5, life: 60, maxLife: 60 });
+    },
+    
+    // 【核心修复】：重新加入遗失的 eatCorpse 函数
+    eatCorpse: function(c, corpse, corpseIndex) {
+        let cp = Game.corpses[corpseIndex];
+        if(!cp || cp !== corpse) return; 
+
+        if(cp.pixels.length > 0) {
+            let p = cp.pixels.pop();
+            c.pixels.push({x: p.x + Math.floor(Math.random()*2), y: p.y + Math.floor(Math.random()*2)}); 
+            c.maxHp += 10; c.hp += 10; c.atk += 1; c.def += 0.5;
+            this.triggerTalent('onEat', c, cp, 0); 
+            this.addFloatingText(c.x, c.y, "+10", "#2ecc71", 14);
+            
+            if(Math.random() < 0.2 && cp.talents && cp.talents.length > 0) {
+                // 绝对防偷学机制
+                let normalTalents = cp.talents.filter(t=> {
+                    let d = DB_TALENTS.find(tt=>tt.TalentID===t);
+                    return d && d.Rarity !== '专属';
+                });
+                if (normalTalents.length > 0) {
+                    let stealId = normalTalents[Math.floor(Math.random() * normalTalents.length)];
+                    if(!c.talents.includes(stealId)) {
+                        c.talents.push(stealId);
+                        this.addFloatingText(c.x, c.y, "领悟天赋!", "#f1c40f", 16);
+                    }
+                }
+            }
+        }
+        if(cp.pixels.length === 0) this.corpses.splice(corpseIndex, 1);
+        c.actionCooldown = Math.max(1, Math.floor(c.atkSpeed * 60)); 
+    },
+
+    updateLogic: function() {
+        // 第一阶段：超强花式弹道计算与像素级精准碰撞
+        for(let i = this.projectiles.length - 1; i >= 0; i--) {
+            let p = this.projectiles[i];
+            
+            if(p.isOrbital) {
+                let owner = this.creatures.find(cr => cr.id === p.ownerId);
+                if(!owner || owner._isDead) { this.projectiles.splice(i,1); continue; }
+                p.angle += p.speed;
+                p.x = owner.x + owner.cxOffset + Math.cos(p.angle) * p.radius;
+                p.y = owner.y + owner.cyOffset + Math.sin(p.angle) * p.radius;
+            } 
+            else if(p.isLaser) {
+                let owner = this.creatures.find(cr => cr.id === p.ownerId);
+                if(!owner || owner._isDead) { this.projectiles.splice(i,1); continue; }
+                p.life--;
+                if(p.life<=0){ this.projectiles.splice(i,1); continue; }
+                p.angle += p.spinSpeed;
+                p.x = owner.x + owner.cxOffset;
+                p.y = owner.y + owner.cyOffset;
+            }
+            else {
+                if(p.homing && p.targetId){
+                    let t = this.creatures.find(cr=>cr.id===p.targetId);
+                    if(t && !t._isDead){
+                        let dx = t.x+t.cxOffset - p.x;
+                        let dy = t.y+t.cyOffset - p.y;
+                        let dist = Math.hypot(dx, dy) || 0.1;
+                        p.vx = (dx/dist)*p.speed;
+                        p.vy = (dy/dist)*p.speed;
+                    }
+                }
+                
+                if(p.blackhole){
+                    this.creatures.forEach(c=>{
+                        if(c.id!==p.ownerId && !c._isDead){
+                            let d = Math.hypot(c.x-p.x, c.y-p.y);
+                            if(d<=15 && d>0.5){
+                                c.x += (p.x-c.x)/d * 0.2;
+                                c.y += (p.y-c.y)/d * 0.2;
+                            }
+                        }
+                    });
+                }
+                
+                p.x += p.vx;
+                p.y += p.vy;
+                p.traveled += p.speed;
+                
+                if(p.boomerang){
+                    if(!p.isReturning && p.traveled >= p.maxDist){
+                        p.isReturning = true;
+                        p.traveled = 0;
+                        if(p.hitTargets) p.hitTargets = []; 
+                    }
+                    if(p.isReturning){
+                        let owner = this.creatures.find(cr => cr.id === p.ownerId);
+                        if(!owner || owner._isDead) { this.projectiles.splice(i,1); continue; }
+                        let dx = owner.x+owner.cxOffset - p.x;
+                        let dy = owner.y+owner.cyOffset - p.y;
+                        let dist = Math.hypot(dx, dy);
+                        if(dist < 1) { this.projectiles.splice(i,1); continue; }
+                        p.vx = (dx/dist)*p.speed;
+                        p.vy = (dy/dist)*p.speed;
+                    }
+                }
+            }
+
+            let hit = false;
+            let hitCreature = null;
+            
+            // 【引擎升级】激光碰撞判定：像素级精准计算
+            if(p.isLaser){
+                let owner = this.creatures.find(cr => cr.id === p.ownerId);
+                if(owner && !owner._isDead){
+                    let ox = owner.x + owner.cxOffset;
+                    let oy = owner.y + owner.cyOffset;
+                    let lx = Math.cos(p.angle);
+                    let ly = Math.sin(p.angle);
+                    
+                    this.creatures.forEach(c=>{
+                        if(c.id !== p.ownerId && !c._isDead){
+                            let hitLaser = false;
+                            for(let px of c.pixels) {
+                                let pxCenter = c.x + px.x + 0.5;
+                                let pyCenter = c.y + px.y + 0.5;
+                                let dx = pxCenter - ox;
+                                let dy = pyCenter - oy;
+                                let dot = dx * lx + dy * ly; 
+                                if(dot > 0 && dot <= p.length) { 
+                                    let distToLaser = Math.abs(dx * ly - dy * lx); 
+                                    // 只要激光擦到身体任何一个像素边缘就算命中
+                                    if(distToLaser <= 1.5) { 
+                                        hitLaser = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if(hitLaser){
+                                if(!p.hitTargets) p.hitTargets = [];
+                                if(!p.hitTargets.includes(c.id)){
+                                    p.hitTargets.push(c.id);
+                                    c.hp -= p.damage;
+                                    this.addFloatingText(c.x, c.y, `-${p.damage}(射线)`, p.color, 16);
+                                    if(c.hp <= 0) {
+                                        this.triggerTalent('onKill', owner, c, 0);
+                                        this.logEvent(`💀 震惊！<span style="color:${c.color}">[${c.name}]</span> 被射线灰飞烟灭！`);
+                                        this.die(c);
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }
+                continue; 
+            }
+
+            // 【引擎升级】普通子弹碰撞判定：像素级精准计算
+            for(let j=0; j<this.creatures.length; j++) {
+                let c = this.creatures[j];
+                if(c.id === p.ownerId || c._isDead) continue;
+                if(p.hitTargets && p.hitTargets.includes(c.id)) continue; 
+                
+                let hitCurrent = false;
+                for(let px of c.pixels) {
+                    let pxCenter = c.x + px.x + 0.5;
+                    let pyCenter = c.y + px.y + 0.5;
+                    // 只要子弹距离任何一个身体像素小于1.5个网格，即视为命中身体！
+                    if(Math.hypot(p.x - pxCenter, p.y - pyCenter) <= 1.5) {
+                        hitCurrent = true;
+                        break;
+                    }
+                }
+                
+                if(hitCurrent) {
+                    hit = true;
+                    hitCreature = c;
+                    
+                    if(p.healAmt > 0){
+                        c.hp = Math.min(c.maxHp, c.hp + p.healAmt);
+                        this.addFloatingText(c.x, c.y, `+${p.healAmt}(治疗)`, '#2ecc71', 16);
+                    } else {
+                        c.hp -= p.damage;
+                        this.addFloatingText(c.x, c.y, `-${p.damage}`, p.color, 16);
+                        if(p.freeze) c.actionCooldown += 60;
+                    }
+                    
+                    let attacker = this.creatures.find(cr => cr.id === p.ownerId);
+                    
+                    if (c.hp > 0 && p.damage > 0) {
+                        if(attacker) {
+                            if(!c.enemyTarget) c.actionCooldown = 0;
+                            c.enemyTarget = attacker;
+                        }
+                    } else if (c.hp <= 0 && p.damage > 0) {
+                        if (attacker) {
+                            this.triggerTalent('onKill', attacker, c, 0);
+                            if(p.lifesteal) {
+                                attacker.hp = Math.min(attacker.maxHp, attacker.hp + p.damage);
+                                this.addFloatingText(attacker.x, attacker.y, '吸血', '#8e44ad');
+                            }
+                        }
+                        this.logEvent(`💀 震惊！<span style="color:${c.color}">[${c.name}]</span> 被无情轰杀了！`);
+                        this.die(c); 
+                    }
+                    
+                    if(p.pierce || p.isOrbital){
+                        if(!p.hitTargets) p.hitTargets = [];
+                        p.hitTargets.push(c.id);
+                        hit = false; // 穿透弹不销毁本体
+                    }
+                    break;
+                }
+            }
+
+            if(hit) {
+                if(!isNaN(p.x) && !isNaN(p.y)) this.vfxList.push({type: 'explosion', x: p.x, y: p.y, color: p.color, life: 15, maxLife: 15});
+                
+                if(p.bounce && p.bounce > 0 && hitCreature){
+                    let nextTarget = this.creatures.find(c=>c!==hitCreature && c.id!==p.ownerId && !c._isDead && Math.hypot(c.x-p.x, c.y-p.y)<=15);
+                    if(nextTarget){
+                        p.bounce--;
+                        let dx = nextTarget.x+nextTarget.cxOffset - p.x;
+                        let dy = nextTarget.y+nextTarget.cyOffset - p.y;
+                        let dist = Math.hypot(dx,dy) || 0.1;
+                        p.vx = (dx/dist)*p.speed;
+                        p.vy = (dy/dist)*p.speed;
+                        p.traveled = 0;
+                    } else {
+                        this.projectiles.splice(i, 1);
+                    }
+                }
+                else if(p.split && p.split > 0){
+                    for(let s=0; s<p.split; s++){
+                        let angle = (Math.PI*2/p.split)*s;
+                        this.projectiles.push({ownerId: p.ownerId, x:p.x, y:p.y, vx:Math.cos(angle)*p.speed, vy:Math.sin(angle)*p.speed, speed:p.speed, traveled:0, maxDist:50, damage:Math.floor(p.damage/2), color:p.color});
+                    }
+                    this.projectiles.splice(i, 1);
+                }
+                else {
+                    this.projectiles.splice(i, 1);
+                }
+                
+            } else if (!p.isOrbital && !p.boomerang && p.traveled >= p.maxDist) {
+                if(p.split && p.split > 0){
+                    for(let s=0; s<p.split; s++){
+                        let angle = (Math.PI*2/p.split)*s;
+                        this.projectiles.push({ownerId: p.ownerId, x:p.x, y:p.y, vx:Math.cos(angle)*p.speed, vy:Math.sin(angle)*p.speed, speed:p.speed, traveled:0, maxDist:50, damage:Math.floor(p.damage/2), color:p.color});
+                    }
+                } else if(!isNaN(p.x) && !isNaN(p.y) && !p.blackhole) {
+                    this.addFloatingText(Math.floor(p.x), Math.floor(p.y), '消散', '#e74c3c', 12);
+                    this.vfxList.push({type: 'explosion', x: p.x, y: p.y, color: '#e74c3c', life: 10, maxLife: 10});
+                }
+                this.projectiles.splice(i, 1);
+            }
+        }
+
+        // 第二阶段：生物行为计算
+        for(let i = this.creatures.length - 1; i >= 0; i--) {
+            let c = this.creatures[i];
+            
+            if (!c || c._isDead) continue; 
+            
+            if (c.migTicks !== undefined && c.migTicks > 0) c.migTicks--;
+            if (c.unpTicks !== undefined && c.unpTicks > 0) c.unpTicks--;
+
+            if(c.hp <= 0) {
+                this.die(c);
+                continue;
+            }
+            
+            if(c.actionCooldown > 0) { c.actionCooldown--; continue; }
+            
+            let isFlying = c.moveType.includes("空") || c.moveType.includes("飞行");
+            let tID = (this.grid[c.y] && this.grid[c.y][c.x]) !== undefined ? this.grid[c.y][c.x] : 2;
+            let inLava = tID === 7;
+            let onSnow = tID === 6;
+
+            if(!isFlying && inLava) {
+                if(this.tickCount % 60 === c.id % 60) {
+                    c.hp -= 100;
+                    this.addFloatingText(c.x, c.y, "-100", "#e74c3c", 16);
+                }
+                if(!c.escapeDir) c.escapeDir = { x: Math.random()>0.5?1:-1, y: Math.random()>0.5?1:-1 };
+                this.applyMove(c, c.escapeDir.x, c.escapeDir.y, true); 
+                continue;
+            } else {
+                c.escapeDir = null; 
+            }
+
+            let baseVision = this.isDay ? c.dayVision : c.nightVision;
+            let actualVision = this.triggerTalent('onVision', c, null, baseVision);
+            let speedMultiplier = (!isFlying && onSnow) ? 2 : 1; 
+            
+            let cCenterX = c.x + c.cxOffset;
+            let cCenterY = c.y + c.cyOffset;
+
+            if (c.personality === "胆小") {
+                let hpRatio = c.hp / c.maxHp;
+                let lastRatio = (c.lastHp || c.hp) / c.maxHp;
+                if (hpRatio <= 0.5 && lastRatio > 0.5) c.forceFlee = true;
+                if (hpRatio <= 0.3 && lastRatio > 0.3) c.forceFlee = true;
+                c.lastHp = c.hp;
+            }
+
+            let nearestEnemy = null, minDist = 99999;
+            let nearestStrongEnemy = null, minStrongDist = 99999;
+
+            for(let j=0; j<this.creatures.length; j++) {
+                if(i===j) continue;
+                let other = this.creatures[j];
+                
+                if (other._isDead) continue; 
+
+                let otherCenterX = other.x + other.cxOffset;
+                let otherCenterY = other.y + other.cyOffset;
+
+                if (c.movePattern === "领主") {
+                    let distToSpawn = Math.hypot(otherCenterX - (c.spawnX + c.cxOffset), otherCenterY - (c.spawnY + c.cyOffset));
+                    if (distToSpawn > actualVision) continue; 
+                }
+
+                let dist = Math.hypot(cCenterX - otherCenterX, cCenterY - otherCenterY);
+                if(dist <= actualVision) { 
+                    if(dist < minDist) { minDist = dist; nearestEnemy = other; }
+                    if(c.personality === "胆小" && other.atk > c.atk && dist < minStrongDist) { 
+                        minStrongDist = dist; nearestStrongEnemy = other; 
+                    }
+                }
+            }
+
+            if (c.personality === "胆小" && !nearestEnemy) {
+                c.forceFlee = false; 
+            }
+            
+            let nearestCorpse = null, minCorpseDist = 99999;
+            for(let j=0; j<this.corpses.length; j++) {
+                let cp = this.corpses[j];
+                let cpCenterX = cp.x + cp.cxOffset;
+                let cpCenterY = cp.y + cp.cyOffset;
+                let dist = Math.hypot(cCenterX - cpCenterX, cCenterY - cpCenterY);
+                if(dist <= actualVision && dist < minCorpseDist) { minCorpseDist = dist; nearestCorpse = {obj: cp, index: j}; }
+            }
+
+            if (c.enemyTarget) {
+                if (c.enemyTarget._isDead || c.enemyTarget.hp <= 0) {
+                    c.enemyTarget = null;
+                } else {
+                    let targetCenterX = c.enemyTarget.x + c.enemyTarget.cxOffset;
+                    let targetCenterY = c.enemyTarget.y + c.enemyTarget.cyOffset;
+                    let distToAggro = Math.hypot(cCenterX - targetCenterX, cCenterY - targetCenterY);
+                    
+                    if (c.personality === "和平" && distToAggro > 10) c.enemyTarget = null; 
+                    else if (distToAggro > actualVision * 1.5) c.enemyTarget = null; 
+                }
+            }
+
+            let actionTaken = false;
+
+            if (c.personality === "胆小" && (nearestStrongEnemy || c.forceFlee)) {
+                let fleeTarget = nearestStrongEnemy || nearestEnemy;
+                if (fleeTarget) {
+                    this.moveTowards(c, fleeTarget.x, fleeTarget.y, true, speedMultiplier);
+                    actionTaken = true;
+                }
+            }
+
+            if (!actionTaken && c.personality === "贪食" && !c.enemyTarget && nearestCorpse) {
+                let eatRange = c.cxOffset + nearestCorpse.obj.cxOffset + 1.5;
+                if (minCorpseDist <= eatRange) this.eatCorpse(c, nearestCorpse.obj, nearestCorpse.index);
+                else this.moveTowards(c, nearestCorpse.obj.x, nearestCorpse.obj.y, false, speedMultiplier);
+                actionTaken = true;
+            }
+
+            if (!actionTaken) {
+                let combatTarget = c.enemyTarget;
+                if (!combatTarget && nearestEnemy) {
+                    if (c.personality === "和平") { } 
+                    else if (c.personality === "懒惰") {
+                        if (minDist <= actualVision * 0.3) combatTarget = nearestEnemy;
+                    } 
+                    else if (c.personality === "胆小") {
+                        if (c.atk > nearestEnemy.atk) combatTarget = nearestEnemy; 
+                    } 
+                    else combatTarget = nearestEnemy; 
+                }
+
+                if (combatTarget) {
+                    let targetCenterX = combatTarget.x + combatTarget.cxOffset;
+                    let targetCenterY = combatTarget.y + combatTarget.cyOffset;
+                    let distToTarget = Math.hypot(cCenterX - targetCenterX, cCenterY - targetCenterY);
+                    let meleeRange = c.cxOffset + combatTarget.cxOffset + 1.5;
+                    
+                    if (distToTarget <= meleeRange) this.attack(c, combatTarget);
+                    else this.moveTowards(c, combatTarget.x, combatTarget.y, false, speedMultiplier);
+                    actionTaken = true;
+                }
+            }
+
+            if (!actionTaken && nearestCorpse) {
+                let eatRange = c.cxOffset + nearestCorpse.obj.cxOffset + 1.5;
+                if (minCorpseDist <= eatRange) this.eatCorpse(c, nearestCorpse.obj, nearestCorpse.index);
+                else this.moveTowards(c, nearestCorpse.obj.x, nearestCorpse.obj.y, false, speedMultiplier);
+                actionTaken = true;
+            }
+
+            if (!actionTaken) this.executeIdleMove(c, speedMultiplier, actualVision);
+        }
+        
+        // 第三阶段：安全清理尸骸
+        for(let i = this.creatures.length - 1; i >= 0; i--) {
+            if (this.creatures[i] && this.creatures[i]._isDead) {
+                if(this.selectedCreature === this.creatures[i]) { 
+                    this.selectedCreature = null; 
+                    this.isDetailExpanded = false; 
+                }
+                this.creatures.splice(i, 1);
+            }
+        }
+
+        for(let i = this.floatingTexts.length - 1; i >= 0; i--) {
+            let ft = this.floatingTexts[i];
+            ft.life--; ft.y -= 0.15;
+            if(ft.life <= 0) this.floatingTexts.splice(i, 1);
+        }
+        for(let i = this.vfxList.length - 1; i >= 0; i--) {
+            this.vfxList[i].life--;
+            if(this.vfxList[i].life <= 0) this.vfxList.splice(i, 1);
+        }
+    },
+    executeIdleMove: function(c, speedMultiplier, actualVision) {
+        if (c.movePattern === "领主") {
+            let cCenterX = c.x + c.cxOffset;
+            let cCenterY = c.y + c.cyOffset;
+            let distToSpawn = Math.hypot(cCenterX - (c.spawnX + c.cxOffset), cCenterY - (c.spawnY + c.cyOffset));
+            
+            if (distToSpawn > actualVision || !c.territoryTarget) {
+                let angle = Math.random() * Math.PI * 2;
+                let r = Math.random() * actualVision;
+                c.territoryTarget = {
+                    x: Math.floor(c.spawnX + Math.cos(angle) * r),
+                    y: Math.floor(c.spawnY + Math.sin(angle) * r)
+                };
+            }
+            let oldX = c.x, oldY = c.y;
+            this.moveTowards(c, c.territoryTarget.x, c.territoryTarget.y, false, speedMultiplier * 2); 
+            if (c.x === oldX && c.y === oldY) c.territoryTarget = null; 
+            else if (c.x === c.territoryTarget.x && c.y === c.territoryTarget.y) c.territoryTarget = null; 
+        } 
+        else if (c.movePattern === "迁徙") {
+            if (c.migDir === undefined) {
+                c.migDir = Math.random() * Math.PI * 2;
+                c.migTicks = Math.floor((2 + Math.random() * 3) * 60);
+            }
+            if (c.migTicks <= 0) {
+                c.migDir += (15 + Math.random() * 30) * (Math.random() < 0.5 ? 1 : -1) * Math.PI / 180;
+                c.migTicks = Math.floor((2 + Math.random() * 3) * 60);
+            }
+            let tx = Math.floor(c.x + Math.cos(c.migDir) * 10);
+            let ty = Math.floor(c.y + Math.sin(c.migDir) * 10);
+            let oldX = c.x, oldY = c.y;
+            this.moveTowards(c, tx, ty, false, speedMultiplier);
+            if (c.x === oldX && c.y === oldY) c.migDir += Math.PI - (Math.random() * Math.PI / 2); 
+        }
+        else if (c.movePattern === "难以预测") {
+            if (c.unpTicks === undefined || c.unpTicks <= 0) {
+                let opts = [0, 1, 2, 3].filter(x => x !== c.unpState);
+                c.unpState = opts[Math.floor(Math.random() * opts.length)];
+                if (c.unpState === 0) { c.unpTicks = Math.floor((2 + Math.random() * 3) * 60); c.unpDir = Math.random() * Math.PI * 2; }
+                else if (c.unpState === 1) { c.unpTicks = 5 * 60; }
+                else if (c.unpState === 2) { c.unpTicks = Math.floor(1.5 * 60); c.unpDir = Math.random() * Math.PI * 2; }
+                else if (c.unpState === 3) { c.unpTicks = 3 * 60; }
+            }
+            
+            if (c.unpState === 0) {
+                let tx = Math.floor(c.x + Math.cos(c.unpDir) * 10);
+                let ty = Math.floor(c.y + Math.sin(c.unpDir) * 10);
+                this.moveTowards(c, tx, ty, false, speedMultiplier);
+            } else if (c.unpState === 1) {
+                this.moveRandom(c, speedMultiplier);
+            } else if (c.unpState === 2) {
+                let tx = Math.floor(c.x + Math.cos(c.unpDir) * 10);
+                let ty = Math.floor(c.y + Math.sin(c.unpDir) * 10);
+                this.moveTowards(c, tx, ty, false, speedMultiplier * 0.5); 
+            } else if (c.unpState === 3) {
+                c.actionCooldown = 30; 
+            }
+        }
+        else {
+            this.moveRandom(c, speedMultiplier);
+        }
+    },
+
+    moveTowards: function(c, tx, ty, flee, multiplier = 1) {
+        let dx = 0, dy = 0;
+        if(c.x < tx) dx = flee ? -1 : 1; else if(c.x > tx) dx = flee ? 1 : -1;
+        if(c.y < ty) dy = flee ? -1 : 1; else if(c.y > ty) dy = flee ? 1 : -1;
+        
+        let moved = false;
+        if(dx !== 0 && this.canWalk(c, c.x + dx, c.y)) { this.applyMove(c, dx, 0, false, multiplier); moved = true; }
+        else if(dy !== 0 && this.canWalk(c, c.x, c.y + dy)) { this.applyMove(c, 0, dy, false, multiplier); moved = true; }
+        else if(dx !== 0 && dy !== 0 && this.canWalk(c, c.x + dx, c.y + dy)) { this.applyMove(c, dx, dy, false, multiplier); moved = true; }
+        
+        if (!moved) {
+            let baseTicks = Math.max(2, (10 - c.baseSpeed) * 2); 
+            c.actionCooldown = Math.floor(baseTicks * multiplier); 
+            
+            if (!flee && Math.random() < 0.3) {
+                let randomDirs = [{x:0,y:1}, {x:0,y:-1}, {x:1,y:0}, {x:-1,y:0}];
+                let rDir = randomDirs[Math.floor(Math.random() * randomDirs.length)];
+                if(this.canWalk(c, c.x + rDir.x, c.y + rDir.y)) {
+                    c.x += rDir.x; c.y += rDir.y;
+                }
+            }
+        }
+    },
+    
+    moveRandom: function(c, multiplier = 1) {
+        let dirs = [{x:0,y:-1}, {x:0,y:1}, {x:-1,y:0}, {x:1,y:0}];
+        let d = dirs[Math.floor(Math.random() * dirs.length)];
+        if(this.canWalk(c, c.x + d.x, c.y + d.y)) this.applyMove(c, d.x, d.y, false, multiplier);
+    },
+    
+    applyMove: function(c, dx, dy, isForceEscape = false, multiplier = 1) {
+        c.x += dx; c.y += dy;
+        let baseTicks = Math.max(2, (10 - c.baseSpeed) * 2); 
+        c.actionCooldown = Math.floor(baseTicks * multiplier); 
+        if(isForceEscape) c.actionCooldown = Math.max(1, baseTicks - 2); 
+    },
+    
+    canWalk: function(c, nx, ny) {
+        if(nx < 0 || nx >= this.width || ny < 0 || ny >= this.height) return false;
+        let tID = this.grid[ny][nx];
+        return TERRAIN_TYPES[tID].walkable.includes(c.moveType);
+    },
+    
+    attack: function(attacker, defender) {
+        let rawDmg = Math.max(1, attacker.atk - defender.def);
+        rawDmg = this.triggerTalent('onAttack', attacker, defender, rawDmg);
+        
+        let isCrit = Math.random() < attacker.critRate;
+        if(isCrit) rawDmg *= 2;
+
+        let finalDmg = Math.floor(rawDmg);
+        finalDmg = this.triggerTalent('onHurt', defender, attacker, finalDmg);
+        
+        defender.hp -= finalDmg;
+        
+        let atkTicks = Math.floor(attacker.atkSpeed * 60);
+        attacker.actionCooldown = Math.max(1, atkTicks);
+        
+        if (defender.hp > 0) {
+            if (!defender.enemyTarget) { defender.actionCooldown = 0; }
+            defender.enemyTarget = attacker;
+        }
+        
+        let minY = Math.min(...defender.pixels.map(p => p.y));
+        let txtStr = `-${finalDmg}${isCrit ? '!' : ''}`;
+        this.addFloatingText(defender.x, defender.y + minY, txtStr, isCrit ? "#ff9f43" : "#ff4757", isCrit ? 22 : 16);
+        
+        if(defender.hp <= 0) {
+            this.triggerTalent('onKill', attacker, defender, 0); 
+            this.logEvent(`💀 震惊！${getColoredName(defender)} 惨死于 ${getColoredName(attacker)} 之手！`);
+            attacker.enemyTarget = null;
+            this.die(defender); 
+        }
+    },
+    
+    draw: function() {
+        let rect = this.wrapper.getBoundingClientRect();
+        if (this.canvas.width !== rect.width || this.canvas.height !== rect.height) {
+            this.canvas.width = rect.width;
+            this.canvas.height = rect.height;
+        }
+        
+        this.ctx.fillStyle = "#5ea3d9";
+        this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+        
+        this.ctx.save();
+        this.ctx.translate(this.cameraX, this.cameraY); 
+
+        for(let y=0; y<this.height; y++) {
+            for(let x=0; x<this.width; x++) {
+                this.ctx.fillStyle = TERRAIN_TYPES[this.grid[y][x]].color;
+                
+                let zx = Math.floor(x * this.zoom);
+                let zy = Math.floor(y * this.zoom);
+                let zw = Math.ceil((x + 1) * this.zoom) - zx;
+                let zh = Math.ceil((y + 1) * this.zoom) - zy;
+                this.ctx.fillRect(zx, zy, zw, zh);
+            }
+        }
+        
+        if(!this.isDay) {
+            this.ctx.save();
+            this.ctx.setTransform(1, 0, 0, 1, 0, 0);
+            this.ctx.fillStyle = "rgba(10, 10, 30, 0.4)";
+            this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            this.ctx.restore();
+        }
+        
+        this.corpses.forEach(cp => {
+            this.ctx.fillStyle = cp.color;
+            cp.pixels.forEach(p => {
+                let zx = Math.floor((cp.x + p.x) * this.zoom);
+                let zy = Math.floor((cp.y + p.y) * this.zoom);
+                let zw = Math.ceil((cp.x + p.x + 1) * this.zoom) - zx;
+                let zh = Math.ceil((cp.y + p.y + 1) * this.zoom) - zy;
+                this.ctx.fillRect(zx, zy, zw, zh);
+            });
+        });
+        
+        this.creatures.forEach(c => {
+            if(c._isDead) return;
+            drawSingleCreatureShape(this.ctx, c, c.x, c.y, this.zoom);
+            
+            if(c === this.selectedCreature) {
+                let minX=999, minY=999, maxX=-999, maxY=-999;
+                c.pixels.forEach(p => {
+                    if(p.x < minX) minX=p.x; if(p.x > maxX) maxX=p.x;
+                    if(p.y < minY) minY=p.y; if(p.y > maxY) maxY=p.y;
+                });
+                
+                this.ctx.strokeStyle = "#fff";
+                this.ctx.lineWidth = 2;
+                this.ctx.strokeRect((c.x + minX - 1)*this.zoom, (c.y + minY - 1)*this.zoom, (maxX-minX+3)*this.zoom, (maxY-minY+3)*this.zoom);
+                
+                let baseVision = this.isDay ? c.dayVision : c.nightVision;
+                let actualVision = this.triggerTalent ? this.triggerTalent('onVision', c, null, baseVision) : baseVision;
+                
+                this.ctx.beginPath();
+                let centerX = (c.x + c.cxOffset) * this.zoom;
+                let centerY = (c.y + c.cyOffset) * this.zoom;
+                this.ctx.arc(centerX, centerY, actualVision * this.zoom, 0, 2 * Math.PI);
+                this.ctx.fillStyle = "rgba(255, 255, 255, 0.1)";
+                this.ctx.fill();
+                this.ctx.strokeStyle = "rgba(255, 255, 255, 0.4)";
+                this.ctx.lineWidth = 1;
+                this.ctx.stroke();
+            }
+
+            let topY = Math.min(...c.pixels.map(p => p.y));
+            let hBarY = (c.y + topY - 1) * this.zoom;
+            let cx = (c.x + c.cxOffset) * this.zoom;
+            let barW = this.zoom * 2.5;
+            let barH = Math.max(2, this.zoom * 0.4);
+            
+            this.ctx.fillStyle = "rgba(0,0,0,0.7)";
+            this.ctx.fillRect(cx - barW/2, hBarY, barW, barH);
+            this.ctx.fillStyle = "#2ecc71";
+            this.ctx.fillRect(cx - barW/2, hBarY, barW * (c.hp / c.maxHp), barH);
+        });
+
+        this.projectiles.forEach(p => {
+            let px = p.x * this.zoom;
+            let py = p.y * this.zoom;
+            
+            if (isNaN(px) || isNaN(py)) return;
+            
+            if(p.isLaser) {
+                let owner = this.creatures.find(cr => cr.id === p.ownerId);
+                if(owner && !owner._isDead) {
+                    let ox = (owner.x + owner.cxOffset) * this.zoom;
+                    let oy = (owner.y + owner.cyOffset) * this.zoom;
+                    let ex = ox + Math.cos(p.angle) * p.length * this.zoom;
+                    let ey = oy + Math.sin(p.angle) * p.length * this.zoom;
+                    
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(ox, oy);
+                    this.ctx.lineTo(ex, ey);
+                    this.ctx.strokeStyle = hexToRgba(p.color, 0.7);
+                    this.ctx.lineWidth = this.zoom * 1.5;
+                    this.ctx.lineCap = "round";
+                    this.ctx.stroke();
+                }
+            } else {
+                this.ctx.beginPath();
+                this.ctx.arc(px, py, this.zoom * 1.5, 0, Math.PI*2);
+                this.ctx.fillStyle = hexToRgba(p.color, 0.4);
+                this.ctx.fill();
+                
+                this.ctx.beginPath();
+                this.ctx.arc(px, py, this.zoom * 0.8, 0, Math.PI*2);
+                this.ctx.fillStyle = p.color;
+                this.ctx.fill();
+            }
+        });
+
+        if(this.placingCreature) {
+            let pos = this.getGridPos(this.mouseX, this.mouseY);
+            this.ctx.globalAlpha = 0.7; 
+            drawSingleCreatureShape(this.ctx, this.placingCreature, pos.x, pos.y, this.zoom);
+            this.ctx.globalAlpha = 1.0;
+        }
+        
+        this.vfxList.forEach(vfx => {
+            let alpha = vfx.life / vfx.maxLife;
+            if (vfx.type === 'pillar') {
+                this.ctx.fillStyle = hexToRgba(vfx.color, alpha * 0.7);
+                let px = (vfx.x * this.zoom) - this.zoom;
+                let pw = this.zoom * 3;
+                let ph = (vfx.y * this.zoom) + this.zoom;
+                if(!isNaN(px) && !isNaN(ph)) this.ctx.fillRect(px, 0, pw, ph);
+            }
+            if (vfx.type === 'skull') {
+                if(!isNaN(vfx.x) && !isNaN(vfx.y)) {
+                    this.ctx.globalAlpha = alpha;
+                    this.ctx.font = `${this.zoom * 3}px Arial`;
+                    this.ctx.textAlign = "center";
+                    this.ctx.textBaseline = "middle";
+                    this.ctx.fillText("☠️", (vfx.x * this.zoom) + this.zoom/2, (vfx.y * this.zoom) - ((vfx.maxLife - vfx.life) * 0.5));
+                    this.ctx.globalAlpha = 1.0;
+                }
+            }
+            if (vfx.type === 'explosion') {
+                if(!isNaN(vfx.x) && !isNaN(vfx.y)) {
+                    this.ctx.beginPath();
+                    this.ctx.arc(vfx.x * this.zoom, vfx.y * this.zoom, this.zoom * (3 - alpha*2), 0, Math.PI*2);
+                    this.ctx.fillStyle = hexToRgba(vfx.color, alpha);
+                    this.ctx.fill();
+                }
+            }
+        });
+
+        this.ctx.textAlign = "center";
+        this.ctx.textBaseline = "middle";
+        this.floatingTexts.forEach(ft => {
+            if(!isNaN(ft.x) && !isNaN(ft.y)) {
+                this.ctx.font = `bold ${ft.size}px Arial`;
+                this.ctx.globalAlpha = ft.life / 60; 
+                
+                this.ctx.strokeStyle = "#000";
+                this.ctx.lineWidth = 3;
+                this.ctx.strokeText(ft.text, ft.x * this.zoom, ft.y * this.zoom);
+                
+                this.ctx.fillStyle = ft.color;
+                this.ctx.fillText(ft.text, ft.x * this.zoom, ft.y * this.zoom);
+                
+                this.ctx.globalAlpha = 1.0;
+            }
+        });
+
+        this.ctx.restore();
+    }
+};
+
+const TalentAssigner = {
+    pickRandomByWeight: function(weights, categorizedTalents) {
+        let availableWeights = [];
+        let total = 0;
+        for(let key in weights) {
+            if(weights[key] > 0 && categorizedTalents[key] && categorizedTalents[key].length > 0) {
+                availableWeights.push({key: key, w: weights[key]});
+                total += weights[key];
+            }
+        }
+        if(availableWeights.length === 0) return null;
+        
+        let r = Math.random() * total;
+        let current = 0;
+        let chosenCat = availableWeights[0].key;
+        for(let item of availableWeights) {
+            current += item.w;
+            if(r <= current) { chosenCat = item.key; break; }
+        }
+        let catArr = categorizedTalents[chosenCat];
+        return catArr[Math.floor(Math.random() * catArr.length)];
+    },
+
+    assign: function(rarityStr) {
+        let talents = [];
+        if(!DB_TALENTS || DB_TALENTS.length === 0) return talents;
+
+        let cats = { '白': [], '蓝': [], '紫': [], '橙': [] };
+        DB_TALENTS.forEach(t => {
+            let r = t.Rarity || '白';
+            if(cats[r] && r !== '专属') cats[r].push(t.TalentID);
+        });
+
+        if (rarityStr === "普通") {
+            let id = this.pickRandomByWeight({'白':10, '蓝':3, '紫':1, '橙':0}, cats);
+            if(id) talents.push(id);
+        }
+        else if (rarityStr === "稀有") {
+            let count = Math.random() < 0.5 ? 1 : 2;
+            let id = this.pickRandomByWeight({'白':0, '蓝':1, '紫':0, '橙':0}, cats); 
+            if(id) talents.push(id);
+            for(let i=1; i<count; i++) {
+                let id2 = this.pickRandomByWeight({'白':10, '蓝':10, '紫':3, '橙':0}, cats);
+                if(id2 && !talents.includes(id2)) talents.push(id2);
+            }
+        }
+        else if (rarityStr === "超稀有") {
+            let count = Math.random() < 0.5 ? 2 : 3;
+            let id = this.pickRandomByWeight({'白':0, '蓝':0, '紫':1, '橙':0}, cats); 
+            if(id) talents.push(id);
+            for(let i=1; i<count; i++) {
+                let id2 = this.pickRandomByWeight({'白':10, '蓝':10, '紫':10, '橙':0}, cats);
+                if(id2 && !talents.includes(id2)) talents.push(id2);
+            }
+        }
+        else if (rarityStr === "传说") {
+            let count = Math.random() < 0.5 ? 3 : 4;
+            let id = this.pickRandomByWeight({'白':0, '蓝':0, '紫':0, '橙':1}, cats); 
+            if(id) talents.push(id);
+            for(let i=1; i<count; i++) {
+                let id2 = this.pickRandomByWeight({'白':10, '蓝':10, '紫':10, '橙':3}, cats);
+                if(id2 && !talents.includes(id2)) talents.push(id2);
+            }
+        }
+        return talents;
+    }
+};
+
+let DB_TALENTS_BACKUP = [...DB_TALENTS];
+let DB_LEGENDS_BACKUP = [...DB_LEGENDS];
+
+const CreatureFactory = {
+    guid: 1,
+    generateGachaCreature: function() {
+        let roll = Math.random() * 44;
+        let rarityStr = "普通";
+        
+        if(roll < 1) rarityStr = "传说";
+        else if(roll < 4) rarityStr = "超稀有";
+        else if(roll < 14) rarityStr = "稀有";
+
+        if(rarityStr === "传说" && DB_LEGENDS.length > 0) {
+            let leg = DB_LEGENDS[Math.floor(Math.random() * DB_LEGENDS.length)];
+            let count = leg.SizeLevel === 4 ? 30 : (leg.SizeLevel === 3 ? 20 : (leg.SizeLevel === 2 ? 12 : 6));
+            let finalTalents = TalentAssigner.assign(rarityStr); 
+            if (leg.TalentIDs && leg.TalentIDs.length > 0) {
+                finalTalents = [...new Set([...leg.TalentIDs, ...finalTalents])];
+            }
+            
+            let legAtkSpd = 0.33 + Math.random() * 0.33; 
+            legAtkSpd = Math.round(legAtkSpd * 100) / 100;
+            return this.buildConfig(leg.Name, leg.SizeLevel, count, leg.BaseHP, leg.BaseATK, leg.BaseDEF, 0.1, 40, 5, legAtkSpd, leg.Personality, leg.MoveType, leg.Color, finalTalents, rarityStr);
+        }
+        
+        let sizeRoll = Math.random();
+        let sizeLvl = 1, minP = 4, maxP = 9;
+        if(sizeRoll < 0.05) { sizeLvl = 4; minP=25; maxP=36; }
+        else if(sizeRoll < 0.20) { sizeLvl = 3; minP=16; maxP=25; }
+        else if(sizeRoll < 0.50) { sizeLvl = 2; minP=9; maxP=16; }
+        let count = Math.floor(Math.random() * (maxP - minP + 1)) + minP;
+
+        let multiplier = 1.0;
+        if (rarityStr === "稀有") multiplier = 1.1 + Math.random() * 0.2; 
+        else if (rarityStr === "超稀有") multiplier = 1.5 + Math.random() * 0.5; 
+        else if (rarityStr === "传说") multiplier = 3.0 + Math.random() * 2.0; 
+        
+        let hp = Math.floor(100 * multiplier * (0.8 + Math.random()*0.4));
+        let atk = Math.floor(15 * multiplier * (0.8 + Math.random()*0.4));
+        let def = Math.floor(5 * multiplier * (0.8 + Math.random()*0.4));
+        let critRate = (0.05 + Math.random() * 0.15); 
+        let dayVis = Math.floor(20 + Math.random()*20); 
+
+        if (Math.random() < 0.5) {
+            let traits = ['hp', 'atk', 'def', 'crit', 'vision'];
+            let buffTrait = traits[Math.floor(Math.random()*traits.length)];
+            let nerfTrait = traits[Math.floor(Math.random()*traits.length)];
+            
+            if(buffTrait === 'hp') hp = Math.floor(hp * 1.5);
+            if(nerfTrait === 'hp') hp = Math.floor(hp * 0.7);
+            if(buffTrait === 'atk') atk = Math.floor(atk * 1.4);
+            if(nerfTrait === 'atk') atk = Math.floor(atk * 0.7);
+            if(buffTrait === 'def') def = Math.floor(def * 1.5);
+            if(nerfTrait === 'def') def = Math.floor(def * 0.6);
+            if(buffTrait === 'crit') critRate *= 2.0;
+            if(nerfTrait === 'crit') critRate *= 0.5;
+            if(buffTrait === 'vision') dayVis = Math.floor(dayVis * 1.5);
+            if(nerfTrait === 'vision') dayVis = Math.floor(dayVis * 0.5);
+        }
+
+        hp = Math.floor(hp * (1 + (sizeLvl - 1) * 0.4));
+        let mSpd = Math.floor(5 + Math.random()*5); 
+        mSpd -= (sizeLvl - 1); 
+        if (mSpd < 1) mSpd = 1;
+        
+        let aSpd = 0.33 + Math.random() * 0.33;
+        aSpd = Math.round(aSpd * 100) / 100;
+        
+        let name = PREFIXES[Math.floor(Math.random()*PREFIXES.length)] + SUFFIXES[Math.floor(Math.random()*SUFFIXES.length)];
+        let pers = PERSONALITIES[Math.floor(Math.random()*PERSONALITIES.length)];
+        let mt = MOVE_TYPES[Math.floor(Math.random()*MOVE_TYPES.length)];
+        let color = "hsl(" + Math.floor(Math.random()*360) + ", 80%, 65%)";
+        let finalTalents = TalentAssigner.assign(rarityStr);
+
+        return this.buildConfig(name, sizeLvl, count, hp, atk, def, critRate, dayVis, mSpd, aSpd, pers, mt, color, finalTalents, rarityStr);
+    },
+    
+    buildConfig: function(name, sizeLvl, pCount, hp, atk, def, critRate, dayVis, mSpd, aSpd, pers, moveType, color, talents, rarityStr) {
+        let pixels = [{x:0, y:0}];
+        let dirs = [{x:0,y:1},{x:0,y:-1},{x:1,y:0},{x:-1,y:0}];
+        while(pixels.length < pCount) {
+            let base = pixels[Math.floor(Math.random() * pixels.length)];
+            let d = dirs[Math.floor(Math.random() * dirs.length)];
+            let nx = base.x + d.x, ny = base.y + d.y;
+            if(!pixels.some(p => p.x === nx && p.y === ny)) pixels.push({x: nx, y: ny});
+        }
+        
+        let minX=999, minY=999, maxX=-999, maxY=-999;
+        pixels.forEach(p => {
+            if(p.x < minX) minX=p.x; if(p.x > maxX) maxX=p.x;
+            if(p.y < minY) minY=p.y; if(p.y > maxY) maxY=p.y;
+        });
+        let cxOffset = (maxX + minX) / 2 + 0.5;
+        let cyOffset = (maxY + minY) / 2 + 0.5;
+
+        let movePattern = MOVE_PATTERNS[Math.floor(Math.random() * MOVE_PATTERNS.length)];
+        
+        return {
+            id: this.guid++, x: 0, y: 0, spawnX: 0, spawnY: 0, cxOffset: cxOffset, cyOffset: cyOffset,
+            name: name, sizeLevel: sizeLvl, pixels: pixels, rarity: rarityStr,
+            maxHp: hp, hp: hp, atk: atk, def: def, critRate: critRate,
+            dayVision: dayVis, nightVision: Math.floor(dayVis * 0.5),
+            personality: pers, moveType: moveType, movePattern: movePattern,
+            baseSpeed: mSpd, atkSpeed: aSpd,  
+            actionCooldown: 0, enemyTarget: null, 
+            migDir: Math.random() * Math.PI * 2, migTicks: 0, 
+            unpState: 0, unpTicks: 0, unpDir: 0, territoryTarget: null,
+            color: color, talents: talents || []
+        };
+    }
+};
+
+window.onload = () => Game.init();
+</script>
+</body>
+</html>
