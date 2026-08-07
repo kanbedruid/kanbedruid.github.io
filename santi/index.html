@@ -251,13 +251,13 @@
         }
         #starryBg { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
         .dice-layout, .btn-controls, #roll-result-text { position: relative; z-index: 1; }
-        .dice-layout { display: flex; align-items: flex-start; justify-content: center; width: 100%; margin-bottom: 20px; }
-        .dice-row { display: flex; justify-content: center; gap: 10px; }
-        .dice-row .dice-container:nth-child(1) { margin-right: 20px; }
-        .dice-container { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 50px; height: 75px; }
+        .dice-layout { display: flex; align-items: flex-start; justify-content: center; width: 100%; margin-bottom: 20px; padding-left: 15px; } /* 核心修改：整体往右挪了一点 */
+        .dice-row { display: flex; justify-content: center; gap: 6px; } /* 核心修改：缩短恒星与行星之间的间距 (从 10px 减小到 6px) */
+        .dice-row .dice-container:nth-child(1) { margin-right: 12px; } /* 核心修改：缩短行星和第一颗恒星的距离 (从 20px 减小到 12px) */
+        .dice-container { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; width: 44px; height: 68px; } /* 核心修改：容器略微缩小 */
         #roll-result-text { font-size: 20px; font-weight: bold; width: auto; min-width: 80px; margin-left: 25px; margin-top: 13px; text-align: left; opacity: 0; transition: opacity 0.3s; color: #fff !important; text-shadow: 0 2px 4px rgba(0,0,0,0.5); line-height: 1.2; }
         
-        .dice { width: 50px; height: 50px; line-height: 44px; text-align: center; border-radius: 8px; border: 3px solid #333; font-weight: bold; font-size: 24px; color: #333; background-color: #fff; position: relative; z-index: 2; margin-bottom: 5px; transition: all 0.3s ease; }
+        .dice { width: 44px; height: 44px; line-height: 38px; text-align: center; border-radius: 8px; border: 2.5px solid #333; font-weight: bold; font-size: 20px; color: #333; background-color: #fff; position: relative; z-index: 2; margin-bottom: 5px; transition: all 0.3s ease; } /* 核心修改：骰子尺寸从 50px 略微缩小到 44px */
         .dice-label { font-size: 14px; font-weight: bold; color: #fff; min-height: 18px; }
 
         .rolling { animation: roll-spin 0.25s linear infinite; }
@@ -2381,7 +2381,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                                         let popArrows = document.getElementById('pop-arrows');
                                                         if(!popDisplay) return;
                                                         popDisplay.style.color = '#e53935';
-                                                        if(popArrows) { popArrows.textContent = '⬇⬇⬇'; popArrows.className = 'pop-down'; }
+                                                        if(popArrows) { popArrows.textContent = '▼▼▼'; popArrows.className = 'pop-down'; }
                                                         if(popContainer) popContainer.classList.add('pop-anim-shake');
 
                                                         if (window.popAnimFrame) cancelAnimationFrame(window.popAnimFrame);
@@ -3510,7 +3510,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function processPopChanges(year, result, displayResult, delta, oldPop, newPop, turnEvents, shouldEmphasize, nodeEventsHtmlList = [], nodeGainedTechs = []) {
         let isPositive = delta > 0; let percent = oldPop > 0 ? Math.abs(delta) / oldPop : 0; let arrowCount = 0;
         if (Math.abs(delta) > 0) { if (percent > 0.5) arrowCount = 3; else if (percent >= 0.25) arrowCount = 2; else arrowCount = 1; }
-        let arrowSym = isPositive ? '⬆' : '⬇'; let arrowStr = arrowCount > 0 ? arrowSym.repeat(arrowCount) : '';
+        let arrowSym = isPositive ? '▲' : '▼'; let arrowStr = arrowCount > 0 ? arrowSym.repeat(arrowCount) : '';
         let colorClass = isPositive ? 'pop-up' : 'pop-down';
 
         let newLog = document.createElement('div'); 
@@ -4377,7 +4377,48 @@ document.addEventListener('DOMContentLoaded', function() {
     enableDrag('settings-modal', 'div');                 
     enableDrag('planet-modal', '.planet-modal-card');    
     // =========================================================
+// ================= 核心注入：全资源静默预加载引擎 =================
+    function preloadImages() {
+        // 把你游戏里用到的所有图片路径全部列在这里
+        const imagesToLoad = [
+            'img/设置.png',
+            'img/人口.png',
+            'img/人口白.png',
+            'img/星星.png',
+            'img/飞星不动.jpg',
+            'img/巨日凌空.jpg',
+            'img/三颗飞星.jpg',
+            'img/三日连珠.jpg',
+            'img/三日凌空.jpg',
+            'img/双日凌空.jpg',
+            'img/农业时代.png',
+            'img/冰河时代.png',
+            'img/祭祀时代.png',
+            'img/青铜时代.png',
+            'img/王国时代.png',
+            'img/机械时代.png',
+            'img/地热时代.png',
+            'img/蒸汽时代.png',
+            'img/电力时代.png',
+            'img/信息时代.png',
+            'img/智能时代.png',
+            'img/星际时代.png',
+            'img/石头.png',
+            'img/剪刀.png',
+            'img/布.png',
+            'img/鱼.png'
+        ];
 
+        imagesToLoad.forEach(src => {
+            let img = new Image();
+            img.src = src; // 浏览器一旦执行这行，就会在后台自动下载并缓存该图片
+        });
+        console.log("后台图片预加载任务已全部触发！");
+    }
+
+    // 网页一加载完毕，立刻在后台静默预加载所有图片
+    preloadImages();
+    // ==================================================================
 });
 </script>
 </body>
