@@ -2109,6 +2109,7 @@ if (setupArea) {
     window.hasShownEnding = false; // 飞向未知结局标记
 
     window.showGameAlert = function(title, text, btnText = "确认", callback = null, theme = 'blue') {
+    saveGame();
         window.gameAlertQueue.push({title, text, btnText, callback, theme});
         processAlertQueue();
     };
@@ -2554,6 +2555,7 @@ if (setupArea) {
     }
     // 1. 点击设置图标：全局暂停并呼出菜单
     document.getElementById('settings-btn').addEventListener('click', () => {
+    saveGame();
         window.isGamePaused = true;
         document.getElementById('settings-modal').style.display = 'flex';
     });
@@ -2642,6 +2644,7 @@ if (setupArea) {
     });
 
     function openPlanetSelection() {
+    saveGame();
         if (!hasTech("沉眠复苏")) {
             window.currentPlanetState = planetStatesDatabase.find(p => p.id === 101) || planetStatesDatabase[0];
             planetModal.style.display = 'none'; achievementStats.planetStatesTried.add(window.currentPlanetState.id);
@@ -3876,6 +3879,7 @@ if (setupArea) {
     const deathScreen = document.getElementById('death-screen'), typeWriter = document.getElementById('death-typewriter'), techSummary = document.getElementById('death-tech-summary'), restartBtn = document.getElementById('restart-btn'), btnControls = document.querySelector('.btn-controls');
 
     function showDeathSequence(number, cause, years, era) {
+    saveGame();
         if (years <= 1000) consecutiveEarlyDeaths++; else consecutiveEarlyDeaths = 0;
         btnControls.style.display = 'none'; deathScreen.style.display = 'flex'; typeWriter.innerHTML = ''; 
         techSummary.style.display = 'none'; techSummary.style.opacity = '0'; restartBtn.style.opacity = '0'; restartBtn.style.display = 'none';
