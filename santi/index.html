@@ -1158,7 +1158,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             let name = row['名称'];
                             if (name) {
                                 let fnGain = null, fnLoss = null, fnPop = null;
-                                if (row['代码_获得条件']) fnGain = new Function('result', 'planet', 'stars', 'pop', 'consecutiveStable', 'currentEra', 'hasTech', 'consecutiveLuan', 'flyStarCount', 'consecutivePlanetSame', 'consecutiveNoStable', 'civilizationYears', 'consecutiveDisasters', 'civilizationNumber', row['代码_获得条件']);
+                                if (row['代码_获得条件']) fnGain = new Function('ctx', 'result', 'planet', 'stars', 'pop', 'consecutiveStable', 'currentEra', 'hasTech', 'consecutiveLuan', 'flyStarCount', 'consecutivePlanetSame', 'consecutiveNoStable', 'civilizationYears', 'consecutiveDisasters', 'civilizationNumber', row['代码_获得条件']);
                                 if (row['代码_失去条件']) fnLoss = new Function('cause', 'currentEra', 'pop', 'hasTech', 'civilizationNumber', 'civilizationYears', row['代码_失去条件']);
                                 if (row['代码_人口结算']) fnPop = new Function('ctx', 'result', 'planet', 'stars', 'hasTech', 'consecutiveSameDisaster', 'encounteredDisasters', 'civilizationNumber', 'currentEra', row['代码_人口结算']);
                                 techData[name] = { color: parseInt(row['背景颜色（3橙，2紫，1蓝0白）']) || 0, desc: row['介绍文本（在科技栏点击科技标签就展示文本气泡）'] || "暂无", checkGain: fnGain, checkLoss: fnLoss, popCalc: fnPop };
@@ -2964,7 +2964,14 @@ if (setupArea) {
         if (civilizationNumber > 1) {
             Object.keys(techData).forEach(tName => {
                 if (!hasTech(tName) && techData[tName].checkGain) {
-                    try { if (techData[tName].checkGain(result, planetNum, starsNum, newPop, consecutiveStable, currentEra, hasTech, consecutiveLuan, flyStarCount, consecutivePlanetSame, consecutiveNoStable, civilizationYears, consecutiveDisasters, civilizationNumber)) newlyGainedThisTurn.push(tName); } catch(e) { console.error(`科技[${tName}]获得条件代码错误:`, e); }
+                    try { 
+    let ctx = { result, planet: planetNum, stars: starsNum, pop: newPop, consecutiveStable, currentEra, hasTech, consecutiveLuan, flyStarCount, consecutivePlanetSame, consecutiveNoStable, civilizationYears, consecutiveDisasters, civilizationNumber };
+    if (techData[tName].checkGain(ctx, result, planetNum, starsNum, newPop, consecutiveStable, currentEra, hasTech, consecutiveLuan, flyStarCount, consecutivePlanetSame, consecutiveNoStable, civilizationYears, consecutiveDisasters, civilizationNumber)) {
+        newlyGainedThisTurn.push(tName);
+    } 
+} catch(e) { 
+    console.error(`科技[${tName}]获得条件代码错误:`, e); 
+}
                 }
             });
         }
