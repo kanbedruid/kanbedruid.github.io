@@ -1225,7 +1225,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // 如果三个都加载成功或者部分成功，隐藏提示框
-        document.getElementById('setup-area').style.display = 'none';
+        let setupArea = document.getElementById('setup-area');
+if (setupArea) {
+    setupArea.style.display = 'none';
+}
     }).catch(err => {
         console.log("云端表格自动加载出错，请检查文件名是否正确或是否需要手动上传。", err);
     });
