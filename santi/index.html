@@ -1150,24 +1150,38 @@ document.addEventListener('DOMContentLoaded', function() {
         if (techBuf) {
             try {
                 let workbook = XLSX.read(new Uint8Array(techBuf), {type: 'array'});
-                workbook.SheetNames.forEach(sheetName => {
-                    let json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-                    if (json && json.length > 0 && ('介绍文本（在科技栏点击科技标签就展示文本气泡）' in json[0] || '代码_获得条件' in json[0])) {
-                        techData = {};
+                let targetSheetName = '科技';
+                if (workbook.SheetNames.includes(targetSheetName)) {
+                    let json = XLSX.utils.sheet_to_json(workbook.Sheets[targetSheetName]);
+                    techData = {};
+                    if (json && json.length > 0) {
                         json.forEach(row => {
                             let name = row['名称'];
                             if (name) {
                                 let fnGain = null, fnLoss = null, fnPop = null;
-                                if (row['代码_获得条件']) fnGain = new Function('ctx', 'result', 'planet', 'stars', 'pop', 'consecutiveStable', 'currentEra', 'hasTech', 'consecutiveLuan', 'flyStarCount', 'consecutivePlanetSame', 'consecutiveNoStable', 'civilizationYears', 'consecutiveDisasters', 'civilizationNumber', row['代码_获得条件']);
-                                if (row['代码_失去条件']) fnLoss = new Function('cause', 'currentEra', 'pop', 'hasTech', 'civilizationNumber', 'civilizationYears', row['代码_失去条件']);
-                                if (row['代码_人口结算']) fnPop = new Function('ctx', 'result', 'planet', 'stars', 'hasTech', 'consecutiveSameDisaster', 'encounteredDisasters', 'civilizationNumber', 'currentEra', row['代码_人口结算']);
-                                techData[name] = { color: parseInt(row['背景颜色（3橙，2紫，1蓝0白）']) || 0, desc: row['介绍文本（在科技栏点击科技标签就展示文本气泡）'] || "暂无", checkGain: fnGain, checkLoss: fnLoss, popCalc: fnPop };
+                                if (row['代码_获得条件']) {
+                                    fnGain = new Function('ctx', 'result', 'planet', 'stars', 'pop', 'consecutiveStable', 'currentEra', 'hasTech', 'consecutiveLuan', 'flyStarCount', 'consecutivePlanetSame', 'consecutiveNoStable', 'civilizationYears', 'consecutiveDisasters', 'civilizationNumber', row['代码_获得条件']);
+                                }
+                                if (row['代码_失去条件']) {
+                                    fnLoss = new Function('cause', 'currentEra', 'pop', 'hasTech', 'civilizationNumber', 'civilizationYears', row['代码_失去条件']);
+                                }
+                                if (row['代码_人口结算']) {
+                                    fnPop = new Function('ctx', 'result', 'planet', 'stars', 'hasTech', 'consecutiveSameDisaster', 'encounteredDisasters', 'civilizationNumber', 'currentEra', row['代码_人口结算']);
+                                }
+                                techData[name] = { 
+                                    color: parseInt(row['背景颜色（3橙，2紫，1蓝0白）']) || 0, 
+                                    desc: row['介绍文本（在科技栏点击科技标签就展示文本气泡）'] || "暂无", 
+                                    checkGain: fnGain, 
+                                    checkLoss: fnLoss, 
+                                    popCalc: fnPop 
+                                };
                             }
                         });
+                        renderTechsUI(); 
+                        setInitialDiceState();
+                        console.log("云端 科技.xlsx 加载成功！");
                     }
-                });
-                renderTechsUI(); setInitialDiceState();
-                console.log("云端 科技.xlsx 加载成功！");
+                }
             } catch(e) { console.error("解析 科技.xlsx 失败", e); }
         }
 
