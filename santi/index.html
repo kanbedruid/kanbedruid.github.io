@@ -802,8 +802,6 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    let hasLoaded = loadGame(); 
-    if(hasLoaded) { /* 如果读档成功，就不显示初始开屏了 */ }
     let planetStatesDatabase = [
         { id: 101, name: "正常", weight: 20, color: "linear-gradient(135deg, #4facfe, #00f2fe)", faces: [1,2,3,4,5,6] },
         { id: 102, name: "生机勃勃", weight: 80/15, color: "linear-gradient(135deg, #38ef7d, #11998e)", faces: [1,1,3,4,5,6] },
@@ -1532,6 +1530,79 @@ if (setupArea) {
             setTimeout(() => { if (typeof renderTechsUI === 'function') renderTechsUI(); }, 0);
         }
     }
+    // --- 自动存档与读档系统 ---
+   function saveGame() {
+    let data = {
+        civNumber: civilizationNumber,
+        population: population,
+        civilizationYears: civilizationYears,
+        currentEra: currentEra,
+        techs: Array.from(currentTechs),
+        // 将全局图鉴中的 Set 转为 Array 才能完整保存
+        collectedTechs: Array.from(globalStats.collectedTechs || []),
+        collectedAchs: Array.from(globalStats.collectedAchs || []),
+        globalStats: {
+            totalYears: globalStats.totalYears,
+            deadCivs: globalStats.deadCivs,
+            maxYears: globalStats.maxYears,
+            maxEra: globalStats.maxEra,
+            maxPop: globalStats.maxPop,
+            disasters: globalStats.disasters,
+            disasterSurvivals: globalStats.disasterSurvivals,
+            firstEra: globalStats.firstEra,
+            eraCount: globalStats.eraCount
+        },
+        unlockedAchievements: unlockedAchievements,
+        selectedTalents: selectedTalents,
+        doomsdayYearsLeft: doomsdayYearsLeft,
+        // 保存成就统计中的 Set
+        planetStatesTried: Array.from(achievementStats.planetStatesTried || [])
+    };
+    localStorage.setItem('santi_game_save', JSON.stringify(data));
+    console.log("游戏已自动存档");
+}
+
+   function loadGame() {
+    let savedData = localStorage.getItem('santi_game_save');
+    if (!savedData) return false;
+    
+    try {
+        let data = JSON.parse(savedData);
+        civilizationNumber = data.civNumber;
+        population = data.population;
+        civilizationYears = data.civilizationYears;
+        currentEra = data.currentEra;
+        currentTechs = new Set(data.techs || []);
+        
+        // 还原恢复全局图鉴和成就统计的 Set 对象
+        if (data.globalStats) {
+            globalStats = data.globalStats;
+            globalStats.collectedTechs = new Set(data.collectedTechs || []);
+            globalStats.collectedAchs = new Set(data.collectedAchs || []);
+        }
+        if (data.unlockedAchievements) unlockedAchievements = data.unlockedAchievements;
+        if (data.selectedTalents) selectedTalents = data.selectedTalents;
+        if (data.doomsdayYearsLeft !== undefined) doomsdayYearsLeft = data.doomsdayYearsLeft;
+        
+        if (data.planetStatesTried) {
+            achievementStats.planetStatesTried = new Set(data.planetStatesTried);
+        }
+        
+        // 还原 UI
+        document.getElementById('civ-title').textContent = `第${civilizationNumber}号文明`;
+        popNumberDisplay.textContent = population;
+        updateEraDisplay();
+        renderTechsUI();
+        updateStatsUI();
+        renderAchievementsUI();
+        renderTalentsUI();
+        console.log("游戏存档已读取");
+        return true;
+    } catch(e) {
+        console.error("存档损坏，无法读取", e);
+        return false;
+    }
+}
     let civilizationNumber = 1, population = 10000, civilizationYears = 0, previousStars = [0, 0, 0];
    // 历史数据统计池
     let globalStats = {
@@ -4062,54 +4133,7 @@ if (setupArea) {
         updateButtonState();
         window.hasShownEnding = false;
     }
-    // --- 存档功能 ---
-function saveGame() {
-    let data = {
-        civNumber: civilizationNumber,
-        population: population,
-        civilizationYears: civilizationYears,
-        currentEra: currentEra,
-        techs: Array.from(currentTechs), // Set 需要转为 Array 才能存入 JSON
-        globalStats: globalStats,
-        unlockedAchievements: unlockedAchievements,
-        selectedTalents: selectedTalents,
-        doomsdayYearsLeft: doomsdayYearsLeft
-    };
-    localStorage.setItem('santi_game_save', JSON.stringify(data));
-    console.log("游戏已自动存档");
-}
-
-// --- 读档功能 ---
-function loadGame() {
-    let savedData = localStorage.getItem('santi_game_save');
-    if (!savedData) return false;
     
-    try {
-        let data = JSON.parse(savedData);
-        civilizationNumber = data.civNumber;
-        population = data.population;
-        civilizationYears = data.civilizationYears;
-        currentEra = data.era;
-        currentTechs = new Set(data.techs); // 还原回 Set
-        globalStats = data.globalStats;
-        unlockedAchievements = data.unlockedAchievements;
-        selectedTalents = data.selectedTalents;
-        doomsdayYearsLeft = data.doomsdayYearsLeft;
-        
-        // 还原 UI
-        document.getElementById('civ-title').textContent = `第${civilizationNumber}号文明`;
-        popNumberDisplay.textContent = population;
-        updateEraDisplay();
-        renderTechsUI();
-        updateStatsUI();
-        renderAchievementsUI();
-        console.log("游戏存档已读取");
-        return true;
-    } catch(e) {
-        console.error("存档损坏，无法读取", e);
-        return false;
-    }
-}
     // 宇宙重启系统：不需要玩家重新上传 Excel，直接实现深层内存软重启并再次播放史诗开屏！
     function fullGameReset() {
         // 1. 彻底清空物理引擎与世界线变量
@@ -4358,7 +4382,18 @@ function loadGame() {
     globalStats.eraCount["原始时代"] = 1;
     updateStatsUI();
 
-    setInitialDiceState(); openPlanetSelection(); updateEraDisplay(); updateDoomsdayUI();
+    // 启动时优先尝试读取存档
+    let hasLoaded = loadGame();
+    if (hasLoaded) {
+        updateEraDisplay();
+        updateDoomsdayUI();
+        console.log("已成功加载上一次的游戏存档！");
+    } else {
+        setInitialDiceState(); 
+        openPlanetSelection(); 
+        updateEraDisplay(); 
+        updateDoomsdayUI();
+    }
 
     // ================== 核心注入：弹窗拖拽功能与彩蛋引擎 ==================
     function enableDrag(modalId, cardSelector) {
