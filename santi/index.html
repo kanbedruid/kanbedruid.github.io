@@ -1536,9 +1536,9 @@ if (setupArea) {
         civNumber: civilizationNumber,
         population: population,
         civilizationYears: civilizationYears,
+        currentYear: currentYear, // <--- 加上这一行，保存当前年份
         currentEra: currentEra,
         techs: Array.from(currentTechs),
-        // 将全局图鉴中的 Set 转为 Array 才能完整保存
         collectedTechs: Array.from(globalStats.collectedTechs || []),
         collectedAchs: Array.from(globalStats.collectedAchs || []),
         globalStats: {
@@ -1555,7 +1555,6 @@ if (setupArea) {
         unlockedAchievements: unlockedAchievements,
         selectedTalents: selectedTalents,
         doomsdayYearsLeft: doomsdayYearsLeft,
-        // 保存成就统计中的 Set
         planetStatesTried: Array.from(achievementStats.planetStatesTried || [])
     };
     localStorage.setItem('santi_game_save', JSON.stringify(data));
@@ -1571,10 +1570,10 @@ if (setupArea) {
         civilizationNumber = data.civNumber;
         population = data.population;
         civilizationYears = data.civilizationYears;
+        currentYear = data.currentYear || 0; // <--- 加上这一行，恢复当前年份
         currentEra = data.currentEra;
         currentTechs = new Set(data.techs || []);
         
-        // 还原恢复全局图鉴和成就统计的 Set 对象
         if (data.globalStats) {
             globalStats = data.globalStats;
             globalStats.collectedTechs = new Set(data.collectedTechs || []);
@@ -1599,7 +1598,7 @@ if (setupArea) {
         console.log("游戏存档已读取");
         return true;
     } catch(e) {
-        console.error("存档损坏，无法读取", e);
+        console.error("存档损坏", e);
         return false;
     }
 }
@@ -4385,6 +4384,10 @@ if (setupArea) {
     // 启动时优先尝试读取存档
     let hasLoaded = loadGame();
     if (hasLoaded) {
+        // 如果有存档，直接销毁开屏动画，防止它重复播放
+        let introScreenEl = document.getElementById('intro-screen');
+        if (introScreenEl) introScreenEl.remove();
+
         updateEraDisplay();
         updateDoomsdayUI();
         console.log("已成功加载上一次的游戏存档！");
@@ -4393,6 +4396,9 @@ if (setupArea) {
         openPlanetSelection(); 
         updateEraDisplay(); 
         updateDoomsdayUI();
+        
+        // 只有在没有存档时，才播放开屏动画
+        initIntroSequence();
     }
 
     // ================== 核心注入：弹窗拖拽功能与彩蛋引擎 ==================
