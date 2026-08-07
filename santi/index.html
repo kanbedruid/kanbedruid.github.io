@@ -2965,7 +2965,27 @@ if (setupArea) {
             Object.keys(techData).forEach(tName => {
                 if (!hasTech(tName) && techData[tName].checkGain) {
                     try { 
-    let ctx = { result, planet: planetNum, stars: starsNum, pop: newPop, consecutiveStable, currentEra, hasTech, consecutiveLuan, flyStarCount, consecutivePlanetSame, consecutiveNoStable, civilizationYears, consecutiveDisasters, civilizationNumber };
+    let ctx = { 
+    result, 
+    planet: planetNum, 
+    stars: starsNum, 
+    pop: newPop, 
+    consecutiveStable, 
+    currentEra, 
+    hasTech, 
+    consecutiveLuan, 
+    flyStarCount, 
+    consecutivePlanetSame, 
+    consecutiveNoStable, 
+    civilizationYears, 
+    consecutiveDisasters, 
+    civilizationNumber,
+    // 补齐所有可能被科技条件（如骰子收藏家）调用的集合与统计对象
+    planetStatesTried: achievementStats.planetStatesTried,
+    encounteredDisasters: achievementStats.encounteredDisastersCounts,
+    collectedTechs: globalStats.collectedTechs,
+    globalStats: globalStats
+};
     if (techData[tName].checkGain(ctx, result, planetNum, starsNum, newPop, consecutiveStable, currentEra, hasTech, consecutiveLuan, flyStarCount, consecutivePlanetSame, consecutiveNoStable, civilizationYears, consecutiveDisasters, civilizationNumber)) {
         newlyGainedThisTurn.push(tName);
     } 
