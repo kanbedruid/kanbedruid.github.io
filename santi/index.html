@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>三体文明模拟器</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; font-style: normal !important; touch-action: manipulation; }
         body, html { width: 100%; height: 100%; overflow: hidden; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #222; }
@@ -774,7 +773,7 @@
             <h2 style="color: #555; margin-bottom: 5px; text-align: center;">成就</h2>
             <div style="font-size:13px; color:#888; text-align:center; margin-bottom:15px; font-weight:bold;">达成目标收集星星</div>
             <div id="achievements-container">
-                <div class="placeholder-text">成就系统<br>（请先导入包含成就表的Excel）</div>
+                <div class="placeholder-text">成就系统<br>（正在加载成就数据...）</div>
             </div>
         </div>
 
@@ -783,7 +782,7 @@
             <div style="font-size:13px; color:#888; text-align:center; margin-bottom:15px; font-weight:bold;">从每行的3个科技中选择1个</div>
             <div class="ach-header" id="talent-stars-header">已获得：<span style="color:#f57c00;">0</span> <img src="img/星星.png" style="height: 18px; width: auto; vertical-align: text-bottom; margin-left: 2px;"></div>
             <div id="talents-container">
-                <div class="placeholder-text">（请先导入包含天赋表的Excel）</div>
+                <div class="placeholder-text">（正在加载天赋数据...）</div>
             </div>
         </div>
     </div>
@@ -1137,114 +1136,103 @@ document.addEventListener('DOMContentLoaded', function() {
     let firstTechsPerEra = {};
 
     
-    // ================= 核心注入：GitHub Pages 自动静默加载 Excel =================
-    // 这个方法会在页面一打开时，自动去服务器寻找同目录下的 "科技.xlsx"
-    // ================= 核心注入：GitHub Pages 自动静默加载所有 Excel 表格 =================
+    // ================= 核心注入：GitHub Pages 自动静默加载所有 JSON 表格 =================
     Promise.all([
-        fetch('科技.xlsx').then(res => res.arrayBuffer()).catch(() => null),
-        fetch('成就表.xlsx').then(res => res.arrayBuffer()).catch(() => null),
-        fetch('天赋表.xlsx').then(res => res.arrayBuffer()).catch(() => null)
-    ]).then(([techBuf, achBuf, talentBuf]) => {
+        fetch('科技.json').then(res => res.json()).catch(() => null),
+        fetch('成就表.json').then(res => res.json()).catch(() => null),
+        fetch('天赋表.json').then(res => res.json()).catch(() => null)
+    ]).then(([techJson, achJson, talentJson]) => {
         
-        // 1. 解析 科技.xlsx
-        if (techBuf) {
+        // 1. 解析 科技.json
+        if (techJson && techJson.length > 0) {
             try {
-                let workbook = XLSX.read(new Uint8Array(techBuf), {type: 'array'});
-                let targetSheetName = '科技';
-                if (workbook.SheetNames.includes(targetSheetName)) {
-                    let json = XLSX.utils.sheet_to_json(workbook.Sheets[targetSheetName]);
-                    techData = {};
-                    if (json && json.length > 0) {
-                        json.forEach(row => {
-                            let name = row['名称'];
-                            if (name) {
-                                let fnGain = null, fnLoss = null, fnPop = null;
-                                if (row['代码_获得条件']) {
-                                    fnGain = new Function('ctx', 'result', 'planet', 'stars', 'pop', 'consecutiveStable', 'currentEra', 'hasTech', 'consecutiveLuan', 'flyStarCount', 'consecutivePlanetSame', 'consecutiveNoStable', 'civilizationYears', 'consecutiveDisasters', 'civilizationNumber', row['代码_获得条件']);
-                                }
-                                if (row['代码_失去条件']) {
-                                    fnLoss = new Function('cause', 'currentEra', 'pop', 'hasTech', 'civilizationNumber', 'civilizationYears', row['代码_失去条件']);
-                                }
-                                if (row['代码_人口结算']) {
-                                    fnPop = new Function('ctx', 'result', 'planet', 'stars', 'hasTech', 'consecutiveSameDisaster', 'encounteredDisasters', 'civilizationNumber', 'currentEra', row['代码_人口结算']);
-                                }
-                                techData[name] = { 
-                                    color: parseInt(row['背景颜色（3橙，2紫，1蓝0白）']) || 0, 
-                                    desc: row['介绍文本（在科技栏点击科技标签就展示文本气泡）'] || "暂无", 
-                                    checkGain: fnGain, 
-                                    checkLoss: fnLoss, 
-                                    popCalc: fnPop 
-                                };
-                            }
-                        });
-                        renderTechsUI(); 
-                        setInitialDiceState();
-                        console.log("云端 科技.xlsx 加载成功！");
-                    }
-                }
-            } catch(e) { console.error("解析 科技.xlsx 失败", e); }
-        }
-
-        // 2. 解析 成就表.xlsx
-        if (achBuf) {
-            try {
-                let workbook = XLSX.read(new Uint8Array(achBuf), {type: 'array'});
-                workbook.SheetNames.forEach(sheetName => {
-                    let json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-                    if (json && json.length > 0 && ('星级/颜色' in json[0] || '名称' in json[0])) {
-                        achievementsData = {};
-                        json.forEach(row => {
-                            let name = String(row['名称']).trim();
-                            if (name && name !== 'undefined') {
-                                let condition = null;
-                                if (row['代码_获得条件']) {
-                                    try { condition = new Function('ctx', row['代码_获得条件']); } catch(err) {}
-                                }
-                                achievementsData[name] = { name: name, rarity: parseInt(row['星级/颜色']) || 0, desc: row['文本介绍/成就触发条件'] || "暂无", isHidden: row['是否隐藏'] == 1 || String(row['是否隐藏']).toLowerCase() === 'true', checkCondition: condition };
-                            }
-                        });
-                        renderAchievementsUI();
-                        console.log("云端 成就表.xlsx 加载成功！");
+                techData = {};
+                techJson.forEach(row => {
+                    let name = row['名称'];
+                    if (name) {
+                        let fnGain = null, fnLoss = null, fnPop = null;
+                        if (row['代码_获得条件']) {
+                            fnGain = new Function('ctx', 'result', 'planet', 'stars', 'pop', 'consecutiveStable', 'currentEra', 'hasTech', 'consecutiveLuan', 'flyStarCount', 'consecutivePlanetSame', 'consecutiveNoStable', 'civilizationYears', 'consecutiveDisasters', 'civilizationNumber', row['代码_获得条件']);
+                        }
+                        if (row['代码_失去条件']) {
+                            fnLoss = new Function('cause', 'currentEra', 'pop', 'hasTech', 'civilizationNumber', 'civilizationYears', row['代码_失去条件']);
+                        }
+                        if (row['代码_人口结算']) {
+                            fnPop = new Function('ctx', 'result', 'planet', 'stars', 'hasTech', 'consecutiveSameDisaster', 'encounteredDisasters', 'civilizationNumber', 'currentEra', row['代码_人口结算']);
+                        }
+                        techData[name] = { 
+                            color: parseInt(row['背景颜色（3橙，2紫，1蓝0白）']) || 0, 
+                            desc: row['介绍文本（在科技栏点击科技标签就展示文本气泡）'] || "暂无", 
+                            checkGain: fnGain, 
+                            checkLoss: fnLoss, 
+                            popCalc: fnPop 
+                        };
                     }
                 });
-            } catch(e) { console.error("解析 成就表.xlsx 失败", e); }
+                renderTechsUI(); 
+                setInitialDiceState();
+                console.log("云端 科技.json 加载成功！");
+            } catch(e) { console.error("解析 科技.json 失败", e); }
         }
 
-        // 3. 解析 天赋表.xlsx
-        if (talentBuf) {
+        // 2. 解析 成就表.json
+        if (achJson && achJson.length > 0) {
             try {
-                let workbook = XLSX.read(new Uint8Array(talentBuf), {type: 'array'});
-                workbook.SheetNames.forEach(sheetName => {
-                    let json = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-                    if (json && json.length > 0 && ('解锁需要成就星星数量' in json[0] || '名称' in json[0])) {
-                        talentData = {};
-                        json.forEach(row => {
-                            let name = String(row['名称']).trim();
-                            if (name && name !== 'undefined') {
-                                let popCalc = null;
-                                if (row['代码_人口结算']) {
-                                    try { popCalc = new Function('ctx', 'result', 'planet', 'stars', 'hasTech', 'consecutiveSameDisaster', 'encounteredDisasters', 'civilizationNumber', 'currentEra', row['代码_人口结算']); } 
-                                    catch(err) {}
-                                }
-                                talentData[name] = {
-                                    name: name, reqStars: parseInt(row['解锁需要成就星星数量']) || 0, color: parseInt(row['颜色']) || 0, desc: row['介绍文本（给玩家看的）'] || "暂无", popCalc: popCalc
-                                };
-                            }
-                        });
-                        renderTalentsUI();
-                        console.log("云端 天赋表.xlsx 加载成功！");
+                achievementsData = {};
+                achJson.forEach(row => {
+                    let name = String(row['名称']).trim();
+                    if (name && name !== 'undefined') {
+                        let condition = null;
+                        if (row['代码_获得条件']) {
+                            try { condition = new Function('ctx', row['代码_获得条件']); } catch(err) {}
+                        }
+                        achievementsData[name] = { 
+                            name: name, 
+                            rarity: parseInt(row['星级/颜色']) || 0, 
+                            desc: row['文本介绍/成就触发条件'] || "暂无", 
+                            isHidden: row['是否隐藏'] == 1 || String(row['是否隐藏']).toLowerCase() === 'true', 
+                            checkCondition: condition 
+                        };
                     }
                 });
-            } catch(e) { console.error("解析 天赋表.xlsx 失败", e); }
+                renderAchievementsUI();
+                console.log("云端 成就表.json 加载成功！");
+            } catch(e) { console.error("解析 成就表.json 失败", e); }
+        }
+
+        // 3. 解析 天赋表.json
+        if (talentJson && talentJson.length > 0) {
+            try {
+                talentData = {};
+                talentJson.forEach(row => {
+                    let name = String(row['名称']).trim();
+                    if (name && name !== 'undefined') {
+                        let popCalc = null;
+                        if (row['代码_人口结算']) {
+                            try { popCalc = new Function('ctx', 'result', 'planet', 'stars', 'hasTech', 'consecutiveSameDisaster', 'encounteredDisasters', 'civilizationNumber', 'currentEra', row['代码_人口结算']); } 
+                            catch(err) {}
+                        }
+                        talentData[name] = {
+                            name: name, 
+                            reqStars: parseInt(row['解锁需要成就星星数量']) || 0, 
+                            color: parseInt(row['颜色']) || 0, 
+                            desc: row['介绍文本（给玩家看的）'] || "暂无", 
+                            popCalc: popCalc
+                        };
+                    }
+                });
+                renderTalentsUI();
+                console.log("云端 天赋表.json 加载成功！");
+            } catch(e) { console.error("解析 天赋表.json 失败", e); }
         }
 
         // 如果三个都加载成功或者部分成功，隐藏提示框
         let setupArea = document.getElementById('setup-area');
-if (setupArea) {
-    setupArea.style.display = 'none';
-}
+        if (setupArea) {
+            setupArea.style.display = 'none';
+        }
     }).catch(err => {
-        console.log("云端表格自动加载出错，请检查文件名是否正确或是否需要手动上传。", err);
+        console.log("云端 JSON 表格自动加载出错，请检查文件名是否正确。", err);
     });
 
    window.showGameToast = function(msg, icon="", colorClass="ach-r0") {
