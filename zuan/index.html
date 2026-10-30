@@ -2376,8 +2376,19 @@ const bgm = (() => {
   // 所以接到这三个总线上的临时节点，8 秒后（音符早已放完）主动断开，让它们能被回收
   let SINKS = new Set(), KEEP = new Set();
   { const _c = AudioNode.prototype.connect;
+    // 总音量：所有接到扬声器的声音先经过一个总增益（×2.4）再经过限幅器，整体更响但不会爆音
+    const MASTER = new WeakMap(), masterOf = ctx => {
+      let m = MASTER.get(ctx);
+      if (!m) {
+        m = ctx.createGain(); m.gain.value = 2.4;
+        const lim = ctx.createDynamicsCompressor(); lim.threshold.value = -4; lim.knee.value = 2; lim.ratio.value = 20; lim.attack.value = .002; lim.release.value = .15;
+        _c.call(m, lim); _c.call(lim, ctx.destination); MASTER.set(ctx, m);
+      }
+      return m;
+    };
     AudioNode.prototype.connect = function (d, ...r) {
-      const res = _c.call(this, d, ...r);
+      const t = d instanceof AudioDestinationNode && !(typeof OfflineAudioContext !== 'undefined' && this.context instanceof OfflineAudioContext) ? masterOf(this.context) : d;
+      const res = _c.call(this, t, ...r);
       if (SINKS.has(d) && !KEEP.has(this)) { const me = this; setTimeout(() => { try { me.disconnect(); } catch (e) {} }, 8000); }
       return res;
     }; }
