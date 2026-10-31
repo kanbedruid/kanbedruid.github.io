@@ -1594,7 +1594,7 @@ const KNOBS={diff:{sc:[0,1,3],un:[1,2,3]},slit:{sc:[0,1,2,3],un:[1,1,3,5]},speed
 // Endless days. Long trend B(d)=1+2.2ln(1+(d-1)/3); 10-day sawtooth M (hard on x5, super-hard on x0, breather after);
 // small climb inside a day; cases per day N(d)=round(3+2.15ln d), -1 on breather days, +1 on super days, clamped 3..10.
 const CYCLE={1:-.6,2:-.2,3:0,4:.3,5:1.5,6:-.5,7:0,8:.3,9:.6,0:2.5};
-const trend=d=>1+2.2*Math.log(1+(d-1)/3);
+const trend=d=>1+2.2*Math.log(1+(d-1)/3)+(d>30?.03*(d-30):0);
 // Cases per day: 3,4,5,5,5,6,6,6,6 then 7 on day 10; regular days cap at 8 (breather days one fewer), 9-10 only on special (x5/x0) days
 const nCasesRaw=d=>{if(d<=10)return[0,3,4,5,5,5,6,6,6,6,7][d];const r=d%10,base=Math.min(8,7+Math.floor((d-11)/10));if(r===5||r===0)return Math.min(10,base+(d>=20?2:1));if(r===1||r===6)return base-1;return base};
 const isBoss=d=>d%10===5||d%10===0;
@@ -1603,7 +1603,7 @@ const nCases=d=>Math.min(isBoss(d)?8:6,nCasesRaw(d)),caseBonus=d=>2*(nCasesRaw(d
 function dayOff(d,n,i){if(d<=1||n<3)return 0;const rn=seeded(d*131+7),last=isBoss(d)?n:n-1,mid=[];for(let k=1;k<last;k++)mid.push((rn()*2-1)*2.4);if(i===0)return -1.8;if(i>=last)return 0;const m=mid.reduce((a,b)=>a+b,0)/mid.length;return mid[i-1]-m+1.8/mid.length}
 const bossType=d=>d===5?'suitcase':d===10?'bag':pick(['suitcase','bag','swap','change','tail','shoe'].filter(t=>TYPES[t].d<=d));
 // From day 2 the last case of every day is a boss; on special days (x5/x0) every case is a boss
-const target=(d,i,n,boss)=>{const r=d%10,b=Math.max(1,trend(d)+CYCLE[r]*Math.min(1,d/5))+.22*i;if(!boss)return b;if(isBoss(d))return b+1.2+(i===n-1?(r===5?2.5:4):0);return b+2};
+const target=(d,i,n,boss)=>{const r=d%10,rest=d>5&&d%5===1,b=rest?Math.max(1,trend(d)*.5)+.11*i:Math.max(1,trend(d)+CYCLE[r]*Math.min(1,d/5))+.22*i;if(!boss)return b;if(isBoss(d))return b+1.2+(i===n-1?(r===5?2.5:4):0);return b+2};
 const scoreOf=(type,L)=>{let s=TYPES[type].s;for(const k in L){const sc=KNOBS[k].sc;s+=sc[Math.min(L[k],sc.length-1)]||0}return s};
 const LIGHT=[['hallway','park','sea'],['bedroom','street','sea'],['bar','storm']];
 const TYPE_ENVS={weird:['hallway','park','street','bar','storm'],back:['hallway','park','street','bar'],run:['park','street','hallway'],phone:['hallway','street','park','bar'],animals:['park','street','hallway'],tally:['hallway','park','street','bar'],handoff:['street','park','hallway','bar'],nth:['hallway','park','street','bar'],order:['hallway','park','street','bar'],last:['hallway','park','street','bar'],dir:['hallway','park','street','bar','storm'],hold:['hallway','street','park','bar'],fish:['sea'],diver:['sea'],change:['hallway','street','park','bar'],tail:['street','park','hallway','storm','bar'],swap:['hallway','street','park','bar'],count:['hallway','park','street','bar'],first:['hallway','park','street','bar'],absent:['hallway','park','street','bar'],owner:['park','street','hallway'],cat:['hallway','bedroom','park','street'],walk:['park','street','hallway','storm'],hat:['hallway','street','park','bar'],shoe:['hallway','street','park','bar'],drive:['park','street','storm'],person:['hallway','park','bedroom','street','bar','storm'],cheat:['hallway','bedroom','bar','street'],dog:['park','hallway','street','storm'],
@@ -1624,7 +1624,7 @@ function genCase(day,i,n,hist=[],bt,tgo,opt){GEN_DAY=day;const DROP=(!opt&&day>=
   const tut=day===1&&!opt&&i<3,fun3=day===3&&!opt&&i===1;const type=tut?['car','person','cheat'][i]:fun3?'weird':(boss&&bt&&i===n-1)?bt:wpick(pool.map(([k,v])=>[k,v.w/(1+2.5*hist.filter(h=>fam(h)===fam(k)).length)]));
   const L={};for(const k in KNOBS)L[k]=0;if(type==='bag'||type==='hat'||type==='shoe')L.passers=2;if(type==='walk'||type==='drive')L.passers=Math.max(L.passers,1);
   for(let g=0;g<80;g++){const sc=scoreOf(type,L);if(sc>=tg-.4)break;
-    const hidOK=Math.random()<.25,c=Object.keys(KNOBS).filter(k=>{const K=KNOBS[k],lv=L[k]+1;return(k!=='hidden'||hidOK)&&lv<K.sc.length&&K.un[lv]<=day&&(!K.only||K.only.includes(type))&&sc+K.sc[lv]-K.sc[L[k]]<=tg+.6});
+    const hidOK=Math.random()<.25,motOK=Math.random()<.5,c=Object.keys(KNOBS).filter(k=>{const K=KNOBS[k],lv=L[k]+1;return(k!=='hidden'||hidOK)&&(k!=='motion'||motOK)&&lv<K.sc.length&&K.un[lv]<=day&&(!K.only||K.only.includes(type))&&sc+K.sc[lv]-K.sc[L[k]]<=tg+.6});
     if(!c.length)break;L[pick(c)]++}
   if(opt){let cs;for(let k=0;k<15;k++){const L2={...L};opt.L(type,L2);cs=buildCase(type,L2,boss,opt.force);opt.post(cs);if(!cs.reject)break}delete cs.reject;return tuneMotion(cs)}
   if(tut){for(const k in L)L[k]=0;const cs=buildCase(type,L,boss,type==='cheat'?{tut:true}:undefined);cs.weather='';cs.fx=[];if(type==='cheat'){cs.calm=true;cs.passers=[];cs.deco={tod:'day',season:'',amb:null,at0:0}}return cs}
@@ -1653,10 +1653,12 @@ function forceEgg(cs,day){if(cs.top||!GAG_OK.includes(cs.type)||cs.passers.some(
 const eggD=()=>.6+Math.random()*.25;
 // Endless mode: waves of 5 cases, the 5th is a boss. E(k)=4+2.4ln(1+k/3)+SAW[k%5] -> zig-zag climb (case 1 ~3, case 10 ~7, case 30 ~10, case 100 ~12.5)
 const ESAW=[-.7,-.2,.3,.8,2.5],ED=11;
-const eTarget=k=>4+2.4*Math.log(1+k/3)+ESAW[k%5];
-function genEndless(k,hist,bt){const n=k-k%5+5;return genCase(ED,k,n,hist,bt,eTarget(k))}
+const eBase=k=>k<=10?3+.7*k:k<=20?10+.5*(k-10):15+.3*(k-20),eTarget=k=>eBase(k)+ESAW[k%5]-.54;
+function genEndless(k,hist,bt){const n=k-k%5+5;let d=Math.min(29,ED+Math.floor(k/5));if(isBoss(d))d--;return genCase(d,k,n,hist,bt,eTarget(k))}
 // Daily challenge: 6 cases, 2 seeded rules per local date
-const TOPK={cat:['color','pattern','tail','body'],dog:['build','tail','coat','spots']};
+function topBad(cs){if(!cs||!cs.top||!Array.isArray(cs.opts))return false;const K=TOPK[cs.kind];if(!K)return false;const o=cs.opts.filter(x=>x&&typeof x==='object'&&!x.none),v=(x,k)=>k==='pattern'&&x[k]==='socks'?'plain':x[k];
+  for(let i=0;i<o.length;i++)for(let j=i+1;j<o.length;j++)if(!K.some(k=>v(o[i],k)!==v(o[j],k)))return true;return false}
+const TOPK={cat:['color','pattern','tail','body'],dog:['build','tail','coat','spots'],car:['body','color','roof'],person:['style','hairC','hat','outfit','color','carry','shoe']};
 const TOP_OK=['nth','last','dir','person','dog','car','cheat','cat','count','first','absent','tail'];
 const SHADOW_NO=['weird','back','run','phone','handoff','nth','order','last','dir','hold','shoe','first','absent','owner','walk','drive','bag','suitcase','change','swap','tail'];
 const GEN_TYPES=['weird','fish','diver','person','dog','car','bird','cat','cheat','suitcase','bag','shoe','walk','drive'];
@@ -1804,7 +1806,7 @@ function crowdCase(type,L,boss,base){const c=base.c,nc=base.fx.includes('gray')|
     opts=shuffle(ppl.slice());correct=opts.indexOf(ppl[0])}
   return{...base,type,kind,opts,correct,tkind,tp,known:null,knownDog,passers:passers.concat(noise),reveal,revealK,s:c.s,hideCue:!!L.hidden,boss,score:scoreOf(type,L)}}
 function buildCase(type,L,boss,force){
-  const c={s:[15,11,7,2][L.slit],dur:[3800,3000,2300][L.speed],motion:['linear',wpick([['surge',5],['dash',4],['stutter',1]]),'reverse'][L.motion],diff:[3,2,1][L.diff],bob:!!L.bob};
+  const c={s:[15,11,7,2][L.slit],dur:[2530,2000,1530][L.speed],motion:['linear',wpick([['surge',5],['dash',5],['stutter',.4]]),Math.random()<.5?'reverse':'dash'][L.motion],diff:[3,2,1][L.diff],bob:!!L.bob};
   let envs=TYPE_ENVS[type].filter(e=>LIGHT[L.light].includes(e));if(!envs.length)envs=TYPE_ENVS[type];const env=pick(envs),indoor=INDOOR.includes(env);
   const weather=L.weather?(env==='sea'?'murky':indoor?'smoke':pick(['snow','fog'])):'';
   let view,fx=[],top=false,trick='';
@@ -2186,7 +2188,7 @@ function claimMs(d,mul){if(S.ms.has(d))return;S.ms.add(d);S.items.rec+=mul;S.ite
 /* flow */
 let attractT=0;
 function attract(){if(S.mode!=='title')return;const run=S.run;let cs;GEN_CONT=pick(CONTS);GEN_LOC=.7;for(let k=0;k<40;k++){const d=2+rnd(8),n=nCases(d);cs=genCase(d,rnd(n),n);if(!cs.top&&['hallway','park','library','kitchen','office','museum','beach','rooftop','forest'].includes(cs.env)&&!cs.tpB)break}
-  Object.assign(cs,{view:'door',s:12,fx:[],trick:'',weather:'',top:false,hideCue:false,deco:{tod:'day',season:'',amb:null,at0:0},passers:(cs.passers||[]).filter(p=>!p.gag&&!p.fn).map(p=>({...p,bal:null,bob:false}))});cs.c={...cs.c,s:12,dur:3800,motion:'linear',bob:false};
+  Object.assign(cs,{view:'door',s:12,fx:[],trick:'',weather:'',top:false,hideCue:false,deco:{tod:'day',season:'',amb:null,at0:0},passers:(cs.passers||[]).filter(p=>!p.gag&&!p.fn).map(p=>({...p,bal:null,bob:false}))});cs.c={...cs.c,s:12,dur:2530,motion:'linear',bob:false};
   cs.cont=GEN_CONT;S.acs=cs;cut(()=>applyPlace(cs),()=>{if(run!==S.run)return;pass(cs,()=>{if(run===S.run)attractT=setTimeout(attract,500)})})}
 function stopStage(){S.run++;S.knk=0;S.burst=null;S.surp=false;S.pest=null;$('#fork').hidden=true;S.hid=null;S.anim=null;S.blkUntil=0;blk.hidden=true;cv.style.transform='';S.qDl=0;$('#qtimer').hidden=true;$('#combo').hidden=true;clearTimeout(attractT);stamp.hidden=true;$('#stool').hidden=true;$('#qband').hidden=true;$('#tut').hidden=true;btnNext.hidden=true;banner.hidden=true;$('#rew').hidden=true;items(false)}
 function toTitle(){stopStage();S.cs=null;show('title');attract()}
@@ -2200,7 +2202,7 @@ function startEvent(){S.evRule=null;S.evOpt=undefined;$('#cue').hidden=true;S.cs
     [392,523,659,784,1047].forEach((f,i)=>tone(f,.1,'square',.035,0,i*.08));setTimeout(()=>{if(run!==S.run)return;banner.hidden=true;nextCase()},2600);return}
   nextCase()}
 function nextCase(){S.anim=null;if(S.inf&&S.idx%5===0)S.bt=pick(['suitcase','bag','swap','change','tail','shoe']);
-  const gi=S.qq?Math.min(S.n-1,S.idx+1):S.idx,make0=()=>{GEN_CONT=runCont();GEN_LOC=locRate(S.inf?'E'+Math.floor(S.idx/3):S.ch?S.runKey:S.day);const c=S.inf?genEndless(S.idx,S.hist,S.bt):S.ch?genDaily(gi,S.hist,S.rules):genCase(S.day,gi,S.n,S.hist,S.bt,undefined,S.evOpt);c.cont=GEN_CONT;return c},make=()=>{let cs=make0();if(S.qq){for(let k=0;k<30&&!cs.q2;k++)cs=make0();if(S.idx>=S.n-1)cs.q2=null}return cs};
+  const gi=S.qq?Math.min(S.n-1,S.idx+1):S.idx,make0=()=>{GEN_CONT=runCont();GEN_LOC=locRate(S.inf?'E'+Math.floor(S.idx/3):S.ch?S.runKey:S.day);const g1=()=>S.inf?genEndless(S.idx,S.hist,S.bt):S.ch?genDaily(gi,S.hist,S.rules):genCase(S.day,gi,S.n,S.hist,S.bt,undefined,S.evOpt);let c=g1();for(let g=0;g<25&&topBad(c);g++)c=g1();c.cont=GEN_CONT;return c},make=()=>{let cs=make0();if(S.qq){for(let k=0;k<30&&!cs.q2;k++)cs=make0();if(S.idx>=S.n-1)cs.q2=null}return cs};
   if(!S.inf&&!S.ch&&!S.mutRun&&S.day>=6&&!isBoss(S.day)&&gi<S.n-1&&!(S.rset&&S.rset.has('hidden'))&&Math.random()<.2){const a=make();let b=make();for(let k=0;k<20&&(fam(b.type)===fam(a.type)||(a.hideCue&&b.hideCue));k++)b=make();if(!(a.hideCue&&b.hideCue)){
     S.cs=null;hud();$('#cue').hidden=true;placeholders();btnNext.hidden=true;stamp.hidden=true;$('#combo').hidden=true;items(false);showFork(a,b,runCase);return}}
   runCase(make())}
