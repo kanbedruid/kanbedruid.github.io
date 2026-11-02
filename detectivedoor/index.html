@@ -1509,8 +1509,10 @@ function buildActors(cs,now){const sv=S.s;if(S.sBase)S.s=S.sBase;let[mn,mx]=worl
   const base=c.dur*(c.motion==='stutter'||c.motion==='reverse'?1.25:1)*(c.s<=2?1.35:1);
   const act=(kind,p,dir,lane,fn,delay,dur,bob)=>{const k=S.top?kind+'_t':kind,sp=sprite(k,p,0,false),A=dir<0?sp.ax:sp.w-sp.ax,xr=mx+A+1,xl=mn-(sp.w-A)-1;
     return{kind:k,base:kind,p,dir,lane,fn,t0:now+delay,dur,bob,x0:dir<0?xr:xl,x1:dir<0?xl:xr,x:dir<0?xr:xl,y:0,vis:true}};
-  S.actors=[act(cs.tkind,cs.tp,-1,0,MOTIONS[c.motion],0,cs.tkind==='walkdrag'?Math.round(base*.28):base,c.bob)];if(cs.tpB){S.actors[0].pA=cs.tp;S.actors[0].pB=cs.tpB}
+  if(cs.tpD==null){cs.tpD=0;cs.tpDir=-1;if(!TP_KEEP.includes(cs.type)){const D=(cs.passers||[]).filter(p=>!p.pB&&!p.gag&&p.kind!=='hatfly').map(p=>p.delay).sort((x,y)=>x-y);if(D.length){const k=rnd(D.length+1);cs.tpD=k===0?0:k<D.length?(D[k-1]+D[k])/2:D[k-1]+.18}if(!TP_DIRKEEP.includes(cs.type)&&Math.random()<.5)cs.tpDir=1}}
+  S.actors=[act(cs.tkind,cs.tp,cs.tpDir,0,MOTIONS[c.motion],cs.tpD*base,cs.tkind==='walkdrag'?Math.round(base*.28):base,c.bob)];if(cs.tpB){S.actors[0].pA=cs.tp;S.actors[0].pB=cs.tpB}
   for(const ps of cs.passers||[]){const a=act(ps.kind,ps.p,ps.dir,ps.lane,MOTIONS[ps.fn||'linear'],ps.delay*base,base/ps.speed,!!ps.bob);a.turn=ps.fn==='turn';a.gag=ps.gag;a.bal=ps.bal?{...ps.bal}:null;if(ps.pB){a.pA=ps.p;a.pB=ps.pB}S.actors.push(a)}return S.actors}
+const TP_KEEP=['first','nth','order','last','swap','handoff','change','tail','count','tally','animals'],TP_DIRKEEP=['dir','back','run','phone'];
 const NOSET=new Set();
 let tvc=null;function oldTV(g){const ph=g%2400;if(ph>380)return;if(!tvc)tvc=document.createElement('canvas');if(tvc.width!==W||tvc.height!==H){tvc.width=W;tvc.height=H}const c=tvc.getContext('2d');c.clearRect(0,0,W,H);c.drawImage(cv,0,0);const off=Math.round(ph/380*H);ctx.clearRect(0,0,W,H);ctx.drawImage(tvc,0,off);ctx.drawImage(tvc,0,off-H);ctx.fillStyle='rgba(0,0,0,.85)';ctx.fillRect(0,off-2,W,4);ctx.fillStyle='rgba(255,255,255,.15)';ctx.fillRect(0,off+2,W,1)}
 let frc=null,trc=null;
@@ -1656,7 +1658,9 @@ const ESAW=[-.7,-.2,.3,.8,2.5],ED=11;
 const eBase=k=>k<=10?3+.7*k:k<=20?10+.5*(k-10):15+.3*(k-20),eTarget=k=>eBase(k)+ESAW[k%5]-.54;
 function genEndless(k,hist,bt){const n=k-k%5+5;let d=Math.min(29,ED+Math.floor(k/5));if(isBoss(d))d--;return genCase(d,k,n,hist,bt,eTarget(k))}
 // Daily challenge: 6 cases, 2 seeded rules per local date
-function topBad(cs){if(!cs||!cs.top||!Array.isArray(cs.opts))return false;const K=TOPK[cs.kind];if(!K)return false;const o=cs.opts.filter(x=>x&&typeof x==='object'&&!x.none),v=(x,k)=>k==='pattern'&&x[k]==='socks'?'plain':x[k];
+const TPX=new Map();function topPx(kind,p){const k=kind+JSON.stringify(p);let d=TPX.get(k);if(!d){const sp=sprite(kind,p,0);d={w:sp.w,h:sp.h,a:sp.c.getContext('2d').getImageData(0,0,sp.w,sp.h).data};TPX.set(k,d)}return d}
+function pxDiff(A,B){if(A.w!==B.w||A.h!==B.h)return 999;let n=0;for(let i=0;i<A.a.length;i+=4)if(Math.abs(A.a[i]-B.a[i])+Math.abs(A.a[i+1]-B.a[i+1])+Math.abs(A.a[i+2]-B.a[i+2])+Math.abs(A.a[i+3]-B.a[i+3])>40)n++;return n}
+function topBad(cs){if(!cs||!cs.top||!Array.isArray(cs.opts))return false;if(KINDS[cs.kind+'_t']){const o=cs.opts.filter(x=>x&&typeof x==='object'&&!x.none),P=o.map(x=>topPx(cs.kind+'_t',x));for(let i=0;i<P.length;i++)for(let j=i+1;j<P.length;j++)if(pxDiff(P[i],P[j])<10)return true}const K=TOPK[cs.kind];if(!K)return false;const o=cs.opts.filter(x=>x&&typeof x==='object'&&!x.none),v=(x,k)=>k==='pattern'&&x[k]==='socks'?'plain':x[k];
   for(let i=0;i<o.length;i++)for(let j=i+1;j<o.length;j++)if(!K.some(k=>v(o[i],k)!==v(o[j],k)))return true;return false}
 const TOPK={cat:['color','pattern','tail','body'],dog:['build','tail','coat','spots'],car:['body','color','roof'],person:['style','hairC','hat','outfit','color','carry','shoe']};
 const TOP_OK=['nth','last','dir','person','dog','car','cheat','cat','count','first','absent','tail'];
@@ -1699,7 +1703,7 @@ const RULES={
   onehp:{g:'run'},
   noitems:{g:'run'}};
 // pairs that are unfair or unreadable together
-const BAD=new Set(['flicker|shadow','torch|shadow','torch|night','flicker|night','shadow|nightshift','torch|weather','flicker|fast','torch|fast','torch|slit','frost|weather','frost|slit','frost|torch','twoq|cctv','twoq|night','twoq|shadow','twoq|hidden','six|hidden','six|shadow','shake|slit','torch|move','flicker|move'].flatMap(p=>{const[a,b]=p.split('|');return[a+'|'+b,b+'|'+a]}));
+const BAD=new Set(['slit|shadow','slit|night','slit|cctv','slit|vhs','slit|oldtv','slit|weather','slit|crowd','slit|blink','slit|twin','shadow|frost','shadow|oldtv','shadow|weather','night|weather','cctv|weather','flicker|shadow','torch|shadow','torch|night','flicker|night','shadow|nightshift','torch|weather','flicker|fast','torch|fast','torch|slit','frost|weather','frost|slit','frost|torch','twoq|cctv','twoq|night','twoq|shadow','twoq|hidden','six|hidden','six|shadow','shake|slit','torch|move','flicker|move'].flatMap(p=>{const[a,b]=p.split('|');return[a+'|'+b,b+'|'+a]}));
 function makeQ2(cs){const cand=(cs.passers||[]).filter(p=>['person','dog','fish','diver'].includes(p.kind)&&p.p);if(!cand.length)return null;const ps=pick(cand),kind=ps.kind;
   const seen=[];const add=(k,p)=>{if(!p)return;if(k===kind)seen.push(p);else if(k==='couple'&&kind==='person'){seen.push(p.s,p.l)}else if(k==='walker'){if(kind==='person')seen.push(p.p);else seen.push(p.d)}else if(k==='drag'&&kind==='person')seen.push(p.p);else if(k==='drive'&&kind==='person')seen.push(p.d)};
   add(cs.tkind,cs.tp);for(const q of cs.passers)add(q.kind,q.p);
@@ -1723,7 +1727,8 @@ function chOpt(rules){const rs=rules.map(id=>RULES[id]);let force=null;for(const
 // Daily is meant to be far harder than the player's current day: ~10 days ahead on the trend, steep climb, brutal finale
 const topDay=()=>{let tp=1;while((S.stars[tp-1]||0)>0)tp++;return tp};
 const chDay=()=>Math.max(8,topDay()+10);
-function genDaily(i,hist,rules){const tg=trend(topDay()+10)+3+.6*i+(i===5?4:0);return genCase(chDay(),i,6,hist,null,tg,chOpt(rules))}
+const dHard=()=>{const d=topDay()+15;return Math.max(10,Math.round(d/5)*5)};
+function genDaily(i,hist,rules){const H=dHard(),cost=rules.reduce((a,r)=>a+(EVC[r]??2),0),tg=Math.max(1,target(H,i,6,i===5)+caseBonus(H)*.5+1.5-cost);return genCase(chDay(),i,6,hist,null,tg,chOpt(rules))}
 const dUnlocked=()=>(S.stars[4]||0)>0;
 // Fictional leaderboard: log-logistic CDF, 10 solved ~46%, 15 ~79%, 30 ~98%, 60 ~99.8%
 const ePct=n=>n<=0?0:Math.min(99.9,Math.round(1000/(1+Math.pow(n/10.44,-3.57)))/10);
@@ -1751,7 +1756,7 @@ function storyCase(type,L,boss,base){const c=base.c,nc=false;
     passers.push({kind:'person',p:ppl[2],dir:-1,delay:.02,speed:1.45,lane:-6});
     passers.push({kind:'person',p:ppl[3],dir:1,delay:.15,speed:1.1,lane:-10});
     opts=shuffle([F,ppl[2],ppl[3],ppl[4]]);correct=opts.indexOf(F);reveal=[known,F]}
-  else{const ppl=distinctPeople(4,nc,true),bags=[];for(let g=0;bags.length<2&&g<50;g++){const b=randP('bag');if(!bags.length||b.type!==bags[0].type)bags.push(b)}
+  else{const ppl=distinctPeople(4,nc,true),bags=[];for(let g=0;g<300&&(ppl[1].color===ppl[0].color||ppl[1].outfit===ppl[0].outfit||ppl[1].hairC===ppl[0].hairC||ppl.slice(2).some(q=>diffKeys(q,ppl[1],nc)<2||diffKeys(q,ppl[0],nc)<2));g++)ppl[1]={...randP('person'),carry:'none'};for(let g=0;bags.length<2&&g<50;g++){const b=randP('bag');if(!bags.length||b.type!==bags[0].type&&b.color!==bags[0].color)bags.push(b)}
     const A={...ppl[0],bag:bags[0]},B={...ppl[1],bag:bags[1]};tp=A;tpB={...ppl[0],bag:bags[1]};c.motion='meet';
     passers.push({kind:'person',p:B,pB:{...ppl[1],bag:bags[0]},dir:1,delay:0,speed:1,lane:4,fn:'meet'});
     knownBag=bags[0];qk=Math.random()<.5?'swapS':'swapE';opts=shuffle(ppl.slice());correct=opts.indexOf(qk==='swapS'?ppl[0]:ppl[1]);reveal=[{...ppl[1],bag:bags[0]},{...ppl[0],bag:bags[1]}]}
@@ -2202,7 +2207,7 @@ function startEvent(){S.evRule=null;S.evOpt=undefined;$('#cue').hidden=true;S.cs
     [392,523,659,784,1047].forEach((f,i)=>tone(f,.1,'square',.035,0,i*.08));setTimeout(()=>{if(run!==S.run)return;banner.hidden=true;nextCase()},2600);return}
   nextCase()}
 function nextCase(){S.anim=null;if(S.inf&&S.idx%5===0)S.bt=pick(['suitcase','bag','swap','change','tail','shoe']);
-  const gi=S.qq?Math.min(S.n-1,S.idx+1):S.idx,make0=()=>{GEN_CONT=runCont();GEN_LOC=locRate(S.inf?'E'+Math.floor(S.idx/3):S.ch?S.runKey:S.day);const g1=()=>S.inf?genEndless(S.idx,S.hist,S.bt):S.ch?genDaily(gi,S.hist,S.rules):genCase(S.day,gi,S.n,S.hist,S.bt,undefined,S.evOpt);let c=g1();for(let g=0;g<25&&topBad(c);g++)c=g1();c.cont=GEN_CONT;return c},make=()=>{let cs=make0();if(S.qq){for(let k=0;k<30&&!cs.q2;k++)cs=make0();if(S.idx>=S.n-1)cs.q2=null}return cs};
+  const gi=S.qq?Math.min(S.n-1,S.idx+1):S.idx,make0=()=>{GEN_CONT=runCont();GEN_LOC=locRate(S.inf?'E'+Math.floor(S.idx/3):S.ch?S.runKey:S.day);const g1=()=>S.inf?genEndless(S.idx,S.hist,S.bt):S.ch?genDaily(gi,S.hist,S.rules):genCase(S.day,gi,S.n,S.hist,S.bt,undefined,S.evOpt);let c=g1();for(let g=0;g<40&&(topBad(c)||topBad(c.q2));g++)c=g1();c.cont=GEN_CONT;return c},make=()=>{let cs=make0();if(S.qq){for(let k=0;k<30&&!cs.q2;k++)cs=make0();if(S.idx>=S.n-1)cs.q2=null}return cs};
   if(!S.inf&&!S.ch&&!S.mutRun&&S.day>=6&&!isBoss(S.day)&&gi<S.n-1&&!(S.rset&&S.rset.has('hidden'))&&Math.random()<.2){const a=make();let b=make();for(let k=0;k<20&&(fam(b.type)===fam(a.type)||(a.hideCue&&b.hideCue));k++)b=make();if(!(a.hideCue&&b.hideCue)){
     S.cs=null;hud();$('#cue').hidden=true;placeholders();btnNext.hidden=true;stamp.hidden=true;$('#combo').hidden=true;items(false);showFork(a,b,runCase);return}}
   runCase(make())}
@@ -2236,7 +2241,7 @@ function protest(c,j){const k=S.cs.kind,g=k==='dog'?'dog':k==='cat'?'cat':(k==='
   const o=S.cs.opts[j];if(o&&o.skin)c.style.setProperty('--skin',o.skin);sg.className='sign '+cls;c.appendChild(sg);c.classList.add('protest')}
 const quickHTML=()=>`<span class="qb">${bm(IC.bolt)}</span>${t('quick')}`;
 function quickGain(){if(S.mode!=='play')return;const e=$('#hudE');e.hidden=false;renderEnergy();gain(1,$('#stamp'));clearTimeout(S.qgT);S.qgT=setTimeout(()=>{if(S.mode==='play')e.hidden=true},1900)}
-function choose(i,bust){if(S.phase!=='q'&&!(S.phase==='pass'&&S.knk&&S.early))return;if(S.phase==='pass'&&S.cs.q2&&!S.cs.isQ2&&!bust){if(S.q1Pick!=null)return;S.q1Pick=i;grid.querySelectorAll('.card').forEach((c,j)=>{c.classList.add('busy');if(j===i)c.classList.add('picked')});sfx.blip();return}endDeck();const early=S.phase==='pass'||S.wasEarly;if(S.phase==='pass'){S.knk=0;S.anim=null;qband(null,false)}S.early=0;pestEnd();S.phase='reveal';S.qDl=0;$('#qtimer').hidden=true;const cs=S.cs,ok=i===cs.correct;items(false);$('#tut').hidden=true;
+function choose(i,bust){if(S.phase!=='q'&&!(S.phase==='pass'&&S.knk&&S.early))return;if(S.phase==='pass'&&!bust&&S.cs&&['swap','handoff','change'].includes(S.cs.type)&&S.actors[0]&&(S.actors[0].kk||0)<.66){const c=grid.querySelectorAll('.card')[i];if(c)bump(c,'nope');return}if(S.phase==='pass'&&S.cs.q2&&!S.cs.isQ2&&!bust){if(S.q1Pick!=null)return;S.q1Pick=i;grid.querySelectorAll('.card').forEach((c,j)=>{c.classList.add('busy');if(j===i)c.classList.add('picked')});sfx.blip();return}endDeck();const early=S.phase==='pass'||S.wasEarly;if(S.phase==='pass'){S.knk=0;S.anim=null;qband(null,false)}S.early=0;pestEnd();S.phase='reveal';S.qDl=0;$('#qtimer').hidden=true;const cs=S.cs,ok=i===cs.correct;items(false);$('#tut').hidden=true;
   grid.querySelectorAll('.card').forEach((c,j)=>{c.classList.add('busy');c.classList.remove('picked');const m=c.querySelector('.mark');
     const live=!bust&&c.querySelector('.who')&&c.querySelector('.who').width>1;if(j===cs.correct){c.classList.remove('out');c.classList.add('good');m.innerHTML=bm(IC.ok);m.style.background='';m.hidden=false}else if(j===i){c.classList.add('bad');if(live)protest(c,j);m.innerHTML=bm(IC.no);m.hidden=false}else if(!c.classList.contains('out'))c.classList.add('dim')});
   S.results[S.idx]=ok;if(ok){S.combo=(S.combo||0)+1;S.solved=(S.solved||0)+1;sfx.good();if(S.combo>=2)comboFx(S.combo)}else{S.combo=0;S.hearts--;sfx.bad();bump(stage,'shake');try{navigator.vibrate&&navigator.vibrate(60)}catch(e){}}
@@ -2360,8 +2365,8 @@ COL.forEach(it=>{const s=it.src,n=+s.slice(1);let p;
   else if(s[0]==='D')p=fDay(5)*.7*Math.pow(.4,n-1);
   else if(s[0]==='L')p=fDay(n);
   else if(s[0]==='S')p=fDay(n/2.5)*.9;
-  else if(s[0]==='C'){const rn=srand('col'+it.id),v=rn();p=[6+20*v,1.5+3*v,.4+.6*v,.08+.2*v][it.r]}
-  else{const rn=srand('col'+it.id),v=rn();p=[9+31*v,2+4.5*v,.5+.8*v,.1+.25*v][it.r];const[,env,cont]=s.split('-');it.env=env;it.cont=cont}
+  else if(s[0]==='C'){const rn=srand('col'+it.id),v=rn(),U=fDay(4)/100,q=[.55/20,.25/15,.15/10,.05/5][it.r];p=100*U*(1-Math.exp(-1*q))*(.85+.3*v)}
+  else{const rn=srand('col'+it.id),v=rn(),w=rn();p=it.r===0?(2.5+6.5*v)*(.6+.4*w):[0,2+4.5*v,.5+.8*v,.1+.25*v][it.r];const[,env,cont]=s.split('-');it.env=env;it.cont=cont}
   it.own=p});
 const fmtPct=v=>v>=1?v.toFixed(1):v.toFixed(2);
 const RCOL=[{bg:'#57516b',ed:'#8d86a6'},{bg:'#2a55b0',ed:'#6f9bff'},{bg:'#6a33a8',ed:'#c48bff'},{bg:'#a8771a',ed:'#ffd65a'}];
