@@ -348,7 +348,8 @@ body.ovl #banner,body.ovl #nextT{visibility:hidden}
 
 /* ---- 首页 ---- */
 #title{justify-content:space-between;gap:0;padding-top:calc(var(--safe-top) + 10px)}
-.ttop{width:100%;display:flex;justify-content:space-between;align-items:center}
+/* 首页资源和设置保持在同一行的左侧：不占右上角的小程序退出区，也不会压住标题。 */
+.ttop{width:100%;display:flex;justify-content:flex-start;align-items:center;gap:10px}
 .tbtn{width:40px;height:40px;display:grid;place-items:center;background:rgba(14,10,24,.8);border:2px solid #3a2f48;border-radius:8px;box-shadow:0 2px 0 #000;padding:0}
 .tbtn img{width:22px;height:22px;image-rendering:pixelated}
 .tres{display:flex;gap:6px;align-items:center}
@@ -356,8 +357,8 @@ body.ovl #banner,body.ovl #nextT{visibility:hidden}
 .splus{width:18px;height:18px;image-rendering:pixelated;margin-right:-6px}
 .rpill i{font-style:normal;color:var(--gold2)}.rpill b{font-family:var(--pix);font-size:13px;font-weight:400}
 /* TapTap iOS 的退出浮层占用右上约一枚按钮加一段胶囊的宽度。
-   首页资源改放到其下方左侧；战斗 HUD 留出整块空间，暂停键落在浮层正下方。 */
-html.tap-ios-safe #title .tres{position:fixed;top:calc(var(--safe-top) + 58px);left:max(16px,var(--safe-left));z-index:32}
+   首页资源放在设置按钮右侧的首行左侧；战斗 HUD 留出整块空间，暂停键落在浮层正下方。 */
+html.tap-ios-safe #title .tres{position:static;z-index:auto}
 html.tap-ios-safe #hud .hA,html.tap-ios-safe #hud .hB{box-sizing:border-box;padding-right:92px}
 html.tap-ios-safe #hud #party{box-sizing:border-box;padding-right:56px}
 html.tap-ios-safe #hud #bPause{position:fixed;top:calc(var(--safe-top) + 58px);right:max(12px,var(--safe-right));z-index:7}
@@ -5424,7 +5425,8 @@ function hurtEnemy(e, base, o) {
   if (e.elite || e.boss) d *= 1 + m.bossDmg + (o.bossBonus || 0) + (TAL('slayer') ? .3 : 0);
   if (G.crossOn && o.src) { d *= bondDmgMul(o.src) * V2.mul(e, o); if (hadMark && G.markHero) { const hid = SKILL_HERO[o.src]; if (hid && G.markHero[hid]) d *= 1 + G.markHero[hid]; } }
   const el = o.el || SKILL_EL[o.src] || (o.src === 'entry' && G.entryEl) || (tags.includes('fire') ? 'fire' : tags.includes('thunder') ? 'thunder' : tags.includes('ice') ? 'ice' : tags.includes('water') ? 'water' : null);
-  if (el && !o.noReact && !o.isDot && !e.obs && !e.civ) d *= elemReact(e, el, o);
+  const reaction = el && !o.noReact && !o.isDot && !e.obs && !e.civ ? elemReact(e, el) : null;
+  if (reaction) d *= reaction.multiplier;
   if (el && G.weather) d *= weatherMul(el);
   if (TAL('moon') && isNight(G.t)) d *= 1.15;
   d *= 1 + (isNight(G.t) ? (m.nightDmg || 0) : (m.dayDmg || 0)) + pb('dmg');
@@ -5437,9 +5439,16 @@ function hurtEnemy(e, base, o) {
     if (crit) { d *= 1 + m.critDmg; if (m.critHeal && G.lsAcc < 4) { G.lsAcc += m.critHeal; healSquadRaw(m.critHeal); } if (m.critMark) e.st.markT = Math.max(e.st.markT, 5 + m.markDur); }
   }
   if (e.shield > 0) { const ab = Math.min(e.shield, d); e.shield -= ab; d -= ab; e.shHit = G.t; if (d <= 0) { e.flash = .05; return 0; } }
-  const shown = Math.min(d, Math.max(1, e.hp)); e.hp -= d; e.flash = .07; if (d > (G.ast.maxHit || 0) && SKILL_HERO[o.src]) G.ast.maxHit = d;
+  const hpBefore = e.hp;
+  const shown = Math.min(d, Math.max(1, hpBefore)); e.hp -= d; e.flash = .07; if (d > (G.ast.maxHit || 0) && SKILL_HERO[o.src]) G.ast.maxHit = d;
   const sid = o.src || 'other'; if (sid !== 'weather' && sid !== 'terrain') G.dmgBy[sid] = (G.dmgBy[sid] || 0) + shown;
-  if (!o.isDot || d >= 4) addNum(e.x + rr(-3, 3), e.y - e.r - 3, shown, crit, o.isDot);
+  const reactionText = reaction ? RX[reaction.key] : REACTION_DAMAGE[o.src];
+  if (reactionText) {
+    if (hpBefore > 0) {
+      const amount = Math.max(1, Math.round(Math.min(d, hpBefore)));
+      addLabel(e.x, e.y - e.r - 6, `${reactionText.n} ${amount}${crit ? '!' : ''}`, reactionText.c, crit ? 18 : 12, crit ? .9 : .7, null, true);
+    }
+  } else if (!o.isDot || d >= 4) addNum(e.x + rr(-3, 3), e.y - e.r - 3, shown, crit, o.isDot);
   const kn = o.knock || (o.isDot || o.src === 'charm' ? 0 : 3.5);
   if (kn && !e.boss) {
     const k = kn * m.knock * (1 - (e.kres || 0)) * (e.elite ? .4 : 1);
@@ -5471,14 +5480,12 @@ function reactBurst(e) {
   const m = G.mods, stacks = Math.max(1, e.st.burn); e.st.burn = 0;
   const r = 20 * m.burstR * m.area, dmg = (9 + 6 * stacks) * m.burstAmp * scaleT();
   explosion(e.x, e.y, r, '#ff8a3a', 'burst');
-  addLabel(e.x, e.y - 10, '超载', '#ff8a3a');
   query(e.x, e.y, r, o => { hurtEnemy(o, dmg, { tags: ['fire'], noReact: true, status: { burn: 1 }, src: 'react_burst' }); });
   Snd.play('burst');
 }
 function reactShatter(e, d, depth) {
   inc('shatter');
   const m = G.mods; e.st.frzT = 0;
-  addLabel(e.x, e.y - 10, '碎裂', '#c8e8ff');
   hurtEnemy(e, d * 2 * m.shatterAmp, { noReact: true, isDot: false, src: 'react_shatter' });
   const n = 4 + m.shardAdd;
   if (depth < 2) for (let i = 0; i < n; i++) {
@@ -5491,7 +5498,6 @@ function reactShatter(e, d, depth) {
 function reactCall(e) {
   inc('call');
   const m = G.mods; e.callCd = .6;
-  addLabel(e.x, e.y - 10, '引雷', '#ffe85a');
   skyBolt(e.x, e.y);
   const dmg = 13 * m.callAmp * scaleT();
   hurtEnemy(e, dmg, { tags: ['thunder'], noReact: true, src: 'react_call' });
@@ -5536,10 +5542,13 @@ function endlessK(t) {
   if (t >= 540) k *= 2 * Math.pow(1.6, (t - 540) / 60);
   return k;
 }
+function bossSizeScale(opt) {
+  return opt?.final || opt?.endlessBoss ? 2 : 1.5;
+}
 function spawnEnemy(type, x, y, opt) {
   opt = opt || {};
   const def = ENEMIES[type] || BOSSES[type], boss = !!BOSSES[type], elite = !!opt.elite;
-  const sizeScale = boss ? (opt.final || opt.endlessBoss ? 3 : 2) : 1;
+  const sizeScale = boss ? bossSizeScale(opt) : 1;
   const hpS = 1 + G.t / RUN_BOSS_T * (4 + (G.asc || 0));
   const lateHp = Math.max(0, G.t - 360) / 30;
   const es = G.endless ? Math.max(0, G.t - G.endlessT - 60) : 0;
@@ -5576,7 +5585,7 @@ function spawnRingPoint(extra) {
   return { x: G.cam.x + x, y: G.cam.y + y };
 }
 function spawnAtEdge(type, opt) {
-  const extra = BOSSES[type] ? BOSSES[type].r * (opt?.final || opt?.endlessBoss ? 3 : 2) : 0;
+  const extra = BOSSES[type] ? BOSSES[type].r * bossSizeScale(opt) : 0;
   const p = spawnRingPoint(extra);
   if (p.push) { // 放到视野之外
     const hw = VW / 2 + 14 + extra, hh = VH / 2 + 14 + extra, dx = p.x - G.cam.x, dy = p.y - G.cam.y;
@@ -7583,64 +7592,79 @@ const RX = {
   evap: { n: '蒸发', c: '#e8f4ff' }, melt: { n: '融化', c: '#ffb08a' }, over: { n: '超载', c: '#ff8a3a' }, elec: { n: '感电', c: '#c8a0ff' },
   freeze: { n: '冻结', c: '#9fefff' }, super: { n: '超导', c: '#b8c8ff' }, swirl: { n: '扩散', c: '#7fe0b0' }, cryst: { n: '结晶', c: '#ffe0a0' },
 };
-function rxHit(e, k) {
-  e.rxT = G.t + .25; addLabel(e.x, e.y - e.r - 6, RX[k].n, RX[k].c, 12);
+const REACTION_DAMAGE = {
+  react_burst: RX.over, react_super: RX.super, react_swirl: RX.swirl, react_elec: RX.elec,
+  react_shatter: { n: '碎裂', c: '#c8e8ff' }, react_call: { n: '引雷', c: '#ffe85a' },
+};
+function rxHit(e, k, multiplier) {
+  e.rxT = G.t + .25;
   const a = AS(); a.rx = a.rx || {}; a.rx[k] = (a.rx[k] || 0) + 1;
+  // 倍率反应由结算后的伤害飘字显示。超载由爆炸命中单独显示。
+  if (multiplier) return { key: k, multiplier };
+  if (k !== 'over') addLabel(e.x, e.y - e.r - 6, RX[k].n, RX[k].c, 12);
 }
-// 返回伤害倍率；同时清除被消耗的元素
-function elemReact(e, el, o) {
-  let k = elemReact0(e, el, o); if (k === 1) return k;
+// 返回强化这次命中的反应，同时清除被消耗的元素。
+function elemReact(e, el) {
+  const reaction = elemReact0(e, el);
+  if (!reaction) return null;
   if (G.combos) taFire('react', e.x, e.y);
   proc('react');
-  if (TAL('harmony')) { const els = new Set(G.heroes.map(h => h.def.skills[0].el).filter(Boolean)); if (els.size >= 3) k *= 1.3; }
-  if (TAL('chainrx') && Math.random() < .1) { k *= 1.8; if (G.fx.length < 180) { fx({ k: 'ring', x: e.x, y: e.y, r0: 4, r1: 26, dur: .3, col: '#ffffff', w: 2 }); addLabel(e.x, e.y - 14, '连锁!', '#ffffff', 11, .6); } }
-  return k;
+  if (TAL('harmony')) { const els = new Set(G.heroes.map(h => h.def.skills[0].el).filter(Boolean)); if (els.size >= 3) reaction.multiplier *= 1.3; }
+  if (TAL('chainrx') && Math.random() < .1) { reaction.multiplier *= 1.8; if (G.fx.length < 180) { fx({ k: 'ring', x: e.x, y: e.y, r0: 4, r1: 26, dur: .3, col: '#ffffff', w: 2 }); addLabel(e.x, e.y - 14, '连锁!', '#ffffff', 11, .6); } }
+  return reaction;
 }
 // 沙暴天气：敌人身上沾满沙尘（岩元素），火/水/雷/冰命中时产生结晶反应
-function elemReact0(e, el, o) {
-  const r0 = e.rxT, k = elemReact00(e, el, o);
-  if (e.rxT !== r0 || k !== 1) return k;
+function elemReact0(e, el) {
+  const r0 = e.rxT, reaction = elemReact00(e, el);
+  if (e.rxT !== r0 || reaction) return reaction;
   if (e.sandT > G.t && !(e.rxT > G.t) && (el === 'fire' || el === 'water' || el === 'thunder' || el === 'ice')) {
-    e.sandT = 0; rxHit(e, 'cryst'); if (Math.random() < .15) dropPickup('crystal', e.x, e.y);
+    e.sandT = 0; const crystallize = rxHit(e, 'cryst', 1.3); if (Math.random() < .15) dropPickup('crystal', e.x, e.y);
     for (let i = 0; i < 5; i++) part(e.x + rr(-4, 4), e.y - 4, rr(-20, 20), rr(-40, -10), .5, pick(['#ffe0a0', EL[el].c]), 2, 60);
-    return 1.3;
+    return crystallize;
   }
-  return 1;
 }
-function elemReact00(e, el, o) {
-  if (e.rxT > G.t || e.boss && Math.random() < .5) return 1;
+function elemReact00(e, el) {
+  if (e.rxT > G.t || e.boss && Math.random() < .5) return;
   const sc = scaleT();
   const F = auraFire(e), W = auraWater(e), T = auraThunder(e), I = auraIce(e);
   if (el === 'fire') {
-    if (W) { e.wetT = 0; e.st.burn = 0; rxHit(e, 'evap'); for (let i = 0; i < 6; i++) part(e.x + rr(-4, 4), e.y - 4, rr(-10, 10), -30, .6, '#e8f4ff', 2, -10); return 1.8; }
-    if (I) { e.st.frzT = 0; e.chillT = 0; rxHit(e, 'melt'); return 2; }
-    if (T) { rxHit(e, 'over'); reactBurst(e); return 1; }
+    if (W) { e.wetT = 0; e.st.burn = 0; const evaporate = rxHit(e, 'evap', 1.8); for (let i = 0; i < 6; i++) part(e.x + rr(-4, 4), e.y - 4, rr(-10, 10), -30, .6, '#e8f4ff', 2, -10); return evaporate; }
+    if (I) { e.st.frzT = 0; e.chillT = 0; return rxHit(e, 'melt', 2); }
+    if (T) { rxHit(e, 'over'); reactBurst(e); return; }
   } else if (el === 'water') {
-    if (F) { e.st.burn = 0; rxHit(e, 'evap'); for (let i = 0; i < 6; i++) part(e.x + rr(-4, 4), e.y - 4, rr(-10, 10), -30, .6, '#e8f4ff', 2, -10); return 1.5; }
-    if (T) { e.ecT = G.t + 4; rxHit(e, 'elec'); return 1; }
-    if (I) { applyStatus(e, { frz: 2.5 }); rxHit(e, 'freeze'); return 1; }
+    if (F) { e.st.burn = 0; const evaporate = rxHit(e, 'evap', 1.5); for (let i = 0; i < 6; i++) part(e.x + rr(-4, 4), e.y - 4, rr(-10, 10), -30, .6, '#e8f4ff', 2, -10); return evaporate; }
+    if (T) { e.ecT = G.t + 4; rxHit(e, 'elec'); return; }
+    if (I) { applyStatus(e, { frz: 2.5 }); rxHit(e, 'freeze'); return; }
   } else if (el === 'thunder') {
-    if (W) { e.ecT = G.t + 4; rxHit(e, 'elec'); return 1.2; }
-    if (I) { e.chillT = 0; rxHit(e, 'super'); fx({ k: 'ring', x: e.x, y: e.y, r0: 3, r1: 30, dur: .3, col: RX.super.c, w: 2 }); query(e.x, e.y, 30, x => { x.vuln = .4; x.vulnT = 6; if (x !== e) hurtEnemy(x, 12 * sc, { src: 'react_super', noReact: true }); }); return 1.3; }
+    if (W) { e.ecT = G.t + 4; return rxHit(e, 'elec', 1.2); }
+    if (I) { e.chillT = 0; return reactSuperconduct(e, sc); }
   } else if (el === 'ice') {
-    if (W) { applyStatus(e, { frz: 2.5 }); rxHit(e, 'freeze'); return 1; }
-    if (F) { e.st.burn = 0; rxHit(e, 'melt'); return 1.5; }
-    if (T) { rxHit(e, 'super'); fx({ k: 'ring', x: e.x, y: e.y, r0: 3, r1: 30, dur: .3, col: RX.super.c, w: 2 }); query(e.x, e.y, 30, x => { x.vuln = .4; x.vulnT = 6; if (x !== e) hurtEnemy(x, 12 * sc, { src: 'react_super', noReact: true }); }); return 1.3; }
+    if (W) { applyStatus(e, { frz: 2.5 }); rxHit(e, 'freeze'); return; }
+    if (F) { e.st.burn = 0; return rxHit(e, 'melt', 1.5); }
+    if (T) return reactSuperconduct(e, sc);
   } else if (el === 'wind') {
     const sp = F ? 'fire' : W ? 'water' : T ? 'thunder' : I ? 'ice' : null;
     if (sp) {
-      rxHit(e, 'swirl'); fx({ k: 'ring', x: e.x, y: e.y, r0: 4, r1: 40, dur: .35, col: EL[sp].c, w: 2 });
+      const swirl = rxHit(e, 'swirl', 1.2); fx({ k: 'ring', x: e.x, y: e.y, r0: 4, r1: 40, dur: .35, col: EL[sp].c, w: 2 });
       query(e.x, e.y, 40, x => { if (x === e) return; hurtEnemy(x, 9 * sc, { src: 'react_swirl', noReact: true }); elemAura(x, sp); });
-      return 1.2;
+      return swirl;
     }
   } else if (el === 'earth') {
     if (F || W || T || I) {
-      rxHit(e, 'cryst'); if (Math.random() < .3) dropPickup('crystal', e.x, e.y);
+      const crystallize = rxHit(e, 'cryst', 1.3); if (Math.random() < .3) dropPickup('crystal', e.x, e.y);
       if (F) e.st.burn = 0; if (W) e.wetT = 0; if (I) e.chillT = 0;
-      return 1.3;
+      return crystallize;
     }
   }
-  return 1;
+}
+function reactSuperconduct(e, scale) {
+  const reaction = rxHit(e, 'super', 1.3);
+  fx({ k: 'ring', x: e.x, y: e.y, r0: 3, r1: 30, dur: .3, col: RX.super.c, w: 2 });
+  query(e.x, e.y, 30, target => {
+    target.vuln = .4; target.vulnT = 6;
+    if (target !== e) hurtEnemy(target, 12 * scale, { src: 'react_super', noReact: true });
+  });
+  return reaction;
 }
 function elemAura(e, el) {
   if (el === 'fire') { if (e.st.burn <= 0) applyStatus(e, { burn: 1 }); }
@@ -9577,13 +9601,16 @@ const TREE = [
 ];
 const OLD_COST = { early: [30, 70, 130], fate: [40, 90, 170], first: [80, 180], late: [60, 140], bond: [50, 120], reroll: [20, 45, 80], hp: [25, 55, 100], luck: [30, 70, 140], xp: [30, 70, 130], gift: [60, 150], magnet: [20, 50], speed: [30, 70, 130] };
 // 以原价两倍为基准，平滑普通节点的跨层价格，保留传奇节点溢价。
-const templePrices = new Map();
+const baseTemplePrices = new Map();
 for (const node of TREE) {
   const rowPrice = (65 + .95 * node.row ** 2) * (node.sm ? .75 : 1);
   const price = node.leg ? node.cost * 2 : 2 * (.8 * node.cost + .2 * rowPrice);
-  const prereqPrice = templePrices.get(node.req) || 0;
-  node.cost = Math.max(Math.round(price / 5) * 5, prereqPrice + 10);
-  templePrices.set(node.id, node.cost);
+  const prereqPrice = baseTemplePrices.get(node.req) || 0;
+  const basePrice = Math.max(Math.round(price / 5) * 5, prereqPrice + 10);
+  baseTemplePrices.set(node.id, basePrice);
+  // 前两行沿用现价，从第三行起每深入一行，涨幅增加 5 个百分点。
+  const growth = 1 + Math.max(0, node.row - 1) * .05;
+  node.cost = Math.round(basePrice * growth / 5) * 5;
 }
 const Meta = {
   d: (() => {
@@ -9608,6 +9635,10 @@ function nodeIcon(k, sc) {
 }
 
 /* ---------- 神格 ---------- */
+function summonDelayRule(slot, seconds, additional = false) {
+  const name = slot === 2 ? '第二位' : '第三位';
+  return { n: [`${name}神明${additional ? '再' : ''}推迟 ${seconds} 秒召唤`], f: { ['d' + slot]: seconds } };
+}
 const ASC = [ // 每一级都在此前基础上叠加
   { n: ['可能会有虫巢从天而降'], f: {}, x: 'hive' },
   { n: ['首领生命 +10%'], f: { bhp: .1 } },
@@ -9620,10 +9651,10 @@ const ASC = [ // 每一级都在此前基础上叠加
   { n: ['宝箱掉率 -15%'], f: { chest: -.15 } },
   { n: ['负面地形更频繁出现'], f: {}, x: 'terrain' },
   { n: ['敌人攻击 +20%'], f: { dmg: .2 } },
-  { n: ['第三位神明推迟 30 秒召唤'], f: { d3: 30 } },
+  summonDelayRule(3, 40),
   { n: ['每 15 秒额外出现一个精英'], f: {}, x: 'e15' },
   { n: ['虫巢掉落更加频繁'], f: {}, x: 'hive5' },
-  { n: ['第二位神明推迟 30 秒召唤'], f: { d2: 30 } },
+  summonDelayRule(2, 40),
   { n: ['敌人移动速度 +40%'], f: { spd: .4 } },
   { n: ['每 120 秒额外出现一个首领'], f: {}, x: 'b120' },
   { n: ['蟠桃回复 -25%'], f: { peach: -.25 } },
@@ -9631,11 +9662,11 @@ const ASC = [ // 每一级都在此前基础上叠加
   { n: ['陨石雨不断落下'], f: {}, x: 'meteor' },
   { n: ['宝箱掉率 -25%'], f: { chest: -.25 } },
   { n: ['精英不会倒戈'], f: {}, x: 'nocharm' },
-  { n: ['第三位神明再推迟 60 秒召唤'], f: { d3: 60 } },
+  summonDelayRule(3, 60, true),
   { n: ['每 60 秒额外出现一个首领'], f: {}, x: 'b60' },
   { n: ['敌人攻击和移动速度 +20%'], f: { dmg: .2, spd: .2 } },
   { n: ['蟠桃回复 -35%'], f: { peach: -.35 } },
-  { n: ['第二位神明再推迟 60 秒召唤'], f: { d2: 60 } },
+  summonDelayRule(2, 60, true),
   { n: ['敌人数量 +20%', '首领生命 +20%'], f: { cnt: .2, bhp: .2 } },
   { n: ['宝箱掉率 -35%'], f: { chest: -.35 } },
   { n: ['精英和首领双倍出现'], f: {}, x: 'double' },
