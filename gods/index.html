@@ -1077,7 +1077,7 @@ function painter(c) {
 
 /* ---------- 英雄精灵 ---------- */
 // 画布 20×22，角色主体区域偏移 (2,2)
-function heroSprite(L, frame) {
+function heroSprite(L, frame, attackBody = false) {
   const c = mkc(20, 22), P = painter(c);
   const O = 2;
   const p = (x, y, col) => P.p(x + O, y + O, col), r = (x, y, w, h, col) => P.r(x + O, y + O, w, h, col);
@@ -1102,8 +1102,8 @@ function heroSprite(L, frame) {
   // 身体
   r(4, 9, 8, 4, body); r(4, 9, 8, 1, trim); r(4, 12, 8, 1, L.belt || trim);
   if (L.body2) { r(7, 10, 2, 2, L.body2); }
-  r(3, 10, 1, 3, L.arm || body); r(12, 10, 1, 3, L.arm || body);
-  p(3, 13, skin); p(12, 13, skin);
+  r(3, 10, 1, 3, L.arm || body); p(3, 13, skin);
+  if (!attackBody) { r(12, 10, 1, 3, L.arm || body); p(12, 13, skin); }
   // 头
   r(4, 3, 8, 6, skin); r(5, 2, 6, 1, skin);
   // 发型/头饰
@@ -1196,6 +1196,10 @@ function heroSprite(L, frame) {
   else if (L.hat === 'bird') { p(6, 5, '#ffd84a'); p(9, 5, '#ffd84a'); }
   else { p(6, 5, eye); p(9, 5, eye); if (st !== 'zeus' && st !== 'guan' && st !== 'thor' && st !== 'poseidon' && st !== 'zhongkui') { p(5, 6, L.blush || '#e8a090'); p(10, 6, L.blush || '#e8a090'); } }
   // 武器
+  if (!attackBody) drawHeroWeapon(p, r, L);
+  return outline(c, OUT);
+}
+function drawHeroWeapon(p, r, L) {
   const wc = L.wc || '#f2c14e';
   switch (L.weapon) {
     case 'staff': r(14, 1, 1, 15, wc); r(14, 1, 1, 2, '#c8423a'); r(14, 14, 1, 2, '#c8423a'); break;
@@ -1218,7 +1222,6 @@ function heroSprite(L, frame) {
     case 'pestle': r(13, 9, 3, 1, '#b8a888'); r(14, 7, 1, 2, '#e8e0d0'); break;
     default: if (L.weapon) genWeapon(p, r, L);
   }
-  return outline(c, OUT);
 }
 
 /* ---------- 外星生物：程序生成 ---------- */
@@ -1556,6 +1559,15 @@ function heroArt(def) {
   const fr = [heroSprite(def.look, 0), heroSprite(def.look, 1)];
   const a = { fr, white: fr.map(f => tint(f, '#ffffff', .85)), ghost: fr.map(f => tint(f, '#ffd84a', .45)) };
   ART.heroes[def.id] = a; return a;
+}
+function heroAttackArt(def) {
+  const art = heroArt(def);
+  if (!art.attack) {
+    const weapon = mkc(20, 22), P = painter(weapon);
+    drawHeroWeapon((x, y, col) => P.p(x + 2, y + 2, col), (x, y, w, h, col) => P.r(x + 2, y + 2, w, h, col), def.look);
+    art.attack = { body: [heroSprite(def.look, 0, true), heroSprite(def.look, 1, true)], weapon: outline(weapon, OUT) };
+  }
+  return art.attack;
 }
 function portrait(def) {
   if (ART.portraits[def.id]) return ART.portraits[def.id];
@@ -2791,7 +2803,7 @@ HEROES.push(
     EN('神风', '风囊打开，狂风扫荡全场', 'nova', { dmg: 50, r: 120, knock: 130, color: '#c8f0e0', vis: 'staffSpin' }), [
     S('风轮', 'orbit', [], { dmg: 8, count: 2, r: 30, size: 6, rot: 3.2, sprite: 'wind', knock: 26, col: '#c8f0e0' }, '风轮绕身旋转，把靠近的敌人吹开', ['n1', 'd40', ['风轮更大', mul('r', 1.35)], 'n2'], EV('风神之轮', '五个风轮高速旋转，每隔几秒把敌人卷到身边', 'n+3 d*1.4', { pullEvery: 5 })),
     S('风压', 'nova', [], { dmg: 10, cd: 3.5, r: 46, knock: 50, col: '#c8f0e0' }, '释放风压，推开周围的敌人', ['d50', 'a30', 'cd25', 'slow']),
-    S('镰鼬', 'strike', [], { dmg: 11, cd: 1.8, count: 4, r: 10, aim: 'around', near: 80, delay: .1, stagger: .05, vis: 'slash' }, '看不见的风刃在身边乱斩', ['n2', 'd40', 'a30', 'n3']),
+    S('镰鼬', 'strike', [], { dmg: 11, cd: 1.8, count: 4, r: 10, aim: 'around', near: 80, delay: .1, stagger: .05, vis: 'slash', windBlade: true }, '看不见的风刃在身边乱斩', ['n2', 'd40', 'a30', 'n3']),
     ['疾风', 'move']]),
   H('momotaro', '桃太郎', '鬼退治', '日本', '桃子', L('band', '#1a1a24', '#e8783a', '#f4f1ea', 'sword', { hc: '#f4f1ea' }),
     EN('鬼退治', '桃太郎与伙伴们一齐冲锋', 'nova', { dmg: 65, r: 100, knock: 50, color: '#ffb0b8', vis: 'greenSlash' }), [
@@ -5306,11 +5318,14 @@ function MODS0() {
     burstAmp: 1, burstR: 1, shatterAmp: 1, shardAdd: 0, spreadAmp: 1, callAmp: 1, callJumps: 2, pierceAdd: 0, chestLuck: 0, power: 0
   };
 }
+const OPENING_XP_SURCHARGE = [8, 17, 26, 31, 30, 26, 22, 17, 12, 7, 4];
 function xpNeed(level) {
   const ramp = Math.max(0, level - 3);
   const lateRamp = Math.max(0, level - 40);
-  // 从 1 到 32 级共需 8699 经验，对齐旧曲线升到 40 级的总量。
-  return Math.round(5 + 3 * level + .3 * level ** 2 + .02385 * ramp ** 3 + 3 * lateRamp ** 2);
+  const base = Math.round(5 + 3 * level + .3 * level ** 2 + .02385 * ramp ** 3 + 3 * lateRamp ** 2);
+  // 把中段的 200 经验移到开场，升到 32 级仍共需 8699 经验。
+  const middleDiscount = 2 * Math.max(0, Math.min(level - 11, 31 - level));
+  return base + (OPENING_XP_SURCHARGE[level - 1] ?? 0) - middleDiscount;
 }
 const scaleT = () => 1 + G.t / 140;
 
@@ -6506,6 +6521,17 @@ function meleeStyle(s, p, giant) {
   if (s.tags.includes('pierce') && !p.omni && p.arc <= 1.7) return 'point';
   return s.tags.includes('blunt') ? 'club' : 'cut';
 }
+const ATTACK_STANCES = [
+  { blade: -.84, lean: .12, reach: 5, side: -3 },
+  { blade: .88, lean: -.14, reach: 4, side: 4 },
+  { blade: -.18, lean: .23, reach: 7, side: 0 },
+];
+function meleeAfterimage(h, x, y, a, step, style, hold) {
+  const stance = ATTACK_STANCES[step % ATTACK_STANCES.length];
+  fx({ k: 'meleeAfterimage', x: x - Math.sin(a) * stance.side, y: y + Math.cos(a) * stance.side,
+    a, def: h.def, flip: Math.abs(Math.cos(a)) > .2 ? Math.cos(a) < 0 : h.flip,
+    stance, frame: step % 2, style, hold, dur: hold + .19 });
+}
 function fireSweep(s, h, p) {
   const m = G.mods, R = p.range * AR(p);
   if (p.frenzy && s.st.fz && G.t < (s.st.fzT || 0)) s.cdT = Math.max(0, s.cdT) * (1 - s.st.fz * .08); else if (p.frenzy) { s.st.fz = 0; s.st.fzShown = 0; }
@@ -6524,10 +6550,10 @@ function fireSweep(s, h, p) {
   h.swingPose = { t: G.t, a, wind, reach: Math.max(4, lg), style };
   Snd.play('swing');
   for (let i = 0; i < p.swings; i++) G.timers.push({ t: wind + i * .13, fn: () =>
-    doSweep(s, h, p, a + (i % 2 ? .25 : 0), giant, wave && i === 0, i % 2, h.x + ldx, h.y + ldy, undefined, i === p.swings - 1) });
+    doSweep(s, h, p, a + (i % 2 ? .25 : 0), giant, wave && i === 0, i % 2, h.x + ldx, h.y + ldy, undefined, i === p.swings - 1, i) });
   return true;
 }
-function doSweep(s, h, p, a, giant, wave, rev, ox, oy, dmgMul, last) {
+function doSweep(s, h, p, a, giant, wave, rev, ox, oy, dmgMul, last, step = 0) {
   const m = G.mods; let R = p.range * AR(p), arc = p.omni ? TAU : p.arc;
   const x = ox != null ? ox : h.x, y = oy != null ? oy : h.y;
   let dmg = p.dmg * (dmgMul || 1);
@@ -6554,6 +6580,7 @@ function doSweep(s, h, p, a, giant, wave, rev, ox, oy, dmgMul, last) {
     const heavy = style === 'heavy', hold = contact ? heavy ? .075 : last ? .055 : .045 : 0;
     h.swingPose = { t: G.t, a, reach: Math.max(4, Math.hypot(x - h.x, y - h.y)), style, hold,
       frame: G.squad.moving ? h.frame : (G.t * 4 + h.idx * .5 | 0) % 2 };
+    if (h.art) meleeAfterimage(h, x + Math.cos(a) * 5, y + Math.sin(a) * 5, a, step, style, hold);
     fx({ k: 'meleeSlash', x, y, a, arc, r: R, dur: hold + (heavy ? .15 : .11), col: s.def.color || '#ffdc9c', rev, style, hold, staff: s.def.id === 'wk1' ? h : null });
     if (contact) {
       Snd.play(heavy ? 'meleeHeavy' : style === 'club' ? 'meleeClub' : 'meleePoint');
@@ -6588,16 +6615,18 @@ function strikeTargets(p, n, h) {
   for (let i = 0; i < n; i++) { const e = pool[i % pool.length]; res.push({ x: e.x + (i >= pool.length ? rr(-10, 10) : 0), y: e.y + (i >= pool.length ? rr(-10, 10) : 0), e }); }
   return res;
 }
-function fireStrike(s, h, p, entry) {
+function fireStrike(s, h, p, entry, caster = h) {
   const n = entry ? p.count : cnt(p);
   const tg = strikeTargets(p, n, h);
   const close = soloAimThreat(s, h.x, h.y, p.near || SEEK_R, p.aim);
   if (close) tg[0] = close;
   if (!tg.length) return false;
-  tg.forEach((t, i) => G.timers.push({ t: i * (p.stagger || .05), fn: () => strikeAt(s, t.x, t.y, p, entry, i === 0 ? close : null) }));
+  const attacker = p.vis === 'slash' && !p.windBlade && caster.art ? caster : null;
+  tg.forEach((t, i) => G.timers.push({ t: i * (p.stagger || .05), fn: () =>
+    strikeAt(s, t.x, t.y, p, i === 0 ? close : null, attacker, i) }));
   return true;
 }
-function strikeAt(s, x, y, p, entry, follow) {
+function strikeAt(s, x, y, p, follow, attacker, step) {
   const m = G.mods, r = p.r * AR(p), delay = p.delay || .3, vis = p.vis || 'bolt', src = s ? s.def.id : 'entry';
   const tags = s ? s.tags : (p.tags || (vis === 'bolt' ? ['thunder'] : vis === 'staff' ? ['blunt'] : []));
   const tele = vis !== 'slash' && fx({ k: 'tele', x, y, r, dur: delay, col: vis === 'bolt' ? '#ffe85a' : '#ff9a6a', follow });
@@ -6612,7 +6641,14 @@ function strikeAt(s, x, y, p, entry, follow) {
       if (p.randStatus) st = pick([{ burn: 2 }, { shock: 1 }, { mark: 1 }, { frz: 1 }]);
       let hadShock = false;
       query(x, y, r, e => { if (e.st.shockT > 0) hadShock = true; hurtEnemy(e, p.dmg, { tags, status: st, src, knock: p.knock ?? (vis === 'staff' ? 14 : 4), fx: x, fy: y, closeHit: vis === 'slash', strongPush: p.strongPush }); });
-      impactFx(x, y, r, vis);
+      let slashAngle;
+      if (attacker) {
+        const dx = x - attacker.x, dy = y - attacker.y;
+        const approach = Math.hypot(dx, dy) > 1 ? Math.atan2(dy, dx) : attacker.flip ? Math.PI : 0;
+        slashAngle = approach + (step % 2 ? .48 : -.4);
+        meleeAfterimage(attacker, x - Math.cos(slashAngle) * 8, y - Math.sin(slashAngle) * 8, slashAngle, step, 'cut', .04);
+      }
+      impactFx(x, y, r, vis, slashAngle, attacker ? step % 2 : 0);
       if (p.zone) addZone({ x, y, r: r * 1.05, dps: p.zone.dps, dur: p.zone.dur * m.dur, status: p.zone.status, vis: p.zone.vis, src, tags });
       if (p.sideWaves) [0, Math.PI].forEach(a => spawnProj({ x, y, a, speed: 160, dmg: p.dmg * .5, size: 6, life: .7, pierce: 99, sprite: 'staffwave', tags: ['blunt'], src }));
       if (p.double && hadShock) G.timers.push({ t: .12, fn: () => { skyBolt(x, y); query(x, y, r, e => hurtEnemy(e, p.dmg * .8, { tags, src })); } });
@@ -6622,7 +6658,7 @@ function strikeAt(s, x, y, p, entry, follow) {
     }
   });
 }
-function impactFx(x, y, r, vis) {
+function impactFx(x, y, r, vis, slashAngle, rev = 0) {
   switch (vis) {
     case 'bolt': skyBolt(x, y); Snd.play('thunder'); break;
     case 'meteor': case 'crow': explosion(x, y, r, '#ff8a3a', 'boom'); fireBurst(x, y, r); break;
@@ -6632,7 +6668,11 @@ function impactFx(x, y, r, vis) {
     case 'rainbow': explosion(x, y, r, pick(['#ff6a8a', '#ffd84a', '#6ac8ff', '#9be38b', '#c88aff']), 'small'); break;
     case 'spear': fx({ k: 'pillar', x, y, w: 6, dur: .3, col: '#e8ecf4' }); explosion(x, y, r, '#c8d8ff', 'small'); break;
     case 'moonstone': explosion(x, y, r, '#e8f0ff', 'small'); break;
-    case 'slash': fx({ k: 'slash', x, y, a: Math.random() * TAU, arc: 2.6, r: r * 1.2, dur: .18, col: '#e8ecf4' }); fx({ k: 'slash', x, y, a: Math.random() * TAU, arc: 2.2, r: r, dur: .18, col: '#ffffff', rev: 1 }); Snd.play('swing'); break;
+    case 'slash': {
+      fx({ k: 'slash', x, y, a: slashAngle ?? Math.random() * TAU, arc: 2.6, r: r * 1.2, dur: .18, col: '#e8ecf4', rev });
+      fx({ k: 'slash', x, y, a: slashAngle ?? Math.random() * TAU, arc: 2.2, r, dur: .18, col: '#ffffff', rev: rev ^ 1 });
+      Snd.play('swing'); break;
+    }
     case 'quake': fx({ k: 'ring', x, y, r0: 3, r1: r * 1.3, dur: .35, col: '#c8a070', w: 3 }); G.shake = Math.max(G.shake, .25); for (let i = 0; i < 10; i++) part(x, y, rr(-70, 70), rr(-40, 10), .4, pick(['#8a7a6a', '#c8b8a0']), 1, 60); Snd.play('smallBoom'); break;
     case 'star': explosion(x, y, r, '#c8d8ff', 'small'); break;
     case 'ice': explosion(x, y, r, '#a8e0ff', null); Snd.play('ice'); break;
@@ -7167,7 +7207,7 @@ function fireEntry(h, showScene = true) {
   addLabel(sq.x, sq.y - 30, e.name, '#ffd84a', 18);
   switch (e.kind) {
     case 'nova': fireNova(null, sq.x, sq.y, Object.assign(p, { always: 1 }), 'entry', p.tags || []); break;
-    case 'strike': fireStrike(null, sq, p, true); break;
+    case 'strike': fireStrike(null, sq, p, true, h); break;
     case 'beam': fireBeam(null, sq, p, true); break;
     case 'storm': {
       const n = Math.round(p.dur / p.every);
@@ -7524,14 +7564,15 @@ function director(dt) {
 
 /* ---------- 拾取 ---------- */
 function updatePickups(dt) {
-  const sq = G.squad, m = G.mods, mr = m.magnet;
+  const sq = G.squad, magnet = G.mods.magnet;
   const hs = G.heroes.length ? G.heroes : [sq];
   for (const p of G.pickups) {
     p.t += dt;
     let tg = hs[0], bd = 1e12;
     for (const h of hs) { const dd = d2(p.x, p.y, h.x, h.y); if (dd < bd) { bd = dd; tg = h; } }
     const d = Math.sqrt(bd);
-    if (!p.fly && d < mr) { p.fly = true; if (p.kind !== 'gem') p.t = 0; } // 拾取范围对所有物品生效
+    const range = p.kind === 'gem' ? magnet * .25 : magnet;
+    if (!p.fly && d < range) { p.fly = true; if (p.kind !== 'gem') p.t = 0; }
     if (p.fly) {
       const sp = Math.min(380, 60 + p.t * 40 + (G.vacuum ? 260 : 0)), a = Math.atan2(tg.y - p.y, tg.x - p.x);
       p.x += Math.cos(a) * sp * dt; p.y += Math.sin(a) * sp * dt;
@@ -10910,9 +10951,44 @@ function drawIceCargo(wx, wy) {
   R2(x - 3, y - 1, 6, 2, '#9fe8ff'); R2(x - 2, y - 3, 4, 5, '#9fe8ff');
   R2(x - 2, y - 2, 2, 2, '#f1ffff');
 }
+function drawMeleeAfterimage(f) {
+  const art = heroAttackArt(f.def), pose = f.stance;
+  const fade = clamp((f.t - f.hold) / (f.dur - f.hold), 0, 1);
+  const side = f.flip ? -1 : 1;
+  const blade = f.a + (f.style === 'point' ? pose.blade * .24 : pose.blade);
+  const shoulderX = side * 4, shoulderY = -10;
+  const handX = Math.round(shoulderX + Math.cos(blade) * pose.reach);
+  const handY = Math.round(shoulderY + Math.sin(blade) * pose.reach);
+  const steps = Math.max(Math.abs(handX - shoulderX), Math.abs(handY - shoulderY), 1);
+  const drift = fade * 3;
+  const body = art.body[f.frame];
+  bx.save();
+  bx.translate(X(f.x + Math.cos(f.a) * drift), Y(f.y + 3 + Math.sin(f.a) * drift));
+  bx.globalAlpha = .8 * (1 - fade) ** 1.4;
+  bx.rotate(side * pose.lean);
+  bx.save();
+  bx.scale(side, 1);
+  bx.drawImage(body, -Math.round(body.width / 2), -body.height);
+  bx.restore();
+  bx.save();
+  bx.translate(handX, handY);
+  bx.rotate(blade + Math.PI / 2);
+  bx.drawImage(art.weapon, -16, -14);
+  bx.restore();
+  bx.fillStyle = f.def.look.arm || f.def.look.body;
+  for (let i = 0; i < steps; i++) {
+    const x = Math.round(lerp(shoulderX, handX, i / steps));
+    const y = Math.round(lerp(shoulderY, handY, i / steps));
+    bx.fillRect(x - 1, y - 1, 2, 2);
+  }
+  bx.fillStyle = f.def.look.skin || '#f1c9a0';
+  bx.fillRect(handX - 1, handY - 1, 2, 2);
+  bx.restore();
+}
 function drawFx(f) {
   const k = f.t / f.dur, a = 1 - k;
   switch (f.k) {
+    case 'meleeAfterimage': drawMeleeAfterimage(f); break;
     case 'meleeSlash': {
       const progress = clamp((f.t - f.hold) / (f.dur - f.hold), 0, 1);
       const fade = 1 - progress;
