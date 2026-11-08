@@ -58,7 +58,7 @@ button:focus-visible{outline:2px solid var(--gold2);outline-offset:3px}
 #party{display:flex;gap:6px}
 #nextT{position:fixed;left:50%;top:max(calc(var(--safe-top) + 150px),calc(var(--field-top,0px) + 12px));transform:translateX(-50%);z-index:6;display:grid;justify-items:center;gap:0;pointer-events:none;text-align:center;line-height:1;animation:ntIn .3s ease-out}
 #nextT span{font-size:19px;font-weight:700;color:var(--ink);-webkit-text-stroke:3px #000;paint-order:stroke fill;transition:opacity .25s}
-#nextT b{display:block;line-height:1;margin-top:2px;font-family:var(--pix);font-size:34px;color:var(--gold);-webkit-text-stroke:4px #000;paint-order:stroke fill;font-variant-numeric:tabular-nums;transition:transform .6s cubic-bezier(.5,0,.75,0)}
+#nextT b{display:block;line-height:1;margin-top:2px;font-family:var(--body);font-weight:900;font-size:34px;color:var(--gold);-webkit-text-stroke:4px #000;paint-order:stroke fill;font-variant-numeric:tabular-nums;transition:transform .6s cubic-bezier(.5,0,.75,0)}
 #nextT.fin{animation:ntZoom .35s cubic-bezier(.3,1.6,.5,1)}#nextT.fin b{font-size:48px}
 @keyframes ntZoom{from{opacity:0;transform:translateX(-50%) scale(.3)}}
 @keyframes ntIn{from{opacity:0;transform:translate(-50%,-8px)}}
@@ -378,7 +378,7 @@ html.tap-ios-safe #hud #bPause{position:fixed;top:calc(var(--safe-top) + 58px);r
 .tped{position:absolute;left:50%;bottom:-6px;width:250px;height:34px;transform:translateX(-50%);background:radial-gradient(ellipse at center,rgba(242,193,78,.45),rgba(242,193,78,.12) 55%,transparent 72%)}
 #rec{font-size:11px;color:var(--muted);margin-top:4px}
 .tbot{width:100%;display:grid;justify-items:center;gap:12px;padding-bottom:4px}
-#intro{position:fixed;inset:0;z-index:200;background:#000;display:flex;align-items:center;justify-content:center}#intro .istage{position:relative;width:min(100vw,56.25vh);width:min(100vw,56.25dvh);aspect-ratio:9/16}#intro canvas{display:block;width:100%;height:100%;image-rendering:pixelated}#intro .inames span{position:absolute;transform:translateX(-50%);font-size:12px;color:#ffe9a0;text-shadow:0 1px 0 #000,0 0 4px #000;opacity:0;transition:opacity .4s;white-space:nowrap}#intro .ibig{position:absolute;left:0;right:0;text-align:center;font-size:26px;letter-spacing:.2em;color:#ffe9a0;text-shadow:0 2px 0 #3a1a06,0 0 8px #000;opacity:0;transition:opacity .25s}#intro .itap{position:absolute;left:0;right:0;bottom:calc(var(--safe-bottom) + 12%);text-align:center;color:#a8a0b8;font-size:13px;letter-spacing:.15em;animation:itap 1.6s ease-in-out infinite}@keyframes itap{50%{opacity:.35}}#intro .icap{white-space:pre-line;position:absolute;left:16px;right:16px;top:50%;transform:translateY(-50%);text-align:center;color:#fff4d8;font-size:22px;font-weight:900;line-height:1.4;letter-spacing:.08em;opacity:0;transition:opacity .4s;-webkit-text-stroke:5px #1a0e06;paint-order:stroke fill;text-shadow:0 3px 0 #000}
+#intro{position:fixed;inset:0;z-index:200;background:#000;display:flex;align-items:center;justify-content:center}#intro .istage{position:relative;width:min(100vw,56.25vh);width:min(100vw,56.25dvh);aspect-ratio:9/16}#intro canvas{display:block;width:100%;height:100%;image-rendering:pixelated}#intro .inames span{position:absolute;transform:translateX(-50%);font-size:12px;color:#ffe9a0;text-shadow:0 1px 0 #000,0 0 4px #000;opacity:0;transition:opacity .4s;white-space:nowrap}#intro .ibig{position:absolute;left:0;right:0;text-align:center;font-size:26px;letter-spacing:.2em;color:#ffe9a0;text-shadow:0 2px 0 #3a1a06,0 0 8px #000;opacity:0;transition:opacity .25s}#intro .itap{position:absolute;inset:0;display:grid;place-items:center;padding-inline:20px;text-align:center;color:#fff4d8;font-size:clamp(24px,7vw,44px);font-weight:900;letter-spacing:.08em;animation:itap 1.6s ease-in-out infinite;pointer-events:none}@keyframes itap{50%{opacity:.75}}#intro .icap{white-space:pre-line;position:absolute;left:16px;right:16px;top:50%;transform:translateY(-50%);text-align:center;color:#fff4d8;font-size:22px;font-weight:900;line-height:1.4;letter-spacing:.08em;opacity:0;transition:opacity .4s;-webkit-text-stroke:5px #1a0e06;paint-order:stroke fill;text-shadow:0 3px 0 #000}
 #title.fresh{justify-content:center}#title.fresh .tmain{flex:0 0 auto}#title.fresh #tshow,#title.fresh #rec{display:none}#title.fresh .tbot{margin-top:40px}
 .btn.bigstart{width:min(320px,84vw);padding:16px 0;font-size:20px}
 #ascRow{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:6px 10px;max-width:320px}
@@ -401,8 +401,8 @@ html.tap-ios-safe #hud #bPause{position:fixed;top:calc(var(--safe-top) + 58px);r
 .rrew{display:flex;justify-content:center;align-items:baseline;gap:10px;padding:8px;background:linear-gradient(90deg,transparent,rgba(242,193,78,.16),transparent)}
 .rrew small{font-size:11px;color:#ff9a7a}.rrew small:empty{display:none}
 .rrew span{font-size:12px;color:var(--gold2);letter-spacing:.2em}
-.rrew b{font-family:var(--pix);font-size:28px;color:var(--gold);-webkit-text-stroke:3px #000;paint-order:stroke fill}
-.rrew b::before{content:"✦ +";font-size:18px}
+#rcoin{font-family:system-ui,sans-serif;font-weight:800;font-variant-numeric:tabular-nums;font-size:32px;color:var(--gold);text-shadow:0 2px 2px #000}
+#rcoin::before{content:"✦ +";font-size:18px}
 #rstat{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 #rstat div{background:#120d1e;border:1px solid #2e2540;border-radius:6px;padding:7px 4px;text-align:center;font-size:11px;color:var(--muted);min-width:0}
 #rstat b{display:block;font-family:var(--pix);font-size:17px;color:var(--ink);margin-bottom:2px}
@@ -3482,7 +3482,7 @@ function bondTick(dt) {
     c.cdT = c.type === 'trio' ? 15 : c.cd;
     switch (c.type) {
       case 'volley': { for (const id of [c.a, c.b]) { const s = skillOfHero(id); if (s) { const h = heroPos(s); castAt(s, h.x, h.y, 1.6); } } comboFlash(c, sq.x, sq.y); break; }
-      case 'rain': { const st = heroStatus(c.b), vis = st.burn ? 'fire' : st.shock ? 'bolt' : st.frz ? 'ice' : 'star'; fireStrike(null, sq, { dmg: 16 * sc, count: 8, r: 14, aim: 'dense', delay: .35, stagger: .06, vis, status: st, tags: [] }, true); comboFlash(c, sq.x, sq.y); break; }
+      case 'rain': { const st = heroStatus(c.b), vis = st.burn ? 'fire' : st.shock ? 'bolt' : st.frz ? 'ice' : 'star'; fireStrike(null, sq, { dmg: 16 * sc, count: 8, r: 14, aim: 'dense', delay: .35, stagger: .06, vis, status: st, tags: [], src: 'bond' }, true); comboFlash(c, sq.x, sq.y); break; }
       case 'resonance': { const st = Object.assign({}, heroStatus(c.a), heroStatus(c.b)); fireRing({ def: { id: 'bond', color: '#ff9ab0' }, tags: [] }, sq, { dmg: 14 * sc ** .8, r: 90, dur: .6, knock: 14, status: st, col: '#ff9ab0', aoe: 1 }); comboFlash(c, sq.x, sq.y); break; }
       case 'shield': { const v = sq.maxHp * .15; if (sq.shield < v) { sq.shield = v; c.armed = true; Snd.play('shield'); comboFlash(c, sq.x, sq.y); } break; }
       case 'vortex': { const pt = densePoints(1)[0]; if (pt) { addZone({ x: pt.x, y: pt.y, r: 34, dps: 4, dur: 2, pull: 60, vis: 'wind', src: 'bond', tags: [], endBurst: 30 * sc ** .8 }); comboFlash(c, pt.x, pt.y); } break; }
@@ -3592,7 +3592,7 @@ function taDo(c, x, y) {
     case 'swift': G.taSwift = G.t + 4; recomputeMods(); G.timers.push({ t: 4.05, fn: () => recomputeMods() }); addLabel(sq.x, sq.y - 30, '疾行', '#a8fcd4', 12, .8); break;
     case 'peach': dropPickup('peach', x + rr(-20, 20), y + rr(-16, 16)); break;
     case 'meteor': { const p = densePoints(1)[0]; if (p) { fx({ k: 'teleC', x: p.x, y: p.y, r: 26, dur: .9, col: '#ff5a3a' }); fx({ k: 'metfall', x: p.x, y: p.y, r: 26, dur: .9, dir: 1 }); G.timers.push({ t: .9, fn: () => { explosion(p.x, p.y, 28, '#ff8a3a', 'boom'); query(p.x, p.y, 28, e => hurtEnemy(e, 45 * sc, { tags: ['fire'], status: { burn: 2 }, src: 'bond', knock: 30, fx: p.x, fy: p.y })); } }); } break; }
-    case 'beams': fireBeam(null, Object.assign({}, sq, { x, y }), { dmg: 26 * sc, len: 160, w: 6, count: 4, spread: Math.PI / 2, aim: 'cross', vis: 'bigSlash', color: col }, true); break;
+    case 'beams': fireBeam(null, Object.assign({}, sq, { x, y }), { dmg: 26 * sc, len: 160, w: 6, count: 4, spread: Math.PI / 2, aim: 'cross', vis: 'bigSlash', color: col, src: 'bond' }, true); break;
     case 'quake': addZone({ x, y, r: 34, dps: 6 * sc, dur: 2.5, status: { slow: .6 }, vis: 'quake', src: 'bond', tags: ['blunt'] }); G.shake = Math.max(G.shake, .3); break;
     case 'gems': for (let i = 0; i < 6; i++) dropGem(x + rr(-20, 20), y + rr(-16, 16), 1); break;
   }
@@ -3928,9 +3928,10 @@ function tickUlt(s, h, p, dt) {
   G.timers.push({ t: .45, fn: () => { if (!G.skills.includes(s)) return; G.flash = .45; G.flashCol = s.def.color; G.shake = Math.max(G.shake, .55); ultFire(s, en, q, sq); } });
 }
 function ultFire(s, en, q, sq) {
+  q.src = s.def.id;
   switch (en.kind) {
-    case 'nova': fireNova(null, sq.x, sq.y, Object.assign(q, { always: 1 }), s.def.id, q.tags || []); break;
-    case 'strike': fireStrike(null, sq, Object.assign(q, { src: s.def.id }), true); break;
+    case 'nova': fireNova(null, sq.x, sq.y, Object.assign(q, { always: 1 }), q.src, q.tags || []); break;
+    case 'strike': fireStrike(null, sq, q, true); break;
     case 'beam': fireBeam(null, sq, q, true); break;
     case 'storm': { const n = Math.round(q.dur / q.every); for (let i = 0; i < n; i++) G.timers.push({ t: i * q.every, fn: () => { const v = visibleEnemies(-4), t = v.length ? pick(v) : null; if (!t) return; skyBolt(t.x, t.y); query(t.x, t.y, q.r, o => hurtEnemy(o, q.dmg, { tags: ['thunder'], status: q.status, src: s.def.id })); } }); Snd.play('thunder'); break; }
     case 'flash': fx({ k: 'flashwave', x: sq.x, y: sq.y, dur: .5, col: s.def.color || '#ffffff' }); visibleEnemies(10).forEach((o, i) => { hurtEnemy(o, q.dmg, { status: q.status, src: s.def.id }); if (i < 30) fx({ k: 'hitspark', x: o.x, y: o.y - o.r * .5, a: Math.atan2(o.y - sq.y, o.x - sq.x), dur: .2, col: s.def.color || '#ffffff', s: 1.2 }); }); break;
@@ -5308,6 +5309,7 @@ function motifImg(key, col) {
 }
 // 绘制一个图标：位置为世界坐标，sc 缩放，rot 旋转，al 透明度
 function drawMotif(key, col, wx, wy, sc, rot, al) {
+  if (G && G.t < G.entrySceneUntil) return;
   const img = motifImg(key, col); if (al != null) bx.globalAlpha = al;
   bx.save(); bx.translate(X(wx), Y(wy)); if (rot) bx.rotate(rot); const s = sc || 1; bx.drawImage(img, -img.width * s / 2 | 0, -img.height * s / 2 | 0, img.width * s | 0, img.height * s | 0); bx.restore();
   if (al != null) bx.globalAlpha = 1;
@@ -5318,11 +5320,12 @@ const MOTIF_MAP = {"ganesha1": "rock", "kuafu1": "star", "niumowang2": "sand", "
 
 /* ================= 世界状态与核心规则 ================= */
 const RUN_BOSS_T = 300, BOSS_TIMES = [120, 240, RUN_BOSS_T], ENDLESS_BOSS_INTERVAL = 60, SUMMON_TIMES = [90, 180], BASE_HP = 120, HERO_SPEED = 54 * 1.2, ENEMY_SPEED_SCALE = 1.15;
+const SUMMON_NOTICE_SECONDS = 5;
 let G = null;
 
 function MODS0() {
   return {
-    dmgAdd: 0, cd: 1, area: 1, pspeed: 1, count: 0, dur: 1, speedAdd: 0, maxHp: 0, regen: 0, armor: 0, magnet: 20, xp: 1, baseRegen: .25,
+    dmgAdd: 0, cd: 1, area: 1, pspeed: 1, count: 0, dur: 1, speedAdd: 0, maxHp: 0, regen: 0, armor: 0, magnet: 30, xp: 1, baseRegen: .25,
     crit: .05, critDmg: 1, burnDmg: 1, burnMax: 3, burnMaxAdd: 0, shockAmp: .3, shockDur: 1, markDur: 0, markDmg: 0, frzDur: 1, knock: 1,
     thunderDmg: 0, pierceDmg: 0, bluntDmg: 0, bossDmg: 0, slowDmg: 0, slowChance: 0, burnVuln: 0, lowHpDmg: 0, execute: 0, executeHeal: 0,
     fireDmg: 0, summonDmg: 0, dodge: 0, moveDmg: 0, stillDmg: 0, thorns: 0, critHeal: 0, orbitDmg: 0, orbitSpd: 0, fullHpDmg: 0, killHeal: 0, lastStand: 0, summonCount: 0, lvReroll: 0,
@@ -6209,8 +6212,8 @@ function dropEnemyXp(e, value, baseChance) {
   const chance = Math.min(1, baseChance * chanceScale * normalModeScale);
   if (value > 0 && (e.elite || Math.random() < chance)) dropGem(e.x, e.y, value);
 }
-function dropGem(x, y, v) {
-  if (G.pickups.length > 380) { // 合并到最近的宝石，避免满地都是
+function dropGem(x, y, v, separate = false) {
+  if (!separate && G.pickups.length > 380) { // 合并到最近的宝石，避免满地都是
     let best = null, bd = 1e9; for (const p of G.pickups) if (p.kind === 'gem' && !p.fly) { const d = d2(x, y, p.x, p.y); if (d < bd) { bd = d; best = p; } }
     if (best) { best.v += v; best.tier = gemTier(best.v); return; }
   }
@@ -6567,7 +6570,15 @@ function fireSweep(s, h, p) {
   if (p.frenzy && s.st.fz && G.t < (s.st.fzT || 0)) s.cdT = Math.max(0, s.cdT) * (1 - s.st.fz * .08); else if (p.frenzy) { s.st.fz = 0; s.st.fzShown = 0; }
   const windBall = G.ebullets.find(b => b.wind && !b.friendly && !b.dead &&
     d2(b.x, b.y, h.x, h.y) <= (R * .85) ** 2 && (h.x - b.x) * b.vx + (h.y - b.y) * b.vy > 0);
-  const t = windBall || nearestEnemy(h.x, h.y, R * 2.4);
+  let t = windBall || nearestEnemy(h.x, h.y, R * 2.4);
+  if (!t && s.def.id === 'wk1') {
+    let best = Infinity;
+    query(h.x, h.y, R, e => {
+      if (!e.obs) return;
+      const dist = d2(h.x, h.y, e.x, e.y);
+      if (dist < best) { best = dist; t = e; }
+    });
+  }
   if (!t) return false;
   const a = Math.atan2(t.y - h.y, t.x - h.x), dist = Math.sqrt(d2(h.x, h.y, t.x, t.y));
   // 目标稍远时向前突进一步再挥砍
@@ -6594,6 +6605,7 @@ function doSweep(s, h, p, a, giant, wave, rev, ox, oy, dmgMul, last, step = 0) {
   query(x, y, R, e => {
     if (arc < TAU - .01 && Math.abs(angDiff(Math.atan2(e.y - y, e.x - x), a)) > arc / 2 + .2) return;
     if (e.dead) return;
+    if (e.obs && h && s.def.id === 'wk1') { e.hp = 0; killEnemy(e, { src: s.def.id }); return; }
     const shield = e.shield;
     const dealt = hurtEnemy(e, dmg, { tags: s.tags, status: p.status, knock: p.knock, fx: x, fy: y, src: s.def.id, markBonus: p.markBonus, minion: !h, melee: style, closeHit: true, pushAngle: a });
     if (!contact && !e.obs && !e.civ && (dealt > 0 || e.shield < shield)) contact = e;
@@ -6657,7 +6669,7 @@ function fireStrike(s, h, p, entry, caster = h) {
   return true;
 }
 function strikeAt(s, x, y, p, follow, attacker, step) {
-  const m = G.mods, r = p.r * AR(p), delay = p.delay || .3, vis = p.vis || 'bolt', src = s ? s.def.id : 'entry';
+  const m = G.mods, r = p.r * AR(p), delay = p.delay || .3, vis = p.vis || 'bolt', src = s?.def.id || p.src || 'other';
   const tags = s ? s.tags : (p.tags || (vis === 'bolt' ? ['thunder'] : vis === 'staff' ? ['blunt'] : []));
   const tele = vis !== 'slash' && fx({ k: 'tele', x, y, r, dur: delay, col: vis === 'bolt' ? '#ffe85a' : '#ff9a6a', follow });
   if (vis !== 'bolt' && vis !== 'slash') fx({ k: 'fall', x, y, dur: delay, vis, r, mo: s && s.def.mo, col: s && s.def.color, follow });
@@ -6744,7 +6756,7 @@ function fireNova(s, x, y, p, src, tags) {
   if (s && !p.always) { let any = false; query(x, y, r, () => { any = true; return false; }); if (!any && !p.heal && !p.shield) return false; }
   const doRing = (rr2, k) => {
     query(x, y, rr2, e => {
-      hurtEnemy(e, p.dmg * (k ? .7 : 1), { tags: tags || p.tags || [], status: p.status, knock: p.knock, fx: x, fy: y, src: src || 'entry', closeHit: !!s?.def.hero, strongPush: p.strongPush });
+      hurtEnemy(e, p.dmg * (k ? .7 : 1), { tags: tags || p.tags || [], status: p.status, knock: p.knock, fx: x, fy: y, src: src || p.src || 'other', closeHit: !!s?.def.hero, strongPush: p.strongPush });
       if (p.execute && !e.dead && !e.elite && !e.boss && e.hp < e.maxHp * p.execute) { addLabel(e.x, e.y - 8, '审判', '#8affc8'); e.hp = 0; killEnemy(e, { execute: true }); }
     });
     novaVis(x, y, rr2, p);
@@ -6783,7 +6795,7 @@ function fireBeam(s, h, p, entry) {
   const n = entry ? p.count : cnt(p), dirs = [];
   if (p.omni || p.aim === 'cross') for (let i = 0; i < n; i++) dirs.push(base + i / n * (p.aim === 'cross' ? Math.PI : TAU) + (p.omni ? (s.st.rot = (s.st.rot || 0) + .4) : 0));
   else for (let i = 0; i < n; i++) dirs.push(base + (i - (n - 1) / 2) * (p.spread || .3));
-  const src = s ? s.def.id : 'entry', tags = s ? s.tags : ['pierce'];
+  const src = s?.def.id || p.src || 'other', tags = s ? s.tags : ['pierce'];
   for (const a of dirs) {
     if (p.sweep) {
       const hit = new Set();
@@ -7229,56 +7241,60 @@ function tickRabbit(mn, s, p, dt) {
     query(mn.x, mn.y, R, e => hurtEnemy(e, mn.dmg, { tags: ['blunt'], src: s.def.id, knock: 8, fx: mn.x, fy: mn.y, minion: 1, closeHit: true }));
     fx({ k: 'ring', x: mn.x, y: mn.y, r0: 3, r1: R, dur: .3, col: '#e8f0ff', w: 2 });
     healSquad(p.heal);
-    if (p.extra) fireStrike(null, mn, { count: p.extra, aim: 'near', near: 110, r: 12, dmg: mn.dmg * 1.2, delay: .4, vis: 'moonstone', tags: ['blunt'], status: { slow: .4 } }, true);
+    if (p.extra) fireStrike(null, mn, { count: p.extra, aim: 'near', near: 110, r: 12, dmg: mn.dmg * 1.2, delay: .4, vis: 'moonstone', tags: ['blunt'], status: { slow: .4 }, src: s.def.id }, true);
     mn.lunge = .2; Snd.play('smallBoom');
   }
 }
 
 /* ---------- 登场技 ---------- */
 const ENTRY_VISUAL = {
-  wukong: ['spin', 'staff', '#ffd84a'], nezha: ['spin', 'chakram', '#ff7842'],
-  zeus: ['storm', 'bolt', '#ffe77a'], thor: ['storm', 'hammer', '#c4e6ff'],
-  houyi: ['fall', 'sun', '#ffad54'], change: ['drift', 'moon', '#b9eaff'],
-  athena: ['seal', 'shield', '#c8e8ff'], lijing: ['seal', 'pagoda', '#f6cc70'],
-  erlang: ['slash', 'halberd', '#a0f8ff'], pangu: ['slash', 'axe', '#ffc381'],
-  nuwa: ['fall', 'gem', '#efb6ff'], poseidon: ['tide', 'trident', '#6ac8ff'],
-  bajie: ['tide', 'wave', '#91e1ff'], shaseng: ['tide', 'sand', '#edc383'],
-  yushi: ['fall', 'drop', '#76cfff'], aoguang: ['storm', 'serpent', '#7bdcff'],
-  tangseng: ['seal', 'bell', '#ffe4a5'], guanyin: ['seal', 'lotus', '#b9f2ce'],
-  goumang: ['seal', 'leaf', '#9deeb3'], houtu: ['quake', 'rock', '#ddaf7e'],
-  fuxi: ['seal', 'rune', '#b8f0d4'], amaterasu: ['seal', 'sun', '#ffc973'],
-  jiangziya: ['seal', null, '#ffe4a5'],
-  ra: ['seal', 'sun', '#ff9e55'], hel: ['drift', 'ghost', '#b3bbfa'],
-  anubis: ['seal', 'ankh', '#8df3be'], hades: ['seal', 'skull', '#b78ae9'],
-  jiuweihu: ['drift', 'fox', '#ffadd4'], taiyi: ['fall', 'star', '#ffe783'],
-  gilgamesh: ['fall', 'sword', '#ffce60'], inari: ['seal', 'fox', '#ff9d6d'],
-  hercules: ['quake', 'rock', '#f0bd83'], odin: ['fall', 'spear', '#dcc3ff'],
-  zhongkui: ['fall', 'rune', '#ffbb67'], xihe: ['fall', 'sun', '#ffb04f'],
-  skadi: ['drift', 'snow', '#d1f3ff'], tsukuyomi: ['drift', 'moon', '#b5a7f4'],
-  isis: ['drift', 'feather', '#ffd9a3'], garuda: ['spin', 'feather', '#ffe281'],
-  osiris: ['tide', 'ankh', '#93cebb'], gonggong: ['quake', 'wave', '#84b9e6'],
-  apollo: ['fall', 'sun', '#ffd777'], artemis: ['fall', 'arrow', '#badcff'],
-  indra: ['storm', 'vajra', '#e8d6ff'], leigong: ['storm', 'drum', '#ffd494'],
+  wukong: ['spin', '#ffd84a'], nezha: ['spin', '#ff7842'],
+  zeus: ['storm', '#ffe77a'], thor: ['storm', '#c4e6ff'],
+  houyi: ['fall', '#ffad54'], change: ['drift', '#b9eaff'],
+  athena: ['seal', '#c8e8ff'], lijing: ['seal', '#f6cc70'],
+  erlang: ['slash', '#a0f8ff'], pangu: ['slash', '#ffc381'],
+  nuwa: ['fall', '#efb6ff'], poseidon: ['tide', '#6ac8ff'],
+  bajie: ['tide', '#91e1ff'], shaseng: ['tide', '#edc383'],
+  yushi: ['fall', '#76cfff'], aoguang: ['storm', '#7bdcff'],
+  tangseng: ['seal', '#ffe4a5'], guanyin: ['seal', '#b9f2ce'],
+  goumang: ['seal', '#9deeb3'], houtu: ['quake', '#ddaf7e'],
+  fuxi: ['seal', '#b8f0d4'], amaterasu: ['seal', '#ffc973'],
+  jiangziya: ['seal', '#ffe4a5'],
+  ra: ['seal', '#ff9e55'], hel: ['drift', '#b3bbfa'],
+  anubis: ['seal', '#8df3be'], hades: ['seal', '#b78ae9'],
+  jiuweihu: ['drift', '#ffadd4'], taiyi: ['fall', '#ffe783'],
+  gilgamesh: ['fall', '#ffce60'], inari: ['seal', '#ff9d6d'],
+  hercules: ['quake', '#f0bd83'], odin: ['fall', '#dcc3ff'],
+  zhongkui: ['fall', '#ffbb67'], xihe: ['fall', '#ffb04f'],
+  skadi: ['drift', '#d1f3ff'], tsukuyomi: ['drift', '#b5a7f4'],
+  isis: ['drift', '#ffd9a3'], garuda: ['spin', '#ffe281'],
+  osiris: ['tide', '#93cebb'], gonggong: ['quake', '#84b9e6'],
+  apollo: ['fall', '#ffd777'], artemis: ['fall', '#badcff'],
+  indra: ['storm', '#e8d6ff'], leigong: ['storm', '#ffd494'],
 };
 const ENTRY_KIND_VISUAL = { storm: 'storm', strike: 'fall', beam: 'slash', nova: 'seal', flash: 'seal' };
 const ENTRY_PROP_VISUAL = { tsunami: 'tide', quake: 'quake', staffSpin: 'spin', greenSlash: 'slash', hammerFall: 'storm', fireNova: 'spin' };
 function entryScene(def) {
   const { p, kind } = def.entry, st = p.status || {};
-  const [style, motif, color] = ENTRY_VISUAL[def.id] || [];
+  const [style, color] = ENTRY_VISUAL[def.id] || [];
   const mode = style || ENTRY_PROP_VISUAL[p.vis] || (kind === 'flash' && (st.charm || def.el === 'ice') ? 'drift' : ENTRY_KIND_VISUAL[kind]) || 'seal';
-  const mo = motif && MOTIF_ROWS[motif] ? motif : null;
   const col = color || p.color || EL[def.el]?.c || def.look.trim || '#ffd84a';
   const seed = hsh(def.id);
   return {
-    k: 'entryScene', dur: mode === 'storm' ? 1.05 : .9, mode, mo, col, def, seed,
-    marks: Array.from({ length: 12 }, (_, i) => [hsh('x' + i + ':' + def.id), hsh('y' + i + ':' + def.id)]),
+    k: 'entryScene', dur: mode === 'storm' ? 1.05 : .9, mode, col, def, seed,
+    marks: mode === 'storm' ? Array.from({ length: 12 }, (_, i) => [hsh('x' + i + ':' + def.id), hsh('y' + i + ':' + def.id)]) : null,
   };
 }
 function fireEntry(h, showScene = true) {
   const e = h.def.entry, p = JSON.parse(JSON.stringify(e.p)), sq = G.squad;
+  p.src = 'entry';
   p.strongPush = KNOCK_TEXT.test(e.desc || '');
   G.entryEl = h.def.el || null; G.entryTr = h.def.entry.tr || null;
-  if (showScene) fx(entryScene(h.def));
+  if (showScene) {
+    const scene = entryScene(h.def);
+    G.entrySceneUntil = G.t + scene.dur;
+    fx(scene);
+  }
   G.shake = Math.max(G.shake, .32);
   // 神威：登场时先对整屏的敌人造成足以消灭大多数小怪的伤害（随时间成长）
   const hpS = 1 + G.t / 75, wave = 24 * hpS;
@@ -7664,7 +7680,7 @@ function updatePickups(dt) {
     let tg = hs[0], bd = 1e12;
     for (const h of hs) { const dd = d2(p.x, p.y, h.x, h.y); if (dd < bd) { bd = dd; tg = h; } }
     const d = Math.sqrt(bd);
-    if (!p.fly && d < magnet) { p.fly = true; if (p.kind !== 'gem') p.t = 0; }
+    if (!p.fly && d <= magnet) { p.fly = true; if (p.kind !== 'gem') p.t = 0; }
     if (p.fly) {
       const sp = Math.min(380, 60 + p.t * 40 + (G.vacuum ? 260 : 0)), a = Math.atan2(tg.y - p.y, tg.x - p.x);
       p.x += Math.cos(a) * sp * dt; p.y += Math.sin(a) * sp * dt;
@@ -9894,6 +9910,22 @@ function spawnCivs(x, y, n) {
 }
 // 市民：怪物靠近时惊慌逃跑，平时到处乱走
 function civTick(e, dt) {
+  if (!e.escapeDir && onScreen(e)) {
+    e.visibleT = (e.visibleT || 0) + dt;
+    if (e.visibleT >= 10 - 1e-6) {
+      dropGem(e.x, e.y, 1, true);
+      const dx = e.x - G.cam.x, dy = e.y - G.cam.y;
+      e.escapeDir = VW / 2 - Math.abs(dx) <= VH / 2 - Math.abs(dy)
+        ? { x: Math.sign(dx) || 1, y: 0 } : { x: 0, y: Math.sign(dy) || 1 };
+      e.kx = e.ky = 0;
+    }
+  }
+  if (e.escapeDir) {
+    e.x += e.escapeDir.x * 210 * dt; e.y += e.escapeDir.y * 210 * dt;
+    e.panic = 1; e.flip = e.escapeDir.x < 0;
+    if (!onScreen(e, 16)) { e.dead = true; G.civN--; inc('civGone'); }
+    return;
+  }
   if (e.kx || e.ky) { e.x += e.kx * dt; e.y += e.ky * dt; const f = Math.pow(.002, dt); e.kx *= f; e.ky *= f; if (Math.abs(e.kx) < 1 && Math.abs(e.ky) < 1) e.kx = e.ky = 0; }
   let th = null, bd = 60 * 60;
   for (const o of G.enemies) { if (o.dead || o.obs || o.civ || o.charmT > 0) continue; const d = d2(o.x, o.y, e.x, e.y); if (d < bd) { bd = d; th = o; } }
@@ -9929,7 +9961,7 @@ function civDeath(e, o) {
   if (o && !['eaten', 'enemy', 'weather', 'terrain', 'bomb'].includes(o.src)) { inc('civK'); addLabel(e.x, e.y - 10, '误伤！', '#ffb03a', 12, .8); }
 }
 function drawCiv(e, T) {
-  const x = X(e.x), y = Y(e.y), run = (e.ft * (e.panic > 0 ? 14 : 8) | 0) % 2;
+  const x = X(e.x), y = Y(e.y), run = (e.ft * (e.escapeDir ? 24 : e.panic > 0 ? 14 : 8) | 0) % 2;
   bx.fillStyle = 'rgba(10,6,18,.35)'; bx.fillRect(x - 2, y, 5, 1);
   const fl = e.flash > 0;
   bx.fillStyle = fl ? '#ffffff' : '#2a2a30'; bx.fillRect(x - 2 + run, y - 2, 1, 2); bx.fillRect(x + 1 - run, y - 2, 1, 2);
@@ -10389,7 +10421,7 @@ function trEnemyTick(e, dt) {
       const t = sd.kind === 'ult' ? ENTRY_TRAIT[h.id] : TRAIT_MAP[sd.id];
       if (!t || !TRAITS[t]) continue;
       TR[sd.id] = t; sd.tr = t;
-      if (sd.lv && sd.lv[0] && !sd.lv[0][0].includes(TRAITS[t])) sd.lv[0][0] += '；' + TRAITS[t];
+      if (!(sd.id === 'wk1' && t === 'soul') && sd.lv && sd.lv[0] && !sd.lv[0][0].includes(TRAITS[t])) sd.lv[0][0] += '；' + TRAITS[t];
     }
     const et = ENTRY_TRAIT[h.id];
     if (et && TRAITS[et]) { h.entry.tr = et; if (h.entry.desc && !h.entry.desc.includes(TRAITS[et])) h.entry.desc += '；' + TRAITS[et]; }
@@ -10921,7 +10953,7 @@ function drawOrbit(s, o, T) {
   if (sp === 'sash') { const R = s.p.r * G.mods.area; for (let k = 0; k < 8; k++) { const a = o.a - k * .07, x = heroPos(s).x + Math.cos(a) * R, y = heroPos(s).y - 3 + Math.sin(a) * R * .85; bx.fillStyle = k < 2 ? '#ff8a8a' : '#e0443a'; bx.fillRect(X(x), Y(y + Math.sin(T * 8 + k) * 1.5), 2, 2); } return; }
   if (sp === 'stormorb') { bx.globalCompositeOperation = 'lighter'; circ(o.x, o.y, 5, '#ffe85a', .35); circ(o.x, o.y, 2.5, '#fff8c0', .9); bx.globalCompositeOperation = 'source-over'; if (Math.random() < .3) { bx.fillStyle = '#ffe85a'; bx.fillRect(X(o.x + rr(-6, 6)), Y(o.y + rr(-6, 6)), 1, 1); } return; }
   const mo = s.def.mo;
-  if (mo && !['raven', 'sash', 'stormorb', 'disc'].includes(sp)) {
+  if (mo && !(G.t < G.entrySceneUntil) && !['raven', 'sash', 'stormorb', 'disc'].includes(sp)) {
     const L = s.st.pos, i = L ? L.indexOf(o) : 0;
     const key = mo === 'weapons5' ? ['sword', 'spear', 'axe', 'halberd', 'bow'][i % 5] : mo;
     bx.globalCompositeOperation = 'lighter'; circ(o.x, o.y, 7, s.def.color || '#ffffff', .18); bx.globalCompositeOperation = 'source-over';
@@ -11048,14 +11080,6 @@ function drawEntryScene(f, k) {
         bx.globalAlpha = fade * (i ? .33 : .63); bx.lineWidth = i ? 2 : 4;
         bx.beginPath(); bx.arc(cx, cy, r, 0, TAU); bx.stroke();
       }
-  }
-  for (let i = 0; f.mo && i < f.marks.length; i++) {
-    const [u, v] = f.marks[i], t = clamp((k - i * .017) / .78, 0, 1);
-    if (!t || t >= 1) continue;
-    const fall = f.mode === 'fall', drift = f.mode === 'drift';
-    const x = VW * (.055 + (i % 4) * .235 + u * .17 + (drift ? (t - .5) * .15 : 0));
-    const y = VH * (.07 + Math.floor(i / 4) * .295 + v * .19 - (fall ? (1 - t) ** 2 * .53 : 0));
-    drawMotif(f.mo, col, x + SX, y + SY, 1.3 + v * 1.15, fall ? 0 : (t - .5) * (u - .5) * 1.4, Math.sin(t * Math.PI) * fade * .82);
   }
   const crest = heroArt(f.def).fr[0], size = Math.round(Math.min(VW, VH) * (.24 + surge * .11));
   bx.globalAlpha = fade * .28;
@@ -12579,6 +12603,7 @@ const UI = (() => {
       if (first && G.giftTre) G.timers.push({ t: 1.1, fn: () => gift() });
       if (G.heroes.length === 3 && Meta.lv('trinity')) G.timers.push({ t: 1.45, fn: () => { G.heroes.slice(0, 2).forEach((x, i) => G.timers.push({ t: i * .35, fn: () => fireEntry(x, false) })); addLabel(G.squad.x, G.squad.y - 34, '三神同心', '#ffd84a', 18); } });
       h.spawnT = G.t + .32; h.whiteT = G.t + .62; G.pillars = G.pillars || []; G.pillars.push({ h, t0: G.t });
+      G.entrySceneUntil = G.t + .75;
       G.timers.push({ t: .32, fn: () => { G.shake = Math.max(G.shake || 0, .25); Snd.play('thunder'); fx({ k: 'ring', x: h.x, y: h.y, r0: 4, r1: 34, dur: .4, col: '#fff0c0', w: 2 }); } });
       G.timers.push({ t: .75, fn: () => fireEntry(h) });
       if (G.heroes.length < 3) G.timers.push({ t: 1, fn: () => nextNotice(G) });
@@ -12589,22 +12614,30 @@ const UI = (() => {
   }
 
   // 正在召唤下一位神明：倒计时出现后缩小飞到队伍栏
+  function summonClock(i) {
+    const at = (G.summonTimes || SUMMON_TIMES)[i - 1];
+    return at == null ? '' : fmtTime(Math.ceil(at - G.t));
+  }
   function nextNotice(g0) {
+    if (G !== g0) return;
     const i = G.heroes.length, box = $('nextT'), lab = box.querySelector('span'), num = box.querySelector('b');
-    if (G !== g0 || i >= 3) return;
+    if (i >= 3) return;
     if (['banner', 'wban'].some(id => { const e = $(id); return e.getAnimations && e.getAnimations().some(x => x.playState === 'running'); })) { G.timers.push({ t: .3, fn: () => nextNotice(g0) }); return; }
     $('toast').classList.remove('on');
     box.classList.remove('fin'); lab.style.opacity = ''; num.style.transform = ''; box.dataset.i = i; box.hidden = false;
-    setTimeout(() => {
-      if (box.classList.contains('fin')) return;
-      if (G !== g0) { box.hidden = true; return; }
+    num.textContent = summonClock(i);
+    G.timers.push({ t: SUMMON_NOTICE_SECONDS, fn: () => {
+      if (G !== g0 || G.heroes.length !== i || box.hidden || box.classList.contains('fin')) return;
       const tg = document.querySelector(`#party .cd[data-i="${i}"]`);
       if (!tg) { box.hidden = true; return; }
       const a = num.getBoundingClientRect(), b = tg.getBoundingClientRect();
       lab.style.opacity = '0';
       num.style.transform = `translate(${b.left + b.width / 2 - (a.left + a.width / 2)}px,${b.top + b.height / 2 - (a.top + a.height / 2)}px) scale(${b.height / a.height})`;
-      setTimeout(() => { if (box.classList.contains('fin')) return; box.hidden = true; if (G === g0) { G.cdOn = G.cdOn || {}; G.cdOn[i] = 1; } }, 600);
-    }, 2800);
+      G.timers.push({ t: .6, fn: () => {
+        if (G !== g0 || G.heroes.length !== i || box.classList.contains('fin')) return;
+        box.hidden = true; G.cdOn = G.cdOn || {}; G.cdOn[i] = 1;
+      } });
+    } });
   }
   // 择善而从：降临的神明可以挑初始技能
   function chooseStart(def, main) {
@@ -12872,13 +12905,13 @@ const UI = (() => {
     const sq = G.squad, L = lastHud;
     if (G.state === 'play') lagStep(L, Math.max(0, sq.hp / sq.maxHp), dt || .016);
     $('hpl').style.width = Math.max(0, Math.min(100, (L.lag == null ? 1 : L.lag) * 100)) + '%';
-    document.querySelectorAll('#party .cd').forEach(c => { const tt = (G.summonTimes || SUMMON_TIMES)[+c.dataset.i - 1]; const v = tt == null ? '' : fmtTime(Math.max(0, Math.ceil(tt - G.t))); if (c.textContent !== v) c.textContent = v; const vis = G.cdOn && G.cdOn[c.dataset.i] ? '' : 'hidden'; if (c.style.visibility !== vis) c.style.visibility = vis; });
+    document.querySelectorAll('#party .cd').forEach(c => { const v = summonClock(+c.dataset.i); if (c.textContent !== v) c.textContent = v; const vis = G.cdOn && G.cdOn[c.dataset.i] ? '' : 'hidden'; if (c.style.visibility !== vis) c.style.visibility = vis; });
     { const nb = $('nextT'), i = G.heroes.length, tt = (G.summonTimes || SUMMON_TIMES)[i - 1];
       // 召唤前 5 秒：提示与倒计时放大再次出现
-      if (G.state === 'play' && i > 0 && i < 3 && tt != null && tt - G.t <= 5 && tt - G.t > 0 && G.finShown !== i && nb.hidden) { G.finShown = i; $('toast').classList.remove('on'); nb.dataset.i = i; nb.querySelector('span').style.opacity = ''; nb.querySelector('b').style.transform = ''; nb.classList.add('fin'); nb.hidden = false; }
+      if (G.state === 'play' && i > 0 && i < 3 && tt != null && tt - G.t <= SUMMON_NOTICE_SECONDS && tt - G.t > 0 && G.finShown !== i && nb.hidden) { G.finShown = i; $('toast').classList.remove('on'); nb.dataset.i = i; nb.querySelector('span').style.opacity = ''; nb.querySelector('b').style.transform = ''; nb.classList.add('fin'); nb.hidden = false; }
       if (nb.classList.contains('fin') && !nb.hidden && (G.heroes.length !== +nb.dataset.i || tt - G.t <= 0)) { nb.hidden = true; nb.classList.remove('fin'); }
     }
-    { const nb = $('nextT'); if (!nb.hidden) { const tt = (G.summonTimes || SUMMON_TIMES)[+nb.dataset.i - 1]; const v = tt == null ? '' : fmtTime(Math.max(0, Math.ceil(tt - G.t))); const n = nb.querySelector('b'); if (n.textContent !== v) n.textContent = v; } }
+    { const nb = $('nextT'); if (!nb.hidden) { const v = summonClock(+nb.dataset.i); const n = nb.querySelector('b'); if (n.textContent !== v) n.textContent = v; } }
     const hp = Math.max(0, Math.ceil(sq.hp)), mh = Math.round(sq.maxHp), sh = Math.round(sq.shield);
     if (L.hp !== hp || L.mh !== mh || L.sh !== sh) {
       L.hp = hp; L.mh = mh; L.sh = sh;
