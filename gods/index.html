@@ -23,13 +23,14 @@
 html.tap-ios-safe{--safe-top:max(60px,env(safe-area-inset-top,0px));--safe-bottom:max(20px,env(safe-area-inset-bottom,0px))}
 html,body{height:100%;margin:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);overflow:hidden;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent;overscroll-behavior:none}
-#cv{position:fixed;inset:0;display:block;image-rendering:pixelated;touch-action:none}
+#battlefield{position:fixed;inset:var(--field-top,0px) 0 0;overflow:hidden}
+#cv{position:absolute;inset:0;display:block;image-rendering:pixelated;touch-action:none}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible{outline:2px solid var(--gold2);outline-offset:3px}
 .gut{padding-left:max(16px,var(--safe-left));padding-right:max(16px,var(--safe-right))}
 
 /* ---- HUD ---- */
-#hud{position:fixed;left:0;right:0;top:0;pointer-events:none;padding-top:calc(var(--safe-top) + 6px);padding-bottom:14px;display:grid;gap:5px;z-index:5;background:linear-gradient(rgba(8,5,16,.82) 70%,rgba(8,5,16,0))}
+#hud{position:fixed;left:0;right:0;top:0;pointer-events:none;padding-top:calc(var(--safe-top) + 6px);padding-bottom:14px;display:grid;gap:5px;z-index:5;background:#100c19;border-bottom:1px solid var(--line)}
 #xpbar{height:6px;background:#120d1c;border:2px solid #000;box-shadow:0 0 0 1px var(--line);position:relative;overflow:hidden}
 #xpf{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(#8ae8ff,#3a9ae0);transition:width .12s}
 .hA{display:flex;align-items:center;gap:8px}
@@ -55,7 +56,7 @@ button:focus-visible{outline:2px solid var(--gold2);outline-offset:3px}
 #hpbar.low{animation:pulse .6s infinite alternate}
 @keyframes pulse{to{box-shadow:0 0 0 1px var(--red),0 0 10px var(--red)}}
 #party{display:flex;gap:6px}
-#nextT{position:fixed;left:50%;top:calc(var(--safe-top) + 150px);transform:translateX(-50%);z-index:6;display:grid;justify-items:center;gap:0;pointer-events:none;text-align:center;line-height:1;animation:ntIn .3s ease-out}
+#nextT{position:fixed;left:50%;top:max(calc(var(--safe-top) + 150px),calc(var(--field-top,0px) + 12px));transform:translateX(-50%);z-index:6;display:grid;justify-items:center;gap:0;pointer-events:none;text-align:center;line-height:1;animation:ntIn .3s ease-out}
 #nextT span{font-size:19px;font-weight:700;color:var(--ink);-webkit-text-stroke:3px #000;paint-order:stroke fill;transition:opacity .25s}
 #nextT b{display:block;line-height:1;margin-top:2px;font-family:var(--pix);font-size:34px;color:var(--gold);-webkit-text-stroke:4px #000;paint-order:stroke fill;font-variant-numeric:tabular-nums;transition:transform .6s cubic-bezier(.5,0,.75,0)}
 #nextT.fin{animation:ntZoom .35s cubic-bezier(.3,1.6,.5,1)}#nextT.fin b{font-size:48px}
@@ -81,7 +82,7 @@ button.adbtn{position:relative;display:inline-flex;align-items:center;justify-co
 #wban small{display:block;font-size:11px;color:#d8d0c8;margin-top:2px}
 #wban.on{animation:toast 3.6s forwards}
 @keyframes toast{0%{opacity:0;transform:translate(-50%,-6px)}8%,85%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
-#banner{position:fixed;left:0;right:0;top:16%;text-align:center;pointer-events:none;opacity:0;z-index:6}
+#banner{position:fixed;left:0;right:0;top:max(16%,calc(var(--field-top,0px) + 14px));text-align:center;pointer-events:none;opacity:0;z-index:6}
 #banner .bt{font-family:var(--body);font-weight:900;font-size:clamp(40px,11vw,72px);color:#e8b8ff;line-height:1;-webkit-text-stroke:3px #1a0526;paint-order:stroke fill}
 #banner .bs{display:inline-block;white-space:pre-line;font-size:14px;font-weight:700;letter-spacing:.12em;color:#fff4e0;max-width:92vw;margin:10px auto 0;line-height:1.5;padding:4px 14px;background:rgba(10,6,16,.78);border:1px solid rgba(232,184,255,.35);border-radius:3px;-webkit-text-stroke:1px #000;paint-order:stroke fill}
 #banner .bs:empty{display:none}
@@ -276,6 +277,10 @@ body.ovl #banner,body.ovl #nextT{visibility:hidden}
 #ach{background:rgba(10,6,18,.92);justify-content:flex-start}
 #ach h2{margin-top:44px}
 #achList{display:grid;gap:6px;width:min(100%,520px)}
+#ach,#codex,#temple{overflow:hidden;gap:0;padding-bottom:0}
+.collectionHead{flex:none;width:100%;display:grid;justify-items:center;gap:10px;padding-bottom:14px}
+.collectionScroll{width:100%;flex:1;min-height:0;overflow:auto;overscroll-behavior:contain;touch-action:pan-y;box-sizing:border-box;padding-bottom:calc(var(--safe-bottom) + 16px)}
+.collectionScroll > div{margin-inline:auto}
 .arow{display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 12px}
 .arow .ai{flex:1;min-width:0;display:grid;gap:2px}.arow .ai b{font-size:14px}.arow .ai span{font-size:12px;color:var(--muted)}
 .arow .ap{height:4px;background:#2e2545;border-radius:2px;overflow:hidden;margin-top:3px}.arow .ap i{display:block;height:100%;background:var(--gold)}
@@ -359,6 +364,7 @@ body.ovl #banner,body.ovl #nextT{visibility:hidden}
 /* TapTap iOS 的退出浮层占用右上约一枚按钮加一段胶囊的宽度。
    首页资源放在设置按钮右侧的首行左侧；战斗 HUD 留出整块空间，暂停键落在浮层正下方。 */
 html.tap-ios-safe #title .tres{position:static;z-index:auto}
+html.tap-ios-safe #hud{box-sizing:border-box;min-height:calc(var(--safe-top) + 108px)}
 html.tap-ios-safe #hud .hA,html.tap-ios-safe #hud .hB{box-sizing:border-box;padding-right:92px}
 html.tap-ios-safe #hud #party{box-sizing:border-box;padding-right:56px}
 html.tap-ios-safe #hud #bPause{position:fixed;top:calc(var(--safe-top) + 58px);right:max(12px,var(--safe-right));z-index:7}
@@ -457,7 +463,7 @@ html.tap-ios-safe #hud #bPause{position:fixed;top:calc(var(--safe-top) + 58px);r
 })();
 </script>
 
-<canvas id="cv"></canvas>
+<div id="battlefield"><canvas id="cv"></canvas></div>
 <div id="hurt"></div>
 <div id="hud" class="gut" hidden>
   <div class="hA">
@@ -503,23 +509,29 @@ html.tap-ios-safe #hud #bPause{position:fixed;top:calc(var(--safe-top) + 58px);r
 
 <section id="temple" hidden>
   <button class="btn ghost small topback" id="bTmBack" type="button">‹ 返回</button>
+  <header class="collectionHead">
   <h2>神殿</h2>
   <div class="muted">现有香火 <span class="coin" id="coinM">0</span></div>
-  <div id="tree"></div>
+  </header>
+  <div class="collectionScroll"><div id="tree"></div></div>
   <div id="tmodal" hidden><div class="tmc"><img id="tmIc" alt=""><b id="tmH"></b><p id="tmD"></p><button class="btn" id="tmBuy" type="button"></button></div></div>
 </section>
 <section id="ach" hidden>
   <button class="btn ghost small topback" id="bAchBack" type="button">‹ 返回</button>
+  <header class="collectionHead">
   <h2>成就</h2>
   <div class="muted" id="achC"></div>
-  <div id="achList"></div>
+  </header>
+  <div class="collectionScroll"><div id="achList"></div></div>
 </section>
 
 <section id="codex" hidden>
   <button class="btn ghost small topback" id="bCxBack" type="button">‹ 返回</button>
+  <header class="collectionHead">
   <h2>神明图鉴</h2>
   <div id="cxcount"></div>
-  <div id="cxgrid"></div>
+  </header>
+  <div class="collectionScroll"><div id="cxgrid"></div></div>
   <div id="cxpop" hidden>
     <button class="btn ghost small topback" id="bCxClose" type="button">‹ 返回</button>
     <div id="cxdetail"></div>
@@ -5310,7 +5322,7 @@ let G = null;
 
 function MODS0() {
   return {
-    dmgAdd: 0, cd: 1, area: 1, pspeed: 1, count: 0, dur: 1, speedAdd: 0, maxHp: 0, regen: 0, armor: 0, magnet: 54, xp: 1, baseRegen: .25,
+    dmgAdd: 0, cd: 1, area: 1, pspeed: 1, count: 0, dur: 1, speedAdd: 0, maxHp: 0, regen: 0, armor: 0, magnet: 20, xp: 1, baseRegen: .25,
     crit: .05, critDmg: 1, burnDmg: 1, burnMax: 3, burnMaxAdd: 0, shockAmp: .3, shockDur: 1, markDur: 0, markDmg: 0, frzDur: 1, knock: 1,
     thunderDmg: 0, pierceDmg: 0, bluntDmg: 0, bossDmg: 0, slowDmg: 0, slowChance: 0, burnVuln: 0, lowHpDmg: 0, execute: 0, executeHeal: 0,
     fireDmg: 0, summonDmg: 0, dodge: 0, moveDmg: 0, stillDmg: 0, thorns: 0, critHeal: 0, orbitDmg: 0, orbitSpd: 0, fullHpDmg: 0, killHeal: 0, lastStand: 0, summonCount: 0, lvReroll: 0,
@@ -5351,7 +5363,6 @@ function heroOfSkill(sd) { return G.heroes.find(h => h.def === sd.hero); }
 function resetUpgradedSkillCooldown(s) {
   if (s.def.kind === 'passive') return;
   s.cdT = 0;
-  if (s.st.rsT > 0) s.st.rsT = 0;
 }
 function learn(sd) {
   let s = getSkill(sd);
@@ -6352,12 +6363,23 @@ function fireSkill(s, h, p) {
 }
 
 /* ---------- 投射物 ---------- */
+const ORBIT_TRAIL_TIME = .25, PROJECTILE_TRAIL_TIME = .5, MINION_TRAIL_TIME = 1.5;
+const FLIGHT_TRAIL_SAMPLE = 1 / 30;
+const FLIGHT_TRAIL_SPRITES = new Set(['sword', 'sword2', 'flysword']);
+function recordFlightTrail(o, duration, y = o.y) {
+  const tr = o.flightTrail, last = tr[tr.length - 1], now = G.t;
+  if (!last || now - last.t >= FLIGHT_TRAIL_SAMPLE - 1e-6) {
+    tr.push({ x: o.x, y, t: now });
+    while (tr.length > 2 && tr[1].t <= now - duration) tr.shift();
+  }
+}
 let SKILL_COL = null;
 function skillCol(id) { if (!SKILL_COL) { SKILL_COL = {}; for (const h of HEROES) for (const sd of h.skills) SKILL_COL[sd.id] = sd.color || (EL[sd.el] && EL[sd.el].c) || '#ffe8a0'; } return SKILL_COL[id] || '#ffe8a0'; }
 function spawnProj(o) {
   const pr = Object.assign({ kind: 'normal', t: 0, hit: new Set(), carry: null, pierce: 0, size: 2, life: 1, tags: [], rot: 0 }, o);
   pr.vx = Math.cos(o.a) * o.speed; pr.vy = Math.sin(o.a) * o.speed;
   pr.ox = pr.x; pr.oy = pr.y; pr.tr = []; if (!pr.col) pr.col = skillCol(pr.src);
+  if (o.flightTrail || FLIGHT_TRAIL_SPRITES.has(pr.sprite)) { pr.flightTrail = []; recordFlightTrail(pr, PROJECTILE_TRAIL_TIME); }
   if (G.projs.length > 500) G.projs.shift();
   G.projs.push(pr); return pr;
 }
@@ -6432,6 +6454,7 @@ function updateProjs(dt) {
     }
     if (pr.sine) { if (pr.bx == null) { pr.bx = pr.x; pr.by = pr.y; } pr.bx += pr.vx * dt; pr.by += pr.vy * dt; const sp = Math.hypot(pr.vx, pr.vy) || 1, off = Math.sin(pr.t * 11) * pr.sine; pr.x = pr.bx - pr.vy / sp * off; pr.y = pr.by + pr.vx / sp * off; }
     else { pr.x += pr.vx * dt; pr.y += pr.vy * dt; }
+    if (pr.flightTrail) recordFlightTrail(pr, PROJECTILE_TRAIL_TIME);
     if (pr.pullR) query(pr.x, pr.y, pr.pullR, e => { if (e.boss) return; const a = Math.atan2(pr.y - e.y, pr.x - e.x); e.x += Math.cos(a) * 40 * dt; e.y += Math.sin(a) * 40 * dt; });
     if (pr.spin) pr.rot += dt * 14;
     // 碰撞
@@ -6443,7 +6466,14 @@ function updateProjs(dt) {
       if (pr.dead) return false;
     });
   }
-  G.projs = G.projs.filter(p => !p.dead);
+  G.projs = G.projs.filter(p => {
+    if (!p.dead) return true;
+    if (p.flightTrail?.length) {
+      p.flightTrail.push({ x: p.x, y: p.y, t: G.t });
+      fx({ k: 'flightTrail', trail: p.flightTrail, col: p.col, dur: PROJECTILE_TRAIL_TIME });
+    }
+    return false;
+  });
 }
 function projHit(pr, e) {
   const m = G.mods;
@@ -6865,11 +6895,15 @@ function updateZones(dt) {
 function tickOrbit(s, h, p, dt) {
   const m = G.mods, n = cnt(p), R = p.r * AR(p), sz = p.size * Math.sqrt(AR(p));
   s.st.ang += p.rot * (1 + G.mods.orbitSpd) * dt;
-  s.st.pos = [];
+  const positions = s.st.pos?.length === n ? s.st.pos : (s.st.pos = Array.from({ length: n }, () => ({
+    flightTrail: p.sprite === 'raven' ? null : [],
+  })));
   const now = G.t;
   for (let i = 0; i < n; i++) {
     const a = s.st.ang + i / n * TAU, x = h.x + Math.cos(a) * R, y = h.y - 3 + Math.sin(a) * R * .85;
-    s.st.pos.push({ x, y, a });
+    const orb = positions[i];
+    orb.x = x; orb.y = y; orb.a = a;
+    if (orb.flightTrail) recordFlightTrail(orb, ORBIT_TRAIL_TIME);
     query(x, y, sz, e => {
       const k = e.id * 16 + i, last = s.st.hit.get(e.id) || -9;
       if (now - last < .45) return;
@@ -6881,7 +6915,7 @@ function tickOrbit(s, h, p, dt) {
   if (s.st.hit.size > 600) s.st.hit.clear();
   if (p.launchEvery) {
     s.st.lT = (s.st.lT || p.launchEvery) - dt;
-    if (s.st.lT <= 0) { s.st.lT = p.launchEvery; for (const o of s.st.pos) { spawnProj({ x: o.x, y: o.y, a: o.a, speed: 210 * m.pspeed, dmg: p.dmg * 1.3, size: sz, life: .9, pierce: 2, sprite: p.sprite || 'orb', tags: s.tags, src: s.def.id, status: p.status, col: s.def.color }); fx({ k: 'boomcore', x: o.x, y: o.y, r: 6, dur: .12, col: s.def.color || '#ffffff' }); } Snd.play('shoot'); }
+    if (s.st.lT <= 0) { s.st.lT = p.launchEvery; for (const o of s.st.pos) { spawnProj({ x: o.x, y: o.y, a: o.a, speed: 210 * m.pspeed, dmg: p.dmg * 1.3, size: sz, life: .9, pierce: 2, sprite: p.sprite || 'orb', tags: s.tags, src: s.def.id, status: p.status, col: s.def.color, flightTrail: !!o.flightTrail }); fx({ k: 'boomcore', x: o.x, y: o.y, r: 6, dur: .12, col: s.def.color || '#ffffff' }); } Snd.play('shoot'); }
   }
   if (p.pullEvery) {
     s.st.pullT = (s.st.pullT || p.pullEvery) - dt;
@@ -6970,6 +7004,42 @@ function fireHeal(s, h, p) {
 }
 
 /* ---------- 召唤物 ---------- */
+const MINION_HP_SHARE = .25, MINION_RESPAWN_DELAY = 2;
+const NON_GROUND_MINIONS = new Set(['owl', 'crow', 'crane', 'falcon', 'ghost', 'illusion', 'flysword', 'turret', 'hut', 'oak', 'furnace']);
+function liveGroundMinion(mn) { return mn.maxHp > 0 && !mn.dead; }
+function scheduleMinionRespawn(mn, delay) {
+  if (mn.death) return;
+  const s = mn.s, state = s.st, ready = G.t + delay;
+  if (mn.dur) {
+    if (cnt(s.p) + G.mods.summonCount === 1 && !G.minions.some(o => o.s === s && !o.dead)) {
+      s.cdT = delay;
+      state.minionRespawnAt = ready;
+    }
+  }
+  else {
+    const wait = state.minionRespawns ||= [];
+    wait.push(ready);
+    wait.sort((a, b) => a - b);
+  }
+}
+function hurtMinion(mn, dmg) {
+  if (!liveGroundMinion(mn) || dmg <= 0) return false;
+  mn.hp = Math.max(0, mn.hp - dmg);
+  mn.hitUntil = G.t + .14;
+  if (mn.hp > 0) return true;
+  mn.dead = true;
+  scheduleMinionRespawn(mn, MINION_RESPAWN_DELAY);
+  fx({ k: 'ring', x: mn.x, y: mn.y, r0: 3, r1: 12, dur: .26, col: '#9fe8b0', w: 1 });
+  return true;
+}
+function hurtEnemyTarget(target, dmg, src, who) {
+  if (target.s) hurtMinion(target, dmg);
+  else hurtSquad(dmg, src, who);
+}
+function hurtAlliesIn(hit, dmg, src, who) {
+  if (G.heroes.some(hit)) hurtSquad(dmg, src, who);
+  for (const mn of G.minions) if (liveGroundMinion(mn) && hit(mn)) hurtMinion(mn, dmg);
+}
 function spawnMinion(s, kind, x, y, dur, death) {
   const p = s.p;
   const mn = { id: G.nextId++, s, kind, x, y, t: 0, dur: dur || 0, death: !!death, atkT: rr(.2, .8), frame: 0, ft: 0, flip: false, state: 'idle', tx: x, ty: y, slot: G.minions.filter(o => o.s === s).length, dmg: p.dmg, speed: p.speed || 90, range: p.range || 9 };
@@ -6978,6 +7048,10 @@ function spawnMinion(s, kind, x, y, dur, death) {
   mn.reT = Math.random();
   if (p.crew) { mn.kind = ['dog', 'monkey', 'crane'][mn.slot % 3]; }
   if (kind === 'illusion') mn.heroDef = s.def.hero;
+  if (!NON_GROUND_MINIONS.has(mn.kind)) {
+    mn.maxHp = mn.hp = Math.max(1, G.squad.maxHp * MINION_HP_SHARE);
+  }
+  if (mn.kind === 'flysword') { mn.flightTrail = []; recordFlightTrail(mn, MINION_TRAIL_TIME, y - 2); }
   G.minions.push(mn);
   fx({ k: 'ring', x, y, r0: 2, r1: 12, dur: .3, col: s.def.color, w: 1 });
   return mn;
@@ -6986,17 +7060,20 @@ function tickSummon(s, h, p, dt) {
   const m = G.mods;
   let want = cnt(p) + G.mods.summonCount;
   if (p.grow) { const k0 = G.killsAtEvo[s.def.id] == null ? (G.killsAtEvo[s.def.id] = G.kills) : G.killsAtEvo[s.def.id]; want = Math.min(p.growMax + m.count, want + Math.floor((G.kills - k0) / p.grow)); }
-  const mine = G.minions.filter(o => o.s === s);
+  const mine = G.minions.filter(o => o.s === s && !o.dead);
   if (p.dur > 0) {
     s.cdT -= dt;
-    if (s.cdT <= 0 && visibleEnemies(-10).length) {
+    if (s.cdT <= 0 && !(s.st.minionRespawnAt > G.t) && visibleEnemies(-10).length) {
       s.cdT = cdOf(p);
       for (let i = 0; i < want; i++) { const a = i / want * TAU; spawnMinion(s, p.mk, h.x + Math.cos(a) * 12, h.y + Math.sin(a) * 12, p.dur * m.dur); }
       Snd.play('magic');
     }
   } else if (mine.length < want) {
-    if (p.boom) { s.st.rsT = (s.st.rsT == null ? 0 : s.st.rsT) - dt; if (s.st.rsT > 0) return; s.st.rsT = 2.2; }
-    for (let i = mine.length; i < want; i++) spawnMinion(s, p.mk, h.x + rr(-10, 10), h.y + rr(-10, 10), 0);
+    const wait = s.st.minionRespawns;
+    if (wait) while (wait.length && wait[0] <= G.t) wait.shift();
+    const ready = want - (wait?.length || 0);
+    if (mine.length >= ready) return;
+    for (let i = mine.length; i < ready; i++) spawnMinion(s, p.mk, h.x + rr(-10, 10), h.y + rr(-10, 10), 0);
   } else if (mine.length > want) { mine.slice(want).forEach(o => o.dead = true); }
 }
 function updateMinions(dt) {
@@ -7006,6 +7083,10 @@ function updateMinions(dt) {
     mn.t += dt; mn.atkT -= dt; mn.ft += dt;
     const s = mn.s, p = s.p;
     if (!p || !G.skills.includes(s)) { mn.dead = true; continue; }
+    if (mn.maxHp) {
+      const maxHp = Math.max(1, sq.maxHp * MINION_HP_SHARE);
+      if (mn.maxHp !== maxHp) { mn.hp *= maxHp / mn.maxHp; mn.maxHp = maxHp; }
+    }
     if (!mn.death) { mn.dmg = p.dmg; mn.speed = p.speed || mn.speed; }
     if (mn.dur && mn.t > mn.dur) {
       mn.dead = true;
@@ -7020,6 +7101,7 @@ function updateMinions(dt) {
     }
   }
   separateMinions();
+  for (const mn of G.minions) if (!mn.dead && mn.flightTrail) recordFlightTrail(mn, MINION_TRAIL_TIME, mn.y - 2);
   G.minions = G.minions.filter(o => !o.dead);
 }
 function homeSpot(mn) {
@@ -7104,7 +7186,7 @@ function tickMelee(mn, s, p, dt) {
       if (p.markHit) st = Object.assign({ mark: 1 }, st);
       hurtEnemy(tg, mn.dmg, { tags: s.tags, status: st, src: s.def.id, knock: 6, fx: mn.x, fy: mn.y, critMarked: p.critMarked, minion: 1, closeHit: true });
       if (p.healHit) { healSquadRaw(p.healHit); if (Math.random() < .3) part(mn.x, mn.y - 6, 0, -20, .5, '#9be38b', 1, 0, true); }
-      if (p.boom) { mn.dead = true; const R = 24 * G.mods.area; explosion(mn.x, mn.y, R, s.def.color || '#ffd84a', 'smallBoom'); query(mn.x, mn.y, R, e => hurtEnemy(e, mn.dmg * 2.5, { tags: s.tags, src: s.def.id, knock: 22, fx: mn.x, fy: mn.y, minion: 1, status: p.status })); }
+      if (p.boom) { mn.dead = true; if (!mn.dur) scheduleMinionRespawn(mn, 2.2); const R = 24 * G.mods.area; explosion(mn.x, mn.y, R, s.def.color || '#ffd84a', 'smallBoom'); query(mn.x, mn.y, R, e => hurtEnemy(e, mn.dmg * 2.5, { tags: s.tags, src: s.def.id, knock: 22, fx: mn.x, fy: mn.y, minion: 1, status: p.status })); }
       if (p.splash) { query(tg.x, tg.y, p.splash * AR(p), e => { if (e !== tg) hurtEnemy(e, mn.dmg * .5, { tags: s.tags, src: s.def.id, status: st, minion: 1 }); }); fx({ k: 'ring', x: tg.x, y: tg.y, r0: 2, r1: p.splash * AR(p), dur: .2, col: s.def.color, w: 1 }); }
       mn.lunge = .12;
       Snd.play('hit');
@@ -7165,6 +7247,7 @@ const ENTRY_VISUAL = {
   tangseng: ['seal', 'bell', '#ffe4a5'], guanyin: ['seal', 'lotus', '#b9f2ce'],
   goumang: ['seal', 'leaf', '#9deeb3'], houtu: ['quake', 'rock', '#ddaf7e'],
   fuxi: ['seal', 'rune', '#b8f0d4'], amaterasu: ['seal', 'sun', '#ffc973'],
+  jiangziya: ['seal', null, '#ffe4a5'],
   ra: ['seal', 'sun', '#ff9e55'], hel: ['drift', 'ghost', '#b3bbfa'],
   anubis: ['seal', 'ankh', '#8df3be'], hades: ['seal', 'skull', '#b78ae9'],
   jiuweihu: ['drift', 'fox', '#ffadd4'], taiyi: ['fall', 'star', '#ffe783'],
@@ -7183,7 +7266,7 @@ function entryScene(def) {
   const { p, kind } = def.entry, st = p.status || {};
   const [style, motif, color] = ENTRY_VISUAL[def.id] || [];
   const mode = style || ENTRY_PROP_VISUAL[p.vis] || (kind === 'flash' && (st.charm || def.el === 'ice') ? 'drift' : ENTRY_KIND_VISUAL[kind]) || 'seal';
-  const mo = [motif, def.skills[0].mo].find(k => k && MOTIF_ROWS[k]) || 'star';
+  const mo = motif && MOTIF_ROWS[motif] ? motif : null;
   const col = color || p.color || EL[def.el]?.c || def.look.trim || '#ffd84a';
   const seed = hsh(def.id);
   return {
@@ -7268,6 +7351,7 @@ function healSquadRaw(v) {
 const ST_TXT = [['潮湿', '#6ab8ff'], ['燃烧', '#ff8a3a'], ['感电', '#ffe85a'], ['冰冻', '#9fefff'], ['寒意', '#d8f4ff'], ['倒戈', '#ff6aa8'], ['沙尘', '#e8c890']];
 function updateEnemies(dt) {
   const sq = G.squad, m = G.mods, hs = G.heroes.length ? G.heroes : [sq];
+  const groundMinions = G.minions.filter(liveGroundMinion);
   const far = Math.max(VW, VH) * 1.25;
   const knockDrag = Math.exp(-KNOCK_DECAY * dt);
   const knockTravel = (1 - knockDrag) / KNOCK_DECAY;
@@ -7319,15 +7403,22 @@ function updateEnemies(dt) {
         if (G.obsN) obsPush(e, dt); continue;
       }
     }
-    const dist = Math.sqrt(bd);
+    let dist = Math.sqrt(bd);
     if (e.mimic) { mimicTick(e, dt, th); continue; }
     // 远离太多则回收到前方
     if (!e.boss && dist > far) { const p = spawnRingPoint(); const hw = VW / 2 + 14, hh = VH / 2 + 14, dx = p.x - G.cam.x, dy = p.y - G.cam.y, s = Math.max(Math.abs(dx) / hw, Math.abs(dy) / hh, .001); e.x = G.cam.x + dx / s; e.y = G.cam.y + dy / s; continue; }
+    let minionDist = Math.min(84 ** 2, bd * 1.22);
+    for (const mn of groundMinions) {
+      if (mn.dead) continue;
+      const d = d2(e.x, e.y, mn.x, mn.y);
+      if (d < minionDist) { minionDist = d; th = mn; }
+    }
+    if (th.s) dist = Math.sqrt(minionDist);
     let spd = e.spd * enemySlowFactor(e);
     if (e.boss) { bossAI(e, dt, th, dist); if (G.obsN) obsPush(e, dt); continue; }
     if (G.civN && preyTick(e, dt, dist)) { if (G.obsN) obsPush(e, dt); continue; }
     affixTick(e, dt, th, dist);
-    if (behTick(e, dt, th, dist)) { e.atkT -= dt; if (!e.hidden && dist < e.r + 5 && e.atkT <= 0) { e.atkT = e.enraged ? .6 : 1; hurtSquad(e.dmg * (e.weakT > G.t ? .5 : 1), e.type, e.def.name); } continue; }
+    if (behTick(e, dt, th, dist)) { e.atkT -= dt; if (!e.hidden && dist < e.r + 5 && e.atkT <= 0) { e.atkT = e.enraged ? .6 : 1; hurtEnemyTarget(th, e.dmg * (e.weakT > G.t ? .5 : 1), e.type, e.def.name); } continue; }
     if (enemyAttackTick(e, th, dist)) { e.atkT -= dt; if (G.obsN) obsPush(e, dt); continue; }
     const ax = (th.x - e.x) / (dist || 1), ay = (th.y - e.y) / (dist || 1);
     let mx = ax, my = ay;
@@ -7351,7 +7442,7 @@ function updateEnemies(dt) {
     if (G.obsN) obsPush(e, dt);
     // 接触伤害
     e.atkT -= dt;
-    if (dist < e.r + 5 && e.atkT <= 0 && !bomb && !e.hidden) { e.atkT = e.enraged ? .6 : 1; hurtSquad(e.dmg * dmgS * (e.weakT > G.t ? .5 : 1), e.type + (e.elite ? '*' : ''), e.def.name); if (m.thorns) hurtEnemy(e, m.thorns * scaleT() ** .5, { src: 'thorns', noReact: true }); }
+    if (dist < e.r + 5 && e.atkT <= 0 && !bomb && !e.hidden) { e.atkT = e.enraged ? .6 : 1; hurtEnemyTarget(th, e.dmg * dmgS * (e.weakT > G.t ? .5 : 1), e.type + (e.elite ? '*' : ''), e.def.name); if (!th.s && m.thorns) hurtEnemy(e, m.thorns * scaleT() ** .5, { src: 'thorns', noReact: true }); }
   }
   // 分离（同格子内互相推开）
   for (const a of grid.values()) {
@@ -7374,7 +7465,7 @@ function bombExplode(e) {
   affixDeath(e);
   enemyDeathAttack(e);
   explosion(e.x, e.y, 22, '#ff7a3a', 'boom'); elemTerrain('fire', e.x, e.y);
-  for (const h of G.heroes) if (d2(h.x, h.y, e.x, e.y) < 22 * 22) { hurtSquad(e.dmg, 'bomb', e.def.name + '的爆炸'); break; }
+  hurtAlliesIn(h => d2(h.x, h.y, e.x, e.y) < 22 * 22, e.dmg, 'bomb', e.def.name + '的爆炸');
   query(e.x, e.y, 22, o => { if (o !== e) hurtEnemy(o, 20 * scaleT() * ENEMY_DAMAGE_SCALE, { src: 'alien', noReact: true }); });
   dropEnemyXp(e, e.xp, 1);
   G.kills++;
@@ -7419,6 +7510,8 @@ function updateEbullets(dt) {
       continue;
     }
     if (G.obsN) { obsBullet(b); if (b.dead) continue; }
+    const blocker = G.minions.find(mn => liveGroundMinion(mn) && d2(mn.x, mn.y - 3, b.x, b.y) < (b.r + 3) ** 2);
+    if (blocker) { hurtMinion(blocker, b.dmg); b.dead = true; continue; }
     for (const h of G.heroes) if (d2(h.x, h.y - 3, b.x, b.y) < (b.r + 3) ** 2) {
       const hp = G.squad.hp;
       hurtSquad(b.dmg, 'bullet', b.own);
@@ -7446,7 +7539,7 @@ function bossAI(e, dt, th, dist) {
     const step = pushed ? 0 : 190 * enemySlowFactor(e) * dt;
     e.tt -= dt; e.x += Math.cos(e.da) * step; e.y += Math.sin(e.da) * step;
     for (let i = 0; i < 2; i++) part(e.x + rr(-e.r, e.r), e.y + e.r * .6, rr(-20, 20), rr(-20, 0), .4, e.def.art.dark, 2, 30);
-    if (dist < e.r + 6 && !e.dashHit) { e.dashHit = true; hurtSquad(e.dmg, 'bossdash', e.def.name + '的冲撞'); }
+    if (dist < e.r + 6 && !e.dashHit) { e.dashHit = true; hurtEnemyTarget(th, e.dmg, 'bossdash', e.def.name + '的冲撞'); }
     if (e.tt <= 0) { if (e.dashQ > 0) { e.dashQ--; e.mode = 'tele'; e.tt = .45; e.dashHit = false; e.da = Math.atan2(th.y - e.y, th.x - e.x); fx({ k: 'teleLine', x: e.x, y: e.y, a: e.da, len: 170, w: e.r * 1.2, dur: .45 }); } else e.mode = 'walk'; }
     return;
   }
@@ -7455,7 +7548,7 @@ function bossAI(e, dt, th, dist) {
   const a = Math.atan2(th.y - e.y, th.x - e.x);
   const spd = e.spd * (ph2 ? 1.25 : 1) * enemySlowFactor(e);
   if (!pushed && dist > Math.max(40, e.r)) { e.x += Math.cos(a) * spd * dt; e.y += Math.sin(a) * spd * dt; }
-  e.atkT -= dt; if (dist < e.r + 6 && e.atkT <= 0) { e.atkT = .8; hurtSquad(e.dmg, 'boss', e.def.name); }
+  e.atkT -= dt; if (dist < e.r + 6 && e.atkT <= 0) { e.atkT = .8; hurtEnemyTarget(th, e.dmg, 'boss', e.def.name); }
   if (e.aT > 0 || !onScreen(e,e.r*.45) || dist > 170) return;
   const turn = e.bossTurn || 0, phaseChange = ph2 && !e.bossPhaseTwo;
   e.bossPhaseTwo = ph2 || e.bossPhaseTwo;
@@ -7571,8 +7664,7 @@ function updatePickups(dt) {
     let tg = hs[0], bd = 1e12;
     for (const h of hs) { const dd = d2(p.x, p.y, h.x, h.y); if (dd < bd) { bd = dd; tg = h; } }
     const d = Math.sqrt(bd);
-    const range = p.kind === 'gem' ? magnet * .25 : magnet;
-    if (!p.fly && d < range) { p.fly = true; if (p.kind !== 'gem') p.t = 0; }
+    if (!p.fly && d < magnet) { p.fly = true; if (p.kind !== 'gem') p.t = 0; }
     if (p.fly) {
       const sp = Math.min(380, 60 + p.t * 40 + (G.vacuum ? 260 : 0)), a = Math.atan2(tg.y - p.y, tg.x - p.x);
       p.x += Math.cos(a) * sp * dt; p.y += Math.sin(a) * sp * dt;
@@ -8132,7 +8224,7 @@ function teleHit(x, y, r, delay, dmg, col, after) {
   fx({ k: 'teleC', x, y, r, dur: delay, col: col || '#ff3a3a' });
   G.timers.push({ t: delay, fn: () => {
     explosion(x, y, r, col || '#ff7a5a', r > 24 ? 'boom' : 'smallBoom');
-    if (G.heroes.some(h => d2(h.x, h.y, x, y) < (r + 3) * (r + 3))) hurtSquad(dmg, 'boss', own);
+    hurtAlliesIn(h => d2(h.x, h.y, x, y) < (r + 3) ** 2, dmg, 'boss', own);
     if (after) after();
   } });
 }
@@ -8150,7 +8242,7 @@ function behTick(e, dt, th, dist) {
       if (e.jump) {
         const j = e.jump; j.t += dt * enemySlowFactor(e); const k = Math.min(1, j.t / j.dur);
         e.x = lerp(j.sx, j.tx, k); e.y = lerp(j.sy, j.ty, k); e.hop = Math.sin(k * Math.PI) * 22;
-        if (k >= 1) { e.jump = null; e.hop = 0; fx({ k: 'ring', x: e.x, y: e.y, r0: 2, r1: 16, dur: .25, col: e.def.art.light, w: 1 }); G.shake = Math.max(G.shake, .12); if (G.heroes.some(h => d2(h.x, h.y, e.x, e.y) < 15 * 15)) hurtSquad(e.dmg * .8, e.type, e.def.name); }
+        if (k >= 1) { e.jump = null; e.hop = 0; fx({ k: 'ring', x: e.x, y: e.y, r0: 2, r1: 16, dur: .25, col: e.def.art.light, w: 1 }); G.shake = Math.max(G.shake, .12); hurtAlliesIn(h => d2(h.x, h.y, e.x, e.y) < 15 ** 2, e.dmg * .8, e.type, e.def.name); }
         return true;
       }
       if (e.bt <= 0 && dist < 110 && dist > 25 && onScreen(e)) { e.bt = rr(2.5, 4); const tx = th.x + rr(-6, 6), ty = th.y + rr(-6, 6); e.jump = { sx: e.x, sy: e.y, tx, ty, t: 0, dur: .65 }; fx({ k: 'teleC', x: tx, y: ty, r: 15, dur: .65, col: '#ff3a3a' }); return true; }
@@ -8170,7 +8262,7 @@ function behTick(e, dt, th, dist) {
         e.ut -= dt; const sp = e.spd * 2.2 * enemySlowFactor(e);
         if (dist > 3) { e.x += (th.x - e.x) / dist * sp * dt; e.y += (th.y - e.y) / dist * sp * dt; }
         if (Math.random() < .4) part(e.x + rr(-3, 3), e.y, rr(-8, 8), -12, .3, '#a08050', 1, 40);
-        if (e.ut <= 0 || dist < 8) { e.hidden = false; e.bt = rr(2, 3); explosion(e.x, e.y, 12, '#c8a060', 'smallBoom'); if (G.heroes.some(h => d2(h.x, h.y, e.x, e.y) < 13 * 13)) hurtSquad(e.dmg, e.type, e.def.name); }
+        if (e.ut <= 0 || dist < 8) { e.hidden = false; e.bt = rr(2, 3); explosion(e.x, e.y, 12, '#c8a060', 'smallBoom'); hurtAlliesIn(h => d2(h.x, h.y, e.x, e.y) < 13 ** 2, e.dmg, e.type, e.def.name); }
         return true;
       }
       if (e.bt <= 0 && dist > 40 && onScreen(e)) { e.hidden = true; e.ut = 2.2; }
@@ -8482,8 +8574,8 @@ function enemyCast(e, kind, target, ph2 = false) {
       fx({ ...cone, dur: delay });
       after(delay, () => {
         fx({ ...cone, dur: .26, fired: true });
-        if (G.heroes.some(h => d2(h.x, h.y, x, y) <= r ** 2 &&
-          Math.abs(angDiff(Math.atan2(h.y - y, h.x - x), a)) <= half)) hurtSquad(power * .9, src, e.def.name);
+        hurtAlliesIn(h => d2(h.x, h.y, x, y) <= r ** 2 &&
+          Math.abs(angDiff(Math.atan2(h.y - y, h.x - x), a)) <= half, power * .9, src, e.def.name);
       });
       break;
     }
@@ -8557,6 +8649,7 @@ function updateEhaz(dt) {
   G.enemyGroundSpeed = 1;
   if (!G.ehaz.length) return;
   let pool = null, vortex = null;
+  const groundMinions = G.minions.filter(liveGroundMinion), minionPoolDamage = new Map();
   for (const z of G.ehaz) {
     const prev = z.t;
     z.t += dt;
@@ -8564,10 +8657,12 @@ function updateEhaz(dt) {
     if (z.t >= z.dur || z.t < (z.arm || 0)) continue;
     if (z.kind === 'quake') {
       const front = z.r + z.speed * z.t, tail = z.r + z.speed * prev - 5;
-      if (!z.hit && G.heroes.some(h => {
+      const hit = h => {
         const distance = Math.hypot(h.x - z.x, h.y - z.y);
         return distance >= tail && distance <= front + 5;
-      })) { z.hit = true; hurtSquad(z.dmg * .9, 'hazard', z.own); }
+      };
+      if (!z.hit && G.heroes.some(hit)) { z.hit = true; hurtSquad(z.dmg * .9, 'hazard', z.own); }
+      for (const mn of groundMinions) if (!z.minionsHit?.has(mn) && hit(mn) && hurtMinion(mn, z.dmg * .9)) (z.minionsHit ||= new Set()).add(mn);
       continue;
     }
     if (z.kind === 'wave') { z.x += z.vx * dt; z.y += z.vy * dt; }
@@ -8579,24 +8674,28 @@ function updateEhaz(dt) {
       if (!z.hit && z.t >= z.dur - .18) {
         z.hit = true;
         fx({ k: 'ring', x: z.x, y: z.y, r0: 4, r1: z.r, dur: .3, col: z.col, w: 2 });
-        if (G.heroes.some(h => d2(z.x, z.y, h.x, h.y) < (z.r * .64) ** 2)) hurtSquad(z.dmg * .85, 'hazard', z.own);
+        hurtAlliesIn(h => d2(z.x, z.y, h.x, h.y) < (z.r * .64) ** 2, z.dmg * .85, 'hazard', z.own);
       }
       continue;
     }
-    if (!hit(sq) && !(z.kind && G.heroes.some(hit))) continue;
+    const playerHit = hit(sq) || (z.kind && G.heroes.some(hit));
     if (z.kind === 'mine' || z.kind === 'wave') {
-      if (z.hit) continue;
-      z.hit = true;
-      hurtSquad(z.dmg * .8, 'hazard', z.own);
-      if (z.kind === 'mine') {
+      let triggered = false;
+      for (const mn of groundMinions) if (!z.minionsHit?.has(mn) && hit(mn) && hurtMinion(mn, z.dmg * .8)) {
+        (z.minionsHit ||= new Set()).add(mn); triggered = true;
+      }
+      if (!z.hit && playerHit) { z.hit = true; hurtSquad(z.dmg * .8, 'hazard', z.own); triggered = true; }
+      if (z.kind === 'mine' && triggered) {
         fx({ k: 'ring', x: z.x, y: z.y, r0: 3, r1: z.r + 7, dur: .32, col: z.col, w: 2 });
         z.t = z.dur;
       }
       continue;
     }
     const dmg = z.kind === 'lava' ? z.dmg * .65 : z.kind === 'acid' ? z.dmg * .46 : (3 + G.t / 80) * ENEMY_DAMAGE_SCALE;
-    if (!pool || dmg > pool.dmg) pool = { dmg, own: z.own || '腐蚀痕迹' };
+    for (const mn of groundMinions) if (!(mn.hazardAt > G.t) && hit(mn)) minionPoolDamage.set(mn, Math.max(minionPoolDamage.get(mn) || 0, dmg));
+    if (playerHit && (!pool || dmg > pool.dmg)) pool = { dmg, own: z.own || '腐蚀痕迹' };
   }
+  for (const [mn, dmg] of minionPoolDamage) if (hurtMinion(mn, dmg)) mn.hazardAt = G.t + .65;
   if (vortex) {
     const { z, d } = vortex, step = Math.min(d, dt * 32);
     sq.x += (z.x - sq.x) * step / d;
@@ -8654,7 +8753,7 @@ function enemyStrike(e, x, y, r, delay, col, power, after) {
   fx({ k: 'teleC', x, y, r, dur: delay, col, hostile: true });
   enemyDelay(e, delay, () => {
     explosion(x, y, r, col, r > 25 ? 'boom' : 'smallBoom');
-    if (power > 0 && G.heroes.some(h => d2(h.x, h.y, x, y) < r * r)) hurtSquad(e.dmg * power, e.boss ? 'boss' : e.type, e.def.name);
+    if (power > 0) hurtAlliesIn(h => d2(h.x, h.y, x, y) < r * r, e.dmg * power, e.boss ? 'boss' : e.type, e.def.name);
     if (after) after();
   });
 }
@@ -8663,7 +8762,7 @@ function enemyLine(e, x, y, a, len, w, delay, col, power, after) {
   fx({ k: 'teleLine', x, y, a, len, w, dur: delay, col });
   enemyDelay(e, delay, () => {
     fx({ k: 'beam', x, y, a, len, w, dur: .24, col });
-    if (G.heroes.some(h => distSeg(h.x, h.y, x, y, tx, ty) < w)) hurtSquad(e.dmg * power, e.boss ? 'boss' : e.type, e.def.name);
+    hurtAlliesIn(h => distSeg(h.x, h.y, x, y, tx, ty) < w, e.dmg * power, e.boss ? 'boss' : e.type, e.def.name);
     if (after) after();
   });
 }
@@ -8675,8 +8774,8 @@ function enemyLattice(e, points, links, delay, life, col, power) {
   enemyDelay(e, delay, () => {
     fx({ k: 'enemyLinks', e, points, links, col, dur: life });
     for (let t = .06; t < life; t += .34) enemyDelay(e, t, () => {
-      if (G.heroes.some(h => links.some(([i, j]) => distSeg(h.x, h.y, ...points[i], ...points[j]) < 4)))
-        hurtSquad(e.dmg * power, e.boss ? 'boss' : e.type, e.def.name);
+      hurtAlliesIn(h => links.some(([i, j]) => distSeg(h.x, h.y, ...points[i], ...points[j]) < 4),
+        e.dmg * power, e.boss ? 'boss' : e.type, e.def.name);
     });
   });
 }
@@ -10377,14 +10476,21 @@ function trEnemyTick(e, dt) {
 /* ================= 渲染：低分辨率像素缓冲 → 放大 ================= */
 const cv = document.getElementById('cv'), ctx = cv.getContext('2d');
 // 省电：画面直接画在低分辨率画布上，由浏览器用 GPU 放大；文字与摇杆画在一张轻量的叠加层上
-const ov = document.createElement('canvas'); ov.id = 'ov'; ov.style.cssText = 'position:fixed;left:0;top:0;pointer-events:none;z-index:1';
+const ov = document.createElement('canvas'); ov.id = 'ov'; ov.style.cssText = 'position:absolute;left:0;top:0;pointer-events:none;z-index:1';
 cv.after(ov); const octx = ov.getContext('2d');
 let PX = 4, VW = 240, VH = 420, DPR = 1, ODPR = 1, buf = null, bx = null, vig = null, ovDirty = true, cvShift = '';
 const chunkCache = new Map();
+const battleHud = document.getElementById('hud'), pauseButton = document.getElementById('bPause');
+let fieldTop = 0;
+function measureFieldTop() {
+  return battleHud.hidden ? 0 : Math.ceil(Math.max(battleHud.getBoundingClientRect().bottom, pauseButton.getBoundingClientRect().bottom));
+}
 function resize() {
   DPR = Math.min(3, window.devicePixelRatio || 1); ODPR = Math.min(2, window.devicePixelRatio || 1);
-  const W = innerWidth, H = innerHeight, dw = Math.round(W * DPR), dh = Math.round(H * DPR);
-  PX = Math.max(2, Math.round(Math.min(dw, dh) / 250));
+  fieldTop = measureFieldTop();
+  document.documentElement.style.setProperty('--field-top', fieldTop + 'px');
+  const W = innerWidth, H = Math.max(1, innerHeight - fieldTop), dw = Math.round(W * DPR), dh = Math.round(H * DPR);
+  PX = Math.max(2, Math.round(Math.min(dw, innerHeight * DPR) / 250));
   VW = Math.ceil(dw / PX) + 1; VH = Math.ceil(dh / PX) + 1; // 多留 1 像素用于亚像素平滑滚动
   cv.width = VW; cv.height = VH; cv.style.width = (VW * PX / DPR) + 'px'; cv.style.height = (VH * PX / DPR) + 'px'; cv.style.transformOrigin = '0 0';
   buf = cv; bx = ctx; bx.imageSmoothingEnabled = false;
@@ -10396,6 +10502,9 @@ function resize() {
 }
 function shiftCv(fx, fy) { const t = fx || fy ? `translate(${(-fx * PX / DPR).toFixed(2)}px,${(-fy * PX / DPR).toFixed(2)}px)` : ''; if (t !== cvShift) { cvShift = t; cv.style.transform = t; } }
 addEventListener('resize', resize);
+if (typeof ResizeObserver !== 'undefined') new ResizeObserver(() => {
+  if (measureFieldTop() !== fieldTop) resize();
+}).observe(battleHud);
 function getChunk(cx, cy) {
   const k = cx + ',' + cy;
   let c = chunkCache.get(k);
@@ -10449,6 +10558,24 @@ function pline(x0, y0, x1, y1, col, w) {
   for (let i = 0; i <= n; i++) { const x = X(x0 + dx * i / n), y = Y(y0 + dy * i / n); bx.fillRect(x - (w >> 1), y - (w >> 1), w, w); }
 }
 
+function drawFlightTrail(tr, col, duration, head) {
+  if (!tr?.length) return;
+  const now = G.t, start = now - duration;
+  const end = tr.length + (head ? 1 : 0);
+  bx.save();
+  for (let i = 1; i < end; i++) {
+    const a = tr[i - 1], b = tr[i] || head;
+    if (b.t <= start || (a.x === b.x && a.y === b.y)) continue;
+    const k = a.t < start ? (start - a.t) / (b.t - a.t) : 0;
+    const x = lerp(a.x, b.x, k), y = lerp(a.y, b.y, k);
+    if (Math.max(x, b.x) < SX - 2 || Math.min(x, b.x) > SX + VW + 2 ||
+        Math.max(y, b.y) < SY - 2 || Math.min(y, b.y) > SY + VH + 2) continue;
+    const fresh = clamp((b.t - start) / duration, 0, 1);
+    bx.globalAlpha = fresh * .55;
+    pline(x, y, b.x, b.y, col || '#e8ecf4', fresh > .62 ? 2 : 1);
+  }
+  bx.restore();
+}
 function drawGround(cx0, cy0) {
   const c0 = Math.floor(cx0 / CH), c1 = Math.floor((cx0 + VW) / CH), r0 = Math.floor(cy0 / CH), r1 = Math.floor((cy0 + VH) / CH);
   for (let cy = r0; cy <= r1; cy++) for (let cx = c0; cx <= c1; cx++) bx.drawImage(getChunk(cx, cy), cx * CH - cx0, cy * CH - cy0);
@@ -10515,7 +10642,10 @@ function render(dt) {
   for (const d of G.deaths) if (onScreen(d, d.r + 32)) ents.push(d);
   for (const e of G.enemies) if (!e.dead && onScreen(e, e.boss ? Math.max(30, e.art.fr[0].height / 2, e.art.fr[0].width / 2) : 30)) ents.push(e);
   for (const h of G.heroes) ents.push(h);
-  for (const m of G.minions) ents.push(m);
+  for (const m of G.minions) if (!m.dead) {
+    if (m.flightTrail) drawFlightTrail(m.flightTrail, m.s.def.color, MINION_TRAIL_TIME, { x: m.x, y: m.y - 2, t: G.t });
+    ents.push(m);
+  }
   ents.sort((a, b) => a.y - b.y);
   for (const e of ents) {
     if (e.deathMode) drawEnemyDeath(e);
@@ -10527,6 +10657,7 @@ function render(dt) {
   for (const s of G.skills) if (s.kind === 'orbit' && s.st.pos) for (const o of s.st.pos) drawOrbit(s, o, T);
   // 投射物
   for (const pr of G.projs) {
+    if (pr.flightTrail) drawFlightTrail(pr.flightTrail, pr.col, PROJECTILE_TRAIL_TIME, { x: pr.x, y: pr.y, t: G.t });
     if (!onScreen(pr, 20)) continue;
     const img = projImg(pr.sprite);
     let sc = 1;
@@ -10541,9 +10672,11 @@ function render(dt) {
       for (let i = 1; i < n; i++) { const t = i / n, x = X(lerp(ox, pr.x, t)), y = Y(lerp(oy, pr.y, t)) + Math.round(Math.sin(t * 9 + G.t * 20) * (1 - t)); bx.fillStyle = i % 2 ? '#1a1222' : col; bx.fillRect(x - 1, y - 1, 2, 2); bx.fillStyle = '#ffffff'; if (i % 4 === 0) bx.fillRect(x, y - 1, 1, 1); }
     }
     // 拖尾残影 + 柔光
-    const tr = pr.tr || (pr.tr = []); tr.push(pr.x, pr.y); if (tr.length > 10) tr.splice(0, 2);
     bx.globalCompositeOperation = 'lighter';
-    for (let i = 0; i < tr.length - 2; i += 2) { const k = i / tr.length; bx.globalAlpha = .1 + k * .3; bx.fillStyle = col; const r = 1 + k * 2 * Math.max(1, sc); bx.fillRect(X(tr[i]) - r | 0, Y(tr[i + 1]) - r | 0, r * 2 | 0 || 1, r * 2 | 0 || 1); }
+    if (!pr.flightTrail) {
+      const tr = pr.tr || (pr.tr = []); tr.push(pr.x, pr.y); if (tr.length > 10) tr.splice(0, 2);
+      for (let i = 0; i < tr.length - 2; i += 2) { const k = i / tr.length; bx.globalAlpha = .1 + k * .3; bx.fillStyle = col; const r = 1 + k * 2 * Math.max(1, sc); bx.fillRect(X(tr[i]) - r | 0, Y(tr[i + 1]) - r | 0, r * 2 | 0 || 1, r * 2 | 0 || 1); }
+    }
     bx.globalAlpha = 1; circ(pr.x, pr.y, 3 + 2 * sc, col, .22);
     bx.globalCompositeOperation = 'source-over';
     sprC(img, pr.x, pr.y, ang, sc);
@@ -10615,10 +10748,10 @@ function render(dt) {
   }
   octx.globalAlpha = 1;
   if (showJs) {
-    const bxp = js.bx * ODPR, byp = js.by * ODPR, R = Input.R * ODPR;
+    const bxp = js.bx * ODPR, byp = (js.by - fieldTop) * ODPR, R = Input.R * ODPR;
     octx.globalAlpha = .35; octx.fillStyle = '#1a1222'; octx.beginPath(); octx.arc(bxp, byp, R + 6 * ODPR, 0, TAU); octx.fill();
     octx.globalAlpha = .6; octx.strokeStyle = '#f2c14e'; octx.lineWidth = 2 * ODPR; octx.beginPath(); octx.arc(bxp, byp, R, 0, TAU); octx.stroke();
-    octx.globalAlpha = .85; octx.fillStyle = '#f2c14e'; octx.beginPath(); octx.arc(js.x * ODPR, js.y * ODPR, 16 * ODPR, 0, TAU); octx.fill();
+    octx.globalAlpha = .85; octx.fillStyle = '#f2c14e'; octx.beginPath(); octx.arc(js.x * ODPR, (js.y - fieldTop) * ODPR, 16 * ODPR, 0, TAU); octx.fill();
     octx.globalAlpha = 1;
   }
 }
@@ -10670,6 +10803,13 @@ function drawMinion(m, T) {
   if (m.kind !== 'owl') shadow(m.x, m.y + 1, 8);
   if (m.dur && m.dur - m.t < 1.2 && (T * 12 | 0) % 2) alpha *= .4;
   spr(img, m.x, m.y + 3 - lunge, m.flip, alpha);
+  if (m.maxHp && m.hp < m.maxHp) {
+    const x = X(m.x) - 5, y = Y(m.y + 3 - lunge) - (img?.height || 12) - 4;
+    bx.fillStyle = '#1a1222'; bx.fillRect(x - 1, y - 1, 12, 4);
+    bx.fillStyle = '#354840'; bx.fillRect(x, y, 10, 2);
+    bx.fillStyle = m.hitUntil > T ? '#f8dc9c' : '#8ee8af';
+    bx.fillRect(x, y, Math.max(1, Math.round(10 * m.hp / m.maxHp)), 2);
+  }
 }
 const nameTags = [];
 function drawEnemyDeath(d) {
@@ -10776,6 +10916,7 @@ function drawEnemy(e, T) {
 }
 function drawOrbit(s, o, T) {
   const sp = s.p.sprite;
+  if (o.flightTrail) drawFlightTrail(o.flightTrail, s.def.color, ORBIT_TRAIL_TIME, { x: o.x, y: o.y, t: G.t });
   if (sp === 'raven') { spr(ART.mini.raven[(T * 6 | 0) % 2], o.x, o.y + 3, Math.cos(o.a + Math.PI / 2) < 0); return; }
   if (sp === 'sash') { const R = s.p.r * G.mods.area; for (let k = 0; k < 8; k++) { const a = o.a - k * .07, x = heroPos(s).x + Math.cos(a) * R, y = heroPos(s).y - 3 + Math.sin(a) * R * .85; bx.fillStyle = k < 2 ? '#ff8a8a' : '#e0443a'; bx.fillRect(X(x), Y(y + Math.sin(T * 8 + k) * 1.5), 2, 2); } return; }
   if (sp === 'stormorb') { bx.globalCompositeOperation = 'lighter'; circ(o.x, o.y, 5, '#ffe85a', .35); circ(o.x, o.y, 2.5, '#fff8c0', .9); bx.globalCompositeOperation = 'source-over'; if (Math.random() < .3) { bx.fillStyle = '#ffe85a'; bx.fillRect(X(o.x + rr(-6, 6)), Y(o.y + rr(-6, 6)), 1, 1); } return; }
@@ -10908,7 +11049,7 @@ function drawEntryScene(f, k) {
         bx.beginPath(); bx.arc(cx, cy, r, 0, TAU); bx.stroke();
       }
   }
-  for (let i = 0; i < f.marks.length; i++) {
+  for (let i = 0; f.mo && i < f.marks.length; i++) {
     const [u, v] = f.marks[i], t = clamp((k - i * .017) / .78, 0, 1);
     if (!t || t >= 1) continue;
     const fall = f.mode === 'fall', drift = f.mode === 'drift';
@@ -10989,6 +11130,7 @@ function drawFx(f) {
   const k = f.t / f.dur, a = 1 - k;
   switch (f.k) {
     case 'meleeAfterimage': drawMeleeAfterimage(f); break;
+    case 'flightTrail': drawFlightTrail(f.trail, f.col, f.dur); break;
     case 'meleeSlash': {
       const progress = clamp((f.t - f.hold) / (f.dur - f.hold), 0, 1);
       const fade = 1 - progress;
@@ -12260,6 +12402,7 @@ const UI = (() => {
     if (G) G.state = 'title';
     G = null;
     $('hud').hidden = true; $('bossbar').hidden = true;
+    resize();
     show('title');
     const r = Records.d;
         $('coinT').textContent = Meta.d.coin; $('cxT').textContent = Codex.count() + '/' + HEROES.length;
@@ -12323,6 +12466,7 @@ const UI = (() => {
     $('hud').hidden = false; $('bossbar').hidden = true;
     lastHud = {};
     buildParty();
+    resize();
     const lp = Records.d.lastPlay; Records.d.runs++; Records.d.lastPlay = Date.now(); Records.save();
     if (lp && Date.now() - lp > 3 * 864e5) G.timers.push({ t: 2, fn: () => Achv.give('comeback') });
     summonFlow(0);
