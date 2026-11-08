@@ -1479,12 +1479,15 @@ function biomeAt(tx, ty) {
 function genChunk(cx, cy) {
   const c = mkc(CH, CH), P0 = painter(c), n = CH / TILE, RC = typeof THEME_RECOLOR !== 'undefined' ? THEME_RECOLOR : {};
   const P = { p: (x, y, col) => P0.p(x, y, RC[col] || col), r: (x, y, w, h, col) => P0.r(x, y, w, h, RC[col] || col) };
-  const bm = [];
+  const bm = [], paths = [];
   for (let ty = 0; ty < n; ty++) for (let tx = 0; tx < n; tx++) {
     const gx = cx * n + tx, gy = cy * n + ty, b = biomeAt(gx, gy); bm.push(b);
     const B = BIOME[b], h = hash2(gx, gy, 9);
+    const path = typeof THEME !== 'undefined' && THEME.id !== 'city' && terrainTrail((gx + .5) * TILE, (gy + .5) * TILE, WORLD_SEED + 991);
+    paths.push(path);
     P.r(tx * TILE, ty * TILE, TILE, TILE, B.base[Math.floor(h * 3)]);
-    for (let k = 0; k < 5; k++) {
+    if (path && (b === 'grass' || b === 'meadow')) P.r(tx * TILE, ty * TILE, TILE, TILE, 'rgba(127,104,70,.21)');
+    for (let k = 0; k < (path ? 3 : 5); k++) {
       const hx = hash2(gx * 7 + k, gy * 13, 21), hy = hash2(gx * 3, gy * 11 + k, 22), hc = hash2(gx + k * 5, gy - k, 23);
       P.p(tx * TILE + Math.floor(hx * TILE), ty * TILE + Math.floor(hy * TILE), B.spk[Math.floor(hc * 3)]);
     }
@@ -1502,6 +1505,7 @@ function genChunk(cx, cy) {
   }
   // 装饰物（只放在完全落在本区块内的位置）
   for (let ty = 1; ty < n - 2; ty++) for (let tx = 1; tx < n - 2; tx++) {
+    if (paths[ty * n + tx]) continue;
     const gx = cx * n + tx, gy = cy * n + ty, b = bm[ty * n + tx], h = hash2(gx, gy, 77), X = tx * TILE, Y = ty * TILE;
     if (b === 'grass' || b === 'meadow') {
       if (h < .1) { P.p(X + 2, Y + 3, '#6a9a55'); P.p(X + 3, Y + 2, '#6a9a55'); P.p(X + 4, Y + 3, '#6a9a55'); P.p(X + 3, Y + 4, '#335631'); }
@@ -3726,9 +3730,9 @@ const BOSS_PROFILES = {
   icedrake: ['shards', '2,9 15,14 14,4 22,12 26,2 31,12 37,5 38,17 46,18 46,27 37,32 35,38 28,36 29,29 21,26 17,34 11,32 13,25 5,22', '6,13 18,19 15,24 8,21;26,13 34,17 41,21 39,26 24,23;17,25 30,25 32,29 23,29', [30,19,37,20], [5,64,3], ['dash','cone']],
   frostmother: ['prison', '19,2 25,7 31,2 36,13 44,7 47,19 39,24 44,31 37,38 31,32 17,32 10,38 4,31 9,24 1,19 4,7 12,13', '23,9 34,16 33,26 24,31 14,25 14,16;7,13 12,17 9,21;37,17 43,13 40,21', [24,14,20,22,28,22], [5,13,34], ['returnShot','meteor']],
   greatworm: ['eruption', '8,34 1,28 2,18 11,13 13,5 21,1 33,2 40,8 45,17 44,26 37,34 23,36 17,32 23,27 31,27 34,21 30,17 21,17 15,21 12,29', '15,12 19,5 31,5 38,12 30,16 21,15;37,17 42,18 40,26 35,28;4,23 10,19 10,28 5,30', [22,8,29,8], [5,19,3], ['burrow','quake']],
-  pharaoh: ['maze', '10,5 19,8 24,1 30,8 39,5 44,22 38,31 32,30 30,37 18,37 16,30 10,31 4,22', '15,10 24,5 34,10 37,21 31,30 17,30 11,21;7,17 11,23 15,28 10,26;33,28 39,22 42,17 39,26', [18,16,30,16,24,10], [3,3,2], ['vortex','laser']],
-  stormray: ['rails', '0,6 13,11 21,6 27,6 35,11 48,6 43,18 33,24 27,25 26,33 30,38 24,39 21,35 22,25 14,23 5,18', '3,9 20,16 15,20 8,17;45,9 28,16 33,20 40,17;22,9 26,9 29,17 24,23 19,17', [22,14,26,14], [3,17,5], ['dash','lightning']],
-  stormeye: ['gyro', '20,2 28,2 28,8 35,12 40,6 45,11 41,17 47,19 47,24 40,25 39,29 43,34 38,38 32,32 27,34 27,39 21,39 21,34 16,32 10,38 5,34 9,29 8,25 1,24 1,19 7,17 3,11 8,6 13,12 20,8', '24,10 37,16 39,21 33,29 24,32 15,29 9,21 11,16;12,21 18,16 30,16 36,21 30,26 18,26', [24,21], [2,72,16], ['lightning','pull']],
+  pharaoh: ['sandSeal', '10,5 19,8 24,1 30,8 39,5 44,22 38,31 32,30 30,37 18,37 16,30 10,31 4,22', '15,10 24,5 34,10 37,21 31,30 17,30 11,21;7,17 11,23 15,28 10,26;33,28 39,22 42,17 39,26', [18,16,30,16,24,10], [3,3,2], ['vortex','laser']],
+  stormray: ['rails', '0,6 13,11 21,6 27,6 35,11 48,6 43,18 33,24 27,25 26,33 30,38 24,39 21,35 22,25 14,23 5,18', '3,9 20,16 15,20 8,17;45,9 28,16 33,20 40,17;22,9 26,9 29,17 24,23 19,17', [22,14,26,14], [3,17,5], ['dash','electricOrb']],
+  stormeye: ['gyro', '20,2 28,2 28,8 35,12 40,6 45,11 41,17 47,19 47,24 40,25 39,29 43,34 38,38 32,32 27,34 27,39 21,39 21,34 16,32 10,38 5,34 9,29 8,25 1,24 1,19 7,17 3,11 8,6 13,12 20,8', '24,10 37,16 39,21 33,29 24,32 15,29 9,21 11,16;12,21 18,16 30,16 36,21 30,26 18,26', [24,21], [2,72,16], ['electricOrb','pull']],
   hydra: ['crossfire', '2,7 9,3 15,7 14,15 18,23 22,19 19,13 19,5 24,1 29,5 29,13 26,19 30,23 34,15 33,7 39,3 46,7 45,15 40,16 37,28 30,36 18,36 11,28 8,16 3,15', '4,8 9,5 13,8 10,13 5,12;21,6 24,3 27,6 27,11 21,11;35,8 39,5 44,8 43,12 38,13;18,28 24,23 30,28 27,33 21,33', [8,9,24,8,40,9], [3,22,6], ['spit','charge3']],
   titan: ['checker', '17,5 24,1 31,5 31,11 42,8 47,13 46,21 40,26 35,25 34,38 26,38 24,31 22,38 14,38 13,25 8,26 2,21 1,13 6,8 17,11', '16,16 24,10 33,16 31,25 24,31 17,25;3,14 7,11 13,14 12,22 6,22;35,14 41,11 45,14 42,22 36,22', [20,7,28,7,24,20], [3,15,22], ['quake','slam']],
   bladequeen: ['blades', '1,1 11,5 18,14 20,7 28,7 30,14 37,5 47,1 43,17 37,27 32,25 31,34 24,39 17,34 16,25 11,27 5,17', '4,4 13,11 16,21 10,20;44,4 35,11 32,21 38,20;20,13 28,13 31,24 24,32 17,24', [21,16,27,16], [4,65,14], ['charge3','returnShot']],
@@ -3736,16 +3740,16 @@ const BOSS_PROFILES = {
   styx: ['current', '31,2 39,2 44,8 45,15 39,19 31,16 27,13 23,16 26,22 34,26 33,33 27,37 15,38 4,32 1,25 6,19 13,17 14,21 8,26 13,30 24,30 27,28 18,24 16,16 20,9 28,8', '32,5 38,5 42,9 41,14 34,14 30,10;19,17 23,18 26,23 21,23;8,29 14,33 25,33 23,35 14,35', [34,9,40,9], [3,25,20], ['burrow','vortex']],
   needleback: ['needle', '1,20 8,15 6,7 13,11 16,2 22,10 27,2 31,11 40,5 39,14 47,19 42,29 33,30 31,35 25,32 17,35 14,29 6,28', '13,15 23,11 33,13 40,19 35,25 12,25 7,21;17,25 30,25 26,29 20,29', [15,20,33,20], [5,72,2], ['returnShot','dash']],
   glassmoth: ['reflection', '1,4 16,8 22,15 20,5 24,2 28,5 26,15 32,8 47,4 45,16 39,24 43,34 34,37 26,29 24,38 22,29 14,37 5,34 9,24 3,16', '4,7 17,13 20,21 10,20;7,32 12,23 20,24 14,34;44,7 31,13 28,21 38,20;41,32 36,23 28,24 34,34', [23,12,25,12], [2,36,6], ['returnShot','web']],
-  lantern: ['lanterns', '18,6 24,1 30,6 31,12 38,15 40,20 46,22 47,30 42,35 35,33 30,25 28,36 20,36 18,25 13,33 6,35 1,30 2,22 8,20 10,15 17,12', '20,9 28,9 33,19 29,25 19,25 15,19;4,24 12,23 12,30 7,33;36,23 44,24 41,33 36,30', [24,17,8,27,40,27], [4,14,39], ['vortex','lightning']],
+  lantern: ['lanterns', '18,6 24,1 30,6 31,12 38,15 40,20 46,22 47,30 42,35 35,33 30,25 28,36 20,36 18,25 13,33 6,35 1,30 2,22 8,20 10,15 17,12', '20,9 28,9 33,19 29,25 19,25 15,19;4,24 12,23 12,30 7,33;36,23 44,24 41,33 36,30', [24,17,8,27,40,27], [4,14,39], ['vortex','electricOrb']],
   ram: ['ricochet', '2,7 10,2 18,5 18,11 30,11 30,5 38,2 46,7 47,16 40,22 35,20 36,29 30,36 26,32 22,32 18,36 12,29 13,20 8,22 1,16', '5,8 10,5 15,7 14,13 8,17 5,14;33,7 38,5 43,8 43,14 40,17 34,13;17,16 31,16 34,23 27,29 21,29 14,23', [19,21,29,21], [3,24,7], ['charge3','quake']],
-  ironjelly: ['conduct', '4,21 6,9 14,4 20,4 24,0 28,4 34,4 42,9 44,21 38,24 38,35 34,38 30,36 31,28 26,24 26,34 22,34 22,24 17,28 18,36 14,38 10,35 10,24', '8,15 16,7 32,7 40,15 36,20 12,20;16,19 20,13 28,13 32,19 29,25 19,25', [24,18,14,16,34,16], [3,31,4], ['wave','lightning']],
+  ironjelly: ['conduct', '4,21 6,9 14,4 20,4 24,0 28,4 34,4 42,9 44,21 38,24 38,35 34,38 30,36 31,28 26,24 26,34 22,34 22,24 17,28 18,36 14,38 10,35 10,24', '8,15 16,7 32,7 40,15 36,20 12,20;16,19 20,13 28,13 32,19 29,25 19,25', [24,18,14,16,34,16], [3,31,4], ['wave','electricOrb']],
   harvester: ['scythes', '0,3 11,5 18,14 15,19 21,15 23,3 26,3 28,15 33,19 30,14 37,5 48,3 43,14 44,24 36,30 31,26 33,35 28,38 24,30 19,38 14,35 17,26 12,30 4,24 5,14', '3,6 12,9 15,16 8,21 8,14;45,6 36,9 33,16 40,21 40,14;22,14 26,14 31,22 24,29 17,22', [21,20,27,20], [2,13,17], ['dash','blinkB']],
   prism: ['prism', '24,0 32,12 38,6 44,16 48,20 41,30 34,26 24,39 14,26 7,30 0,20 4,16 10,6 16,12', '24,4 35,20 24,34 13,20;4,20 10,10 14,20 10,26;44,20 38,10 34,20 38,26', [24,20], [3,21,4], ['laser','returnShot']],
   broodship: ['invasion', '1,13 8,8 15,10 21,3 27,3 33,10 40,8 47,13 47,22 39,29 32,29 30,37 18,37 16,29 9,29 1,22', '4,14 12,12 18,17 13,23 6,21;44,14 36,12 30,17 35,23 42,21;24,7 30,13 31,23 24,32 17,23 18,13', [24,16,10,17,38,17,24,26], [3,3,31], ['web','summon']],
   cinderwheel: ['wheel', '19,4 29,4 34,9 42,5 46,11 40,17 42,23 48,27 44,34 36,31 29,37 19,37 13,31 4,34 0,27 6,23 8,17 2,11 6,5 14,9', '24,8 34,12 39,22 33,31 24,34 15,31 9,22 14,12;24,14 31,18 31,24 24,29 17,24 17,18', [24,21], [7,68,11], ['cone','dash']],
   frostbell: ['silence', '17,9 21,7 21,1 27,1 27,7 31,9 37,19 39,30 46,33 46,37 2,37 2,33 9,30 11,19', '17,14 24,9 31,14 35,29 13,29;7,32 41,32 41,35 7,35;20,15 24,12 28,15 28,25 20,25', [24,22,19,31,29,31], [3,16,25], ['quake','returnShot']],
   portal: ['gates', '14,4 34,4 34,10 39,10 39,15 45,15 48,21 43,26 39,26 39,31 34,31 34,37 14,37 14,31 9,31 9,26 5,26 0,21 3,15 9,15 9,10 14,10', '14,10 34,10 38,20 34,31 14,31 10,20;18,14 30,14 33,21 30,28 18,28 15,21', [24,21,7,21,41,21], [4,24,6], ['blinkB','vortex']],
-  beacon: ['beacon', '17,14 20,8 18,2 30,2 28,8 31,14 38,15 42,23 41,30 37,30 37,36 30,36 29,31 19,31 18,36 11,36 11,30 7,30 6,23 10,15', '22,4 26,4 26,14 22,14;18,16 30,16 35,23 29,28 19,28 13,23;8,21 11,18 12,24 8,27;40,21 37,18 36,24 40,27', [24,17,24,24], [3,26,20], ['lightning','laser']],
+  beacon: ['beacon', '17,14 20,8 18,2 30,2 28,8 31,14 38,15 42,23 41,30 37,30 37,36 30,36 29,31 19,31 18,36 11,36 11,30 7,30 6,23 10,15', '22,4 26,4 26,14 22,14;18,16 30,16 35,23 29,28 19,28 13,23;8,21 11,18 12,24 8,27;40,21 37,18 36,24 40,27', [24,17,24,24], [3,26,20], ['electricOrb','laser']],
 };
 const NEW_BOSSES = {
   needleback: ['穿甲棘兽','huaguo',false, '#a28a47','#47351c','#eadf9b','#ff6b38'],
@@ -3784,18 +3788,17 @@ const RS = role => { const r = ROSTER[(typeof THEME !== 'undefined' ? THEME.id :
 
 /* ---------- 精英词缀 ---------- */
 const AFFIX = [
-  { id: 'haste', name: '迅捷', col: '#ffe85a', on: e => { e.spd *= 1.6; } },
+  { id: 'haste', name: '迅捷', col: '#ffe85a', on: e => { e.hasteStart = G.t; } },
   { id: 'regen', name: '再生', col: '#6aff7a' },
   { id: 'shield', name: '护盾', col: '#6ac8ff', on: e => { e.shieldMax = e.shield = e.maxHp * .35; } },
   { id: 'split', name: '分裂', col: '#ff9ab0' },
-  { id: 'summon', name: '召唤', col: '#c8ff6a', cd: 6.5 },
+  { id: 'summon', name: '召唤', col: '#c8ff6a', cd: 3.2 },
   { id: 'nova', name: '新星', col: '#ff7a5a', cd: 5 },
   { id: 'blink', name: '闪烁', col: '#c88aff', cd: 4 },
   { id: 'frenzy', name: '狂暴', col: '#ff3a3a' },
   { id: 'mortar', name: '抛火', col: '#ffae53', cd: 5.5 },
   { id: 'frost', name: '霜晶', col: '#a9ebff', cd: 6.4 },
   { id: 'lattice', name: '雷网', col: '#fff177', cd: 6.6 },
-  { id: 'wall', name: '筑墙', col: '#edb98b', cd: 7 },
   { id: 'venom', name: '毒蚀', col: '#b7ed51', cd: 5.6 },
   { id: 'leech', name: '汲魂', col: '#f67bb4', cd: 6.2 },
 ];
@@ -5320,7 +5323,7 @@ function newGame() {
     heroes: [], skills: [], mods: MODS0(), level: 1, xp: 0, xpNext: xpNeed(1), kills: 0,
     enemies: [], projs: [], ebullets: [], zones: [], pickups: [], minions: [], fx: [], deaths: [], parts: [], nums: [], labels: [], timers: [],
     trail: [{ x: 0, y: 0 }], cam: { x: 0, y: 0 }, shake: 0, flash: 0, flashCol: '#fff', nextId: 1, spawnAcc: 0, evDone: {},
-    boss: null, rerolls: 0, adRefresh: 3, adTake: 3, adRevive: 1, adSummon: 1, treasures: [], synergies: [], dmgBy: {}, pendingLv: 0, pendingChests: [], newHeroBoost: 0,
+    boss: null, rerolls: 0, adRefresh: 3, adTake: 3, adRevive: 1, adSummon: 1, treasures: [], synergies: [], dmgBy: {}, pendingLv: 0, pendingChests: [], arrivalOffers: 0,
     won: false, endless: false, nextEndlessBoss: 0, roster: shuffle(HEROES.map(h => h.id)), summonIdx: 0, lsAcc: 0, autoMarkT: 5,
     discovered: [], evoFound: [], power: 0, bonds: [], heroBuff: {}, crossMap: {}, crossCd: {}, healFull: false, killsAtEvo: {}, finalWave: false, props: [], propCells: new Set(), ehaz: [], fireC: new Map(), scorch: new Set(), obsGrid: new Map(), obsCells: new Set(), obsN: 0, weather: null, wSeen: {}, ast: { minHp: 1 }, terrSpd: 1, tbuff: null, themeShown: false
   };
@@ -5438,6 +5441,7 @@ function addHero(def) {
   const sq = G.squad;
   const sd = openingSkill(def, !G.heroes.length);
   const h = { def, x: sq.x, y: sq.y + 6, frame: 0, ft: 0, flip: false, idx: G.heroes.length, art: heroArt(def), shadowR: 5 };
+  if (G.heroes.length) G.arrivalOffers = 4;
   G.heroes.push(h); if (G.heroes.length === 3 && G.t > 1 && sq.hp < sq.maxHp * .2) Achv.give('lastGod');
   { const st = HERO_STAT[def.id], hpOld = sq.maxHp; recomputeMods(); if (G.heroes.length === 1) sq.hp = sq.maxHp; else if (st && st.hp > 0) sq.hp = Math.min(sq.maxHp, sq.hp + (sq.maxHp - hpOld)); else sq.hp = Math.min(sq.hp, sq.maxHp); }
   learn(sd);
@@ -5533,8 +5537,11 @@ function applyStatus(e, st, amp) {
     e.st.slowT = 2.2;
   }
 }
+function hasteActive(e) {
+  return e.hasteStart != null && (G.t - e.hasteStart) % 6 < 3;
+}
 function enemySlowFactor(e) {
-  return e.st.slowT > 0 ? 1 - e.st.slow : 1;
+  return (e.st.slowT > 0 ? 1 - e.st.slow : 1) * (hasteActive(e) ? 1.6 : 1);
 }
 const KNOCK_TEXT = /击退|击飞|击开|震退|震开|震飞|推开|推飞|撞开|撞飞|打飞|弹飞|卷开|卷走|冲开|冲飞|吹开|吹飞|扇飞|拍飞|惊飞|挑飞|弹开/;
 const KNOCK_DECAY = -Math.log(.0005), KNOCK_RELEASE = .16;
@@ -5653,6 +5660,7 @@ function hurtEnemy(e, base, o) {
   } else if (!o.isDot || d >= 4) addNum(e.x + rr(-3, 3), e.y - e.r - 3, shown, crit, o.isDot);
   applyHitKnock(e, o);
   if (o.status) applyStatus(e, o.status, o.amp);
+  if (!e.dead) specialEnemyHit(e, o, el, crit);
   if (el && !e.dead && !e.obs && !e.civ) { elemAura(e, el); if (Math.random() < (o.isDot ? .05 : .3)) elemTerrain(el, e.x, e.y, e); }
   if (m.slowChance && Math.random() < m.slowChance) applyStatus(e, { slow: .4 });
   if (!o.noReact && !e.dead) {
@@ -5761,7 +5769,7 @@ const ELITE_SIGILS = {
   summon:['00100','01110','10101','10001','11111'], nova:['10101','01110','11111','01110','10101'],
   blink:['11110','00010','01110','01000','01111'], frenzy:['00101','10111','11110','11111','01110'],
   mortar:['00001','00111','01100','01010','10010'], frost:['00100','10101','01110','10101','00100'],
-  lattice:['11110','10010','10010','11111','00001'], wall:['11111','10001','10101','11111','10001'],
+  lattice:['11110','10010','10010','11111','00001'],
   venom:['00100','01110','01010','11111','01110'], leech:['11011','11111','01110','00100','00100'],
 };
 function eliteSigil(id,x,y,col,scale=1) {
@@ -5781,7 +5789,7 @@ function drawEliteAura(e,T,hop) {
         pline(x+Math.cos(s)*r,y+Math.sin(s)*r,x+Math.cos(t)*r,y+Math.sin(t)*r,col,2);
       }
       bx.globalAlpha=1;
-    } else if(a.id==='haste' || (a.id==='frenzy' && e.frenzied)){
+    } else if((a.id==='haste' && hasteActive(e)) || (a.id==='frenzy' && e.frenzied)){
       for(let i=0;i<5;i++){
         const s=T*(a.id==='haste'?11:6)+i*TAU/5, q=r+Math.sin(s*2)*2;
         bx.fillStyle=i%2?'#fff4da':col;
@@ -5836,6 +5844,9 @@ const ENEMY_DAMAGE_SCALE = .75;
 function bossSizeScale(opt) {
   return opt?.final || opt?.endlessBoss ? 2 : 1.5;
 }
+function enemySpecialChance(t) {
+  return t < 30 ? 0 : clamp(.28 + (t - 30) / 245, .28, 1);
+}
 function spawnEnemy(type, x, y, opt) {
   opt = opt || {};
   const def = ENEMIES[type] || BOSSES[type], boss = !!BOSSES[type], elite = !!opt.elite;
@@ -5865,6 +5876,10 @@ function spawnEnemy(type, x, y, opt) {
   e.spd *= ENEMY_SPEED_SCALE * ascF('spd') * Math.min(1.5, 1 + (EK - 1) * .04);
   e.dmg *= ENEMY_DAMAGE_SCALE * bossDifficultyScale * ascF('dmg') * (1 + (EK - 1) * .5);
   if ((elite || boss) && ascX('enrage')) { e.enraged = 1; e.spd *= 1.3; e.dmg *= 1.3; }
+  if (!boss && !type.startsWith('obs_') && (def.beh || def.attack || def.deathAttack || def.bomb || def.extraAttack || def.tail || def.iceCargo || def.healDrop)) {
+    e.special = Math.random() < enemySpecialChance(G.t);
+    e.carryIce = e.special && !!def.iceCargo;
+  }
   initAffix(e, opt);
   G.enemies.push(e);
   return e;
@@ -6019,9 +6034,14 @@ function killEnemy(e, o) {
   if (e.dead) return; e.dead = true; o = o || {};
   if (e.obs) { obsBreak(e); return; }
   if (e.civ) { civDeath(e, o); return; }
+  if (e.healCoreEnd) { fx({ k: 'ring', x: e.x, y: e.y, r0: 2, r1: 10, dur: .25, col: '#b9f7ce', w: 1 }); return; }
   startEnemyDeath(e, o);
   affixDeath(e);
   enemyDeathAttack(e);
+  if (e.special && e.def.healDrop && !(e.charmT > 0) && onScreen(e, 22)) {
+    const core = spawnEnemy('healcore', e.x, e.y);
+    core.healCoreEnd = G.t + 2.4;
+  }
   if (e.mimic) dropChest(e.x, e.y);
   const m = G.mods;
   G.kills++; if (G.kills % 100 === 0) proc('k100');
@@ -6489,7 +6509,9 @@ function meleeStyle(s, p, giant) {
 function fireSweep(s, h, p) {
   const m = G.mods, R = p.range * AR(p);
   if (p.frenzy && s.st.fz && G.t < (s.st.fzT || 0)) s.cdT = Math.max(0, s.cdT) * (1 - s.st.fz * .08); else if (p.frenzy) { s.st.fz = 0; s.st.fzShown = 0; }
-  const t = nearestEnemy(h.x, h.y, R * 2.4);
+  const windBall = G.ebullets.find(b => b.wind && !b.friendly && !b.dead &&
+    d2(b.x, b.y, h.x, h.y) <= (R * .85) ** 2 && (h.x - b.x) * b.vx + (h.y - b.y) * b.vy > 0);
+  const t = windBall || nearestEnemy(h.x, h.y, R * 2.4);
   if (!t) return false;
   const a = Math.atan2(t.y - h.y, t.x - h.x), dist = Math.sqrt(d2(h.x, h.y, t.x, t.y));
   // 目标稍远时向前突进一步再挥砍
@@ -6512,6 +6534,7 @@ function doSweep(s, h, p, a, giant, wave, rev, ox, oy, dmgMul, last) {
   const style = h ? meleeStyle(s, p, giant) : null;
   if (giant) { R *= 2.24; arc = TAU; dmg *= 2; G.shake = Math.max(G.shake, .5); Snd.play('boom'); }
   let hits = 0, contact = null;
+  if (h && deflectWindShots(x, y, R, a, arc)) contact = { x: x + Math.cos(a) * R * .6, y: y + Math.sin(a) * R * .6 };
   query(x, y, R, e => {
     if (arc < TAU - .01 && Math.abs(angDiff(Math.atan2(e.y - y, e.x - x), a)) > arc / 2 + .2) return;
     if (e.dead) return;
@@ -6531,7 +6554,7 @@ function doSweep(s, h, p, a, giant, wave, rev, ox, oy, dmgMul, last) {
     const heavy = style === 'heavy', hold = contact ? heavy ? .075 : last ? .055 : .045 : 0;
     h.swingPose = { t: G.t, a, reach: Math.max(4, Math.hypot(x - h.x, y - h.y)), style, hold,
       frame: G.squad.moving ? h.frame : (G.t * 4 + h.idx * .5 | 0) % 2 };
-    fx({ k: 'meleeSlash', x, y, a, arc, r: R, dur: hold + (heavy ? .15 : .11), col: s.def.color || '#ffdc9c', rev, style, hold });
+    fx({ k: 'meleeSlash', x, y, a, arc, r: R, dur: hold + (heavy ? .15 : .11), col: s.def.color || '#ffdc9c', rev, style, hold, staff: s.def.id === 'wk1' ? h : null });
     if (contact) {
       Snd.play(heavy ? 'meleeHeavy' : style === 'club' ? 'meleeClub' : 'meleePoint');
       if (heavy && G.fx.length < 160) fx({ k: 'ring', x: contact.x, y: contact.y + 3, r0: 3, r1: 13, dur: .23, col: '#d8b070', w: 2 });
@@ -7175,7 +7198,7 @@ function updateSquad(dt) {
   const sp = HERO_SPEED * (1 + m.speedAdd + pb('spd')) * (G.terrSpd || 1) * (G.enemyGroundSpeed || 1) * (G.weather === 'sand' ? .9 : 1);
   const mag = Math.hypot(v.x, v.y);
   sq.moving = mag > .05;
-  if (sq.moving) { sq.mvx = v.x / mag; sq.mvy = v.y / mag; enemyWallMove(sq, sq.x + v.x * sp * dt, sq.y + v.y * sp * dt); G.ast.dist = (G.ast.dist || 0) + sp * mag * dt; } else if (sq.deadT <= 0) G.ast.still = (G.ast.still || 0) + dt;
+  if (sq.moving) { sq.mvx = v.x / mag; sq.mvy = v.y / mag; sq.x += v.x * sp * dt; sq.y += v.y * sp * dt; G.ast.dist = (G.ast.dist || 0) + sp * mag * dt; } else if (sq.deadT <= 0) G.ast.still = (G.ast.still || 0) + dt;
   // 轨迹：用于队员跟随
   const tr = G.trail, last = tr[0];
   if (d2(last.x, last.y, sq.x, sq.y) > 1) { tr.unshift({ x: sq.x, y: sq.y }); if (tr.length > 120) tr.pop(); }
@@ -7211,6 +7234,7 @@ function updateEnemies(dt) {
   const dmgS = 1;
   for (const e of G.enemies) {
     if (e.dead) continue;
+    if (e.healCoreEnd) { updateHealCore(e, dt); continue; }
     e.ft += dt; if (e.ft > .22) { e.ft = 0; e.frame ^= 1; }
     e.flash -= dt; e.callCd -= dt; e.vulnT -= dt;
     if (e.elite || e.maxHp >= 30) lagStep(e, Math.max(0, e.hp / e.maxHp), dt);
@@ -7277,15 +7301,17 @@ function updateEnemies(dt) {
         Snd.play('ebullet');
       }
     }
-    if (e.def.bomb) {
+    const bomb = e.def.bomb && e.special !== false;
+    if (bomb) {
       if (dist < 16 && !e.fuse) e.fuse = .55;
       if (e.fuse) { e.fuse -= dt; spd *= .3; e.flash = (e.fuse * 10 % 1) < .5 ? .05 : 0; if (e.fuse <= 0) { bombExplode(e); continue; } }
     }
+    if (mx || my) e.front = Math.atan2(my, mx);
     e.x += mx * spd * dt; e.y += my * spd * dt;
     if (G.obsN) obsPush(e, dt);
     // 接触伤害
     e.atkT -= dt;
-    if (dist < e.r + 5 && e.atkT <= 0 && !e.def.bomb && !e.hidden) { e.atkT = e.enraged ? .6 : 1; hurtSquad(e.dmg * dmgS * (e.weakT > G.t ? .5 : 1), e.type + (e.elite ? '*' : ''), e.def.name); if (m.thorns) hurtEnemy(e, m.thorns * scaleT() ** .5, { src: 'thorns', noReact: true }); }
+    if (dist < e.r + 5 && e.atkT <= 0 && !bomb && !e.hidden) { e.atkT = e.enraged ? .6 : 1; hurtSquad(e.dmg * dmgS * (e.weakT > G.t ? .5 : 1), e.type + (e.elite ? '*' : ''), e.def.name); if (m.thorns) hurtEnemy(e, m.thorns * scaleT() ** .5, { src: 'thorns', noReact: true }); }
   }
   // 分离（同格子内互相推开）
   for (const a of grid.values()) {
@@ -7318,15 +7344,50 @@ function ebullet(x, y, a, sp, dmg, spr, own, sizeScale = 1, motion) {
   const r = (spr === 'ebig' ? 4 : 2.5) * sizeScale;
   G.ebullets.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, dmg, t: 0, life: 4, r, spr, sizeScale, own: own || G.shooter, ...motion });
 }
+function enemyElectricOrb(e, x, y, a, speed, damage) {
+  ebullet(x, y, a, speed, damage, 'ebig', e.def.name, e.sizeScale || 1,
+    { electric: true, col: '#9deeff', life: 2.25 });
+}
+function deflectWindShots(x, y, r, a, arc) {
+  let count = 0;
+  for (const b of G.ebullets) {
+    if (!b.wind || b.dead || b.friendly || d2(x, y, b.x, b.y) > (r + b.r) ** 2) continue;
+    if (arc < TAU - .01 && Math.abs(angDiff(Math.atan2(b.y - y, b.x - x), a)) > arc / 2 + .2) continue;
+    b.friendly = true; b.t = 0; b.life = 1.4;
+    const target = b.caster && !b.caster.dead && !(b.caster.charmT > 0) ? b.caster : nearestEnemy(b.x, b.y, 120);
+    const dir = target ? Math.atan2(target.y - b.y, target.x - b.x) : a;
+    b.vx = Math.cos(dir) * 122; b.vy = Math.sin(dir) * 122;
+    fx({ k: 'ring', x: b.x, y: b.y, r0: 2, r1: 11, dur: .25, col: '#aaf6c1', w: 1 });
+    count++;
+  }
+  return count;
+}
 function updateEbullets(dt) {
   for (const b of G.ebullets) {
+    if (b.dead) continue;
     const prev = b.t;
     b.t += dt;
     const travel = b.turn && b.t >= b.turn ? 2 * Math.max(0, b.turn - prev) - dt : dt;
     b.x += b.vx * travel; b.y += b.vy * travel;
     if (b.t > b.life) { b.dead = true; continue; }
+    if (b.friendly) {
+      query(b.x, b.y, b.r, e => {
+        if (e.dead || e.hidden || e.phased || e.obs || e.civ || e.charmT > 0) return;
+        hurtEnemy(e, b.dmg * 2.5 * scaleT() ** .55, { src: 'windReflect', el: 'wind', knock: 12, kx: b.vx, ky: b.vy });
+        b.dead = true; return false;
+      });
+      continue;
+    }
     if (G.obsN) { obsBullet(b); if (b.dead) continue; }
-    for (const h of G.heroes) if (d2(h.x, h.y - 3, b.x, b.y) < (b.r + 3) ** 2) { hurtSquad(b.dmg, 'bullet', b.own); b.dead = true; break; }
+    for (const h of G.heroes) if (d2(h.x, h.y - 3, b.x, b.y) < (b.r + 3) ** 2) {
+      const hp = G.squad.hp;
+      hurtSquad(b.dmg, 'bullet', b.own);
+      if (b.wind && G.squad.hp < hp && G.squad.hp > 0) {
+        const speed = Math.hypot(b.vx, b.vy) || 1;
+        G.squad.x += 10 * b.vx / speed; G.squad.y += 10 * b.vy / speed;
+      }
+      b.dead = true; break;
+    }
   }
   G.ebullets = G.ebullets.filter(b => !b.dead);
 }
@@ -7449,7 +7510,7 @@ function director(dt) {
   if (G.endless && t >= 540 && Math.floor((t - 540) / 60) !== Math.floor((t - dt - 540) / 60)) { const n = Math.floor((t - 540) / 60); if (n === 0) { UI.banner('外星援军抵达', ''); G.shake = .8; Snd.play('roar'); } else UI.toast('外星援军抵达'); }
   const spawnScale = G.asc || G.endless ? 3 : 1.5;
   const rate = spawnScale * (2 / 1.35 + Math.min(t, 300) * .03 + es * .09) * ascF('cnt') * 1.35 * Math.min(3, 1 + (endlessK(t) - 1) * .25);
-  for (const [f, iv] of [['e30', 30], ['e15', 15]]) if (ascX(f) && t > iv && Math.floor(t / iv) !== Math.floor((t - dt) / iv)) { G.e15n = (G.e15n || 0) + 1; eliteSpawn(pick(['grunt', 'tank', 'ranged', 'sp2', 'x']), false, G.e15n <= 2 ? { ban: ['haste'] } : null); } // 前两次不会是迅捷
+  for (const [f, iv] of [['e30', 30], ['e15', 15]]) if (ascX(f) && t >= 30 && t >= iv && Math.floor(t / iv) !== Math.floor((t - dt) / iv)) { G.e15n = (G.e15n || 0) + 1; eliteSpawn(pick(['grunt', 'tank', 'ranged', 'sp2', 'x']), false, G.e15n <= 2 ? { ban: ['haste'] } : null); } // 前两次不会是迅捷
   const cap = 360 + (es > 0 ? 100 : 0);
   G.spawnAcc += rate * dt * (G.boss ? .6 : 1);
   while (G.spawnAcc >= 1) {
@@ -7557,7 +7618,6 @@ function update(dt) {
   updateZones(dt);
   updateTerrain(dt);
   updateEhaz(dt);
-  if (G.enemyWalls?.length) G.enemyWalls = G.enemyWalls.filter(w => w.end > G.t);
   elemTick(dt);
   weatherTick(dt); ascMeteorTick(dt); ascHiveTick(dt); envTick(dt);
   if (G.crossOn) { bondTick(dt); V2.tick(dt); }
@@ -7591,7 +7651,7 @@ function tickReflect(s, h, p, dt) {
   const R = p.r * AR(p);
   s.st.vis = (s.st.vis || 0) + dt;
   for (const b of G.ebullets) {
-    if (b.dead || d2(b.x, b.y, h.x, h.y) > R * R) continue;
+    if (b.dead || b.friendly || d2(b.x, b.y, h.x, h.y) > R * R) continue;
     b.dead = true;
     const t = nearestEnemy(b.x, b.y, 160), a = t ? Math.atan2(t.y - b.y, t.x - b.x) : Math.atan2(b.vy, b.vx) + Math.PI;
     spawnProj({ x: b.x, y: b.y, a, speed: 200, dmg: p.dmg, size: 3, life: 1.2, pierce: 2, sprite: p.sprite || 'orb', tags: s.tags, src: s.def.id, status: p.status });
@@ -7760,6 +7820,52 @@ function themeComp(list) { const c = THEME.comp || {}; return list.map(([k, w]) 
 
 /* ---------- 地形物件 ---------- */
 const PCELL = 130;
+const POOL_STEPS = 24, POOL_ANGLE = TAU / POOL_STEPS;
+const POOL_COS = Array.from({ length: POOL_STEPS }, (_, i) => Math.cos(i * POOL_ANGLE));
+const POOL_SIN = Array.from({ length: POOL_STEPS }, (_, i) => Math.sin(i * POOL_ANGLE));
+// Coarse harmonics shape coves and lobes. Fine noise roughens the shoreline.
+function poolShape(seed) {
+  const noise = i => hash2(Math.floor(seed * 1048576), i, 731);
+  const rot = noise(1) * TAU, stretch = .62 + noise(2) * .36;
+  const radii = POOL_COS.map((_, i) => {
+    const a = i * POOL_ANGLE, b = a - rot;
+    const oval = 1 / Math.hypot(Math.cos(b) * stretch, Math.sin(b) / stretch);
+    return oval * (1 + Math.cos(3 * a + noise(3) * TAU) * (.12 + noise(4) * .11)
+      + Math.cos(5 * a + noise(5) * TAU) * .09 + (noise(i + 9) - .5) * .13);
+  });
+  // Keep equal nominal radii equal in area even when their outlines differ.
+  const area = radii.reduce((sum, r, i) => sum + r * radii[(i + 1) % POOL_STEPS], 0) * Math.sin(POOL_ANGLE) / 2;
+  const scale = Math.sqrt(Math.PI / area);
+  const edge = radii.map(r => r * scale);
+  return { edge, max: Math.max(...edge) };
+}
+function poolRadius(p, a) {
+  const edge = p.shape?.edge;
+  if (!edge) return p.r;
+  const u = (a < 0 ? a + TAU : a) / POOL_ANGLE;
+  const i = Math.floor(u), f = (u - i) * POOL_ANGLE;
+  const r0 = edge[i % POOL_STEPS], r1 = edge[(i + 1) % POOL_STEPS];
+  return p.r * r0 * r1 * Math.sin(POOL_ANGLE) / (r1 * Math.sin(POOL_ANGLE - f) + r0 * Math.sin(f));
+}
+function inPool(p, x, y, pad = 0) {
+  const dx = x - p.x, dy = y - p.y, dist = dx * dx + dy * dy;
+  if (dist >= (p.r * (p.shape?.max || 1) + pad) ** 2) return false;
+  return !p.shape || dist < (poolRadius(p, Math.atan2(dy, dx)) + pad) ** 2;
+}
+function drawPool(p, col, alpha, scale = 1, stroke = false) {
+  if (!p.shape) { circ(p.x, p.y, p.r * scale, col, alpha, stroke, 1); return; }
+  const x = X(p.x), y = Y(p.y);
+  bx.globalAlpha = alpha; bx.beginPath();
+  for (let i = 0; i < POOL_STEPS; i++) {
+    const r = p.r * p.shape.edge[i] * scale;
+    if (i) bx.lineTo(x + POOL_COS[i] * r, y + POOL_SIN[i] * r);
+    else bx.moveTo(x + POOL_COS[i] * r, y + POOL_SIN[i] * r);
+  }
+  bx.closePath();
+  if (stroke) { bx.strokeStyle = col; bx.lineWidth = 1; bx.stroke(); }
+  else { bx.fillStyle = col; bx.fill(); }
+  bx.globalAlpha = 1;
+}
 // 神格：负面地形（减速、伤血的水洼/流沙/酸池/熔岩）出现得更频繁
 const BAD_PROPS = { water: 1, sand: 1, acid: 1, lava: 1 };
 function terrainBadProps() { const p = THEME.props.map(([k, w]) => [k, BAD_PROPS[k] ? w * 3 : w]); if (!p.some(([k]) => BAD_PROPS[k])) p.push(['sand', 3]); return p; }
@@ -7776,7 +7882,10 @@ function genProps() {
     const x = (cx + .2 + hash2(cx, cy, seed + 2) * .6) * PCELL, y = (cy + .2 + hash2(cx, cy, seed + 3) * .6) * PCELL;
     const pr = { k, x, y, t: 0, cd: rr(0, 2), used: false, fuse: 0, act: 0, seed: hash2(cx, cy, seed + 4) };
     pr.r = { lava: 22, water: 26, ice: 30, sand: 22, acid: 20 }[k] || ENV_R[k] || 7;
-    if (pr.r > 7) pr.r *= .8 + pr.seed * .5;
+    if (POOLS[k] || k === 'oil') {
+      pr.r *= .68 + hash2(cx, cy, seed + 5) * .75;
+      pr.shape = poolShape(pr.seed);
+    } else if (pr.r > 7) pr.r *= .8 + pr.seed * .5;
     G.props.push(pr);
   }
   if (G.props.length > 160) G.props = G.props.filter(p => d2(p.x, p.y, sq.x, sq.y) < 900 * 900);
@@ -7799,16 +7908,17 @@ function updateTerrain(dt) {
     const dx = pr.x - sq.x, dy = pr.y - sq.y;
     if (dx * dx + dy * dy > 330 * 330) continue;
     pr.t += dt; pr.cd -= dt;
-    const dSq = Math.sqrt(dx * dx + dy * dy), heroIn = dSq < pr.r + 3;
+    const dSq = Math.sqrt(dx * dx + dy * dy);
     if (POOLS[pr.k]) {
-      if (heroIn && !pr.tmp) {
+      if (!pr.tmp && inPool(pr, sq.x, sq.y, 2)) {
         inc(pr.k + 'T', dt);
         spd *= POOL_PLAYER_SPEED[pr.k] ?? 1;
         if ((pr.k === 'lava' || pr.k === 'acid') && sq.invT <= 0) { pr.hurtT = (pr.hurtT || 0) - dt; if (pr.hurtT <= 0) { pr.hurtT = .6; hurtSquad(2 + G.t / 120, pr.k, pr.k === 'lava' ? '熔岩' : '酸池'); } }
       }
       if (pr.cd <= 0) {
         pr.cd = .3;
-        query(pr.x, pr.y, pr.r, e => {
+        query(pr.x, pr.y, pr.r * (pr.shape?.max || 1), e => {
+          if (!inPool(pr, e.x, e.y, e.r)) return;
           if (pr.k === 'water') applyStatus(e, { slow: .5 });
           else if (pr.k === 'mud' || pr.k === 'sand') applyStatus(e, { slow: .6 });
           if (e.boss) return;
@@ -7896,13 +8006,13 @@ function drawProps(T) {
     const x = X(pr.x), y = Y(pr.y);
     if (POOLS[pr.k]) {
       const c = POOLCOL[pr.k];
-      blob(pr.x, pr.y, pr.r + 2, c[0], .55, pr.seed); blob(pr.x, pr.y, pr.r, c[1], .7, pr.seed); blob(pr.x, pr.y, pr.r * .55, c[1], .5, pr.seed + .3);
+      drawPool(pr, c[0], .62, 1.06); drawPool(pr, c[1], .72); drawPool(pr, c[2], .13, .65);
       const n = Math.round(pr.r / 3);
       for (let i = 0; i < n; i++) {
-        const a = pr.seed * 40 + i * 2.4, rr2 = pr.r * ((i * 37 % 10) / 12), tw = Math.sin(T * (pr.k === 'lava' || pr.k === 'acid' ? 4 : 2) + i * 1.7);
-        if (tw > .3) { bx.fillStyle = c[2]; bx.fillRect(Math.round(x + Math.cos(a) * rr2), Math.round(y + Math.sin(a) * rr2 * .7), pr.k === 'ice' ? 2 : 1, 1); }
+        const a = pr.seed * 40 + i * 2.4, rr2 = poolRadius(pr, a % TAU) * ((i * 37 % 10) / 12), tw = Math.sin(T * (pr.k === 'lava' || pr.k === 'acid' ? 4 : 2) + i * 1.7);
+        if (tw > .3) { bx.fillStyle = c[2]; bx.fillRect(Math.round(x + Math.cos(a) * rr2), Math.round(y + Math.sin(a) * rr2), pr.k === 'ice' ? 2 : 1, 1); }
       }
-      if (pr.k === 'sand') { bx.strokeStyle = c[0]; bx.globalAlpha = .6; bx.beginPath(); bx.arc(x, y, pr.r * (.3 + (T * .5 % 1) * .6), 0, TAU); bx.stroke(); bx.globalAlpha = 1; }
+      if (pr.k === 'sand') drawPool(pr, c[0], .6, .3 + (T * .5 % 1) * .6, true);
       continue;
     }
     if (drawEnvProp(pr, x, y, T)) continue;
@@ -7955,11 +8065,6 @@ function drawProps(T) {
   if (G.tbuff) { const b = G.tbuff.b, left = G.tbuff.until - G.t; if (left > 3 || Math.sin(T * 20) > 0) circ(G.squad.x, G.squad.y - 4, 20 + Math.sin(T * 4) * 1.5, b.col, .5, true, 1); }
 }
 function R2(x, y, w, h, c) { bx.fillStyle = c; bx.fillRect(Math.round(x), Math.round(y), w, h); }
-function blob(wx, wy, r, col, a, seed) {
-  const x = X(wx), y = Y(wy); bx.globalAlpha = a; bx.fillStyle = col; bx.beginPath();
-  for (let i = 0; i <= 16; i++) { const t = i / 16 * TAU, k = 1 + Math.sin(t * 3 + seed * 20) * .12 + Math.sin(t * 5 + seed * 7) * .06; const px = x + Math.cos(t) * r * k, py = y + Math.sin(t) * r * k * .72; i ? bx.lineTo(px, py) : bx.moveTo(px, py); }
-  bx.fill(); bx.globalAlpha = 1;
-}
 
 /* ================= 怪物行为、精英词缀、首领招式 ================= */
 function initAffix(e, opt) {
@@ -7977,7 +8082,7 @@ function initAffix(e, opt) {
   e.affixes = [af];
   for (let i = 0; i < slots; i++) if (Math.random() < .5) { const pool = AF.filter(a => !e.affixes.includes(a)); if (pool.length) e.affixes.push(pick(pool)); }
   e.affix = af; e.affTs = {};
-  e.affixes.forEach((a,i) => { if (a.on) a.on(e); e.affTs[a.id] = rr(1.35, 2.5) + i * .7; });
+  e.affixes.forEach((a,i) => { if (a.on) a.on(e); e.affTs[a.id] = (a.id === 'summon' ? rr(.65, 1.15) : rr(1.35, 2.5)) + i * .7; });
   e.affName = e.affixes.map(a => a.name).join('·') + '·' + e.def.name;
 }
 // 预警圈：一段时间后在该位置造成伤害
@@ -7991,7 +8096,7 @@ function teleHit(x, y, r, delay, dmg, col, after) {
   } });
 }
 function behTick(e, dt, th, dist) {
-  const b = e.def.beh; if (!b) return false;
+  const b = e.def.beh; if (!b || e.special === false) return false;
   e.bt = (e.bt == null ? rr(1.5, 3.5) : e.bt) - dt;
   switch (b) {
     case 'dash': {
@@ -8123,15 +8228,8 @@ function affixTick1(e, a, dt, th, dist) {
       enemyLattice(e,[[tx-px,ty-py],[tx+px,ty+py],[tx+Math.cos(dir)*34,ty+Math.sin(dir)*34]],[[0,1],[1,2]],.74,1.7,col,.5);
       break;
     }
-    case 'wall': {
-      const ux=Math.cos(dir), uy=Math.sin(dir);
-      const points=[[-23,-21],[-23,21],[20,21],[20,-21]].map(([p,q])=>[tx+ux*p-uy*q,ty+uy*p+ux*q]);
-      enemyWalls(e,[[...points[3],...points[0]],[...points[0],...points[1]],[...points[1],...points[2]]],.75,2.7,col);
-      break;
-    }
     case 'venom':
-      tele(tx,ty,14,.72);
-      enemyDelay(e,.72,()=>enemyGround('acid',tx,ty,e,{r:14,arm:0,col,dur:3.4}));
+      enemyGround('acid',tx,ty,e,{r:14,arm:.72,col,dur:4.12,caster:e});
       break;
     case 'leech':
       tele(tx,ty,16,.68);
@@ -8151,7 +8249,7 @@ function affixDeath(e) {
 }
 function splitOnDeath(e) {
   if (e.child) return;
-  let t = e.def.splitInto, n = 2;
+  let t = e.special === false ? null : e.def.splitInto, n = 2;
   const split = e.affixes?.some(a => a.id === 'split');
   if (split) { t = e.type; n = 4; }
   if (!t) return;
@@ -8164,10 +8262,14 @@ function splitOnDeath(e) {
   if (split && onScreen(e,16)) fx({k:'ring',x:e.x,y:e.y,r0:4,r1:e.r+15,dur:.4,col:'#ff9ab0',w:2});
 }
 const ENEMY_CASTS = {
+  recoilJet: [70, '#ff9b5d', []],
+  doubleStab: [61, '#f7ae83', []],
+  windShot: [105, '#b9f7e1', []],
+  scout: [98, '#ffd483', []],
   spit: [110, '#a8f24d', ['spitter', 'serpentkin', 'hydra', 'scorpion']],
   web: [94, '#d6b4ec', ['nurse', 'broodsac', 'lavaspider', 'queen']],
   cone: [62, '#ff9b48', ['flameeye', 'lavabrute', 'icedrake', 'magmacolossus']],
-  lightning: [104, '#ffe85a', ['thundereye', 'arcwisp', 'stormray', 'stormeye']],
+  electricOrb: [104, '#ffe85a', ['thundereye', 'arcwisp', 'stormray', 'stormeye']],
   quake: [78, '#f9c176', ['brute', 'sandgolem', 'stonegolem', 'boneogre', 'huntun', 'greatworm', 'titan']],
   vortex: [105, '#d196ff', ['dusteye', 'grudgeeye', 'shade', 'pharaoh', 'judge', 'styx']],
   wave: [115, '#8deaff', ['jelly', 'clawbrute', 'coralspawn', 'giantcrab', 'leviathan']],
@@ -8180,6 +8282,19 @@ for (const [kind, [, , ids]] of Object.entries(ENEMY_CASTS)) {
     } else ENEMIES[id].attack = kind;
   }
 }
+// Keep the original attack on species that already have one.
+for (const [ability, ids] of Object.entries({
+  recoilJet: ['emberfly', 'leapfish'],
+  doubleStab: ['hopper', 'cinderhound', 'netherhound'],
+  windShot: ['harpy', 'gargoyle'],
+  scout: ['eye', 'thundereye', 'grudgeeye'],
+})) for (const id of ids) ENEMIES[id].extraAttack = ability;
+for (const id of ['beetle', 'shellback', 'scarabtank', 'voltbeetle']) ENEMIES[id].tail = true;
+for (const id of ['starfish', 'nurse']) ENEMIES[id].healDrop = true;
+for (const id of ['frostcrawl', 'icebeetle', 'frostgiant']) ENEMIES[id].iceCargo = true;
+MON('healcore', '回疗虫核', 'x', C4('#65d69a', '#225442', '#c0ffe6', '#f3ffcc'),
+  { hp: 9, spd: 0, dmg: 0, r: 5, xp: 0, art: { w: 11, h: 12, legs: 0, core: '#d7ffd8', eyes: [] } });
+
 const DEATH_ATTACKS = {
   acid: ['spitter', 'serpentkin', 'soulbomb'],
   lava: ['lavacrawl', 'magmabeetle', 'blastbug', 'firesplit'],
@@ -8202,6 +8317,16 @@ const ENEMY_GROUND = {
 function enemyGround(kind, x, y, e, opts) {
   const spec = ENEMY_GROUND[kind];
   const z = { ...spec, kind, x, y, t: 0, dmg: e.dmg, own: e.def.name, ...opts };
+  if (kind === 'acid' || kind === 'lava' || kind === 'web') {
+    const size = Math.random();
+    z.shape = poolShape(Math.random());
+    if (z.deathPool) {
+      z.r = 8 + 10 * size;
+      z.dur = z.arm + 5 + 5 * size;
+    } else {
+      z.r *= .73 + size * .64;
+    }
+  }
   if (spec.arm > 0) {
     let count = 0;
     for (const other of G.ehaz) {
@@ -8211,11 +8336,12 @@ function enemyGround(kind, x, y, e, opts) {
   }
   if (G.ehaz.length >= 90) return;
   G.ehaz.push(z);
-  if (z.arm) fx({ k: 'teleC', x, y, r: z.r, dur: z.arm, col: z.col });
+  if (z.arm && !z.shape) fx({ k: 'teleC', x, y, r: z.r, dur: z.arm, col: z.col });
+  return z;
 }
 function enemyDeathAttack(e) {
   const kind = e.def.deathAttack;
-  if (!kind || e.charmT > 0 || !onScreen(e, 32)) return;
+  if (!kind || e.special === false || e.charmT > 0 || !onScreen(e, 32)) return;
   const { x, y } = e;
   if (kind === 'ice') {
     if (G.enemyIceAt > G.t) return;
@@ -8229,18 +8355,20 @@ function enemyDeathAttack(e) {
     } });
     return;
   }
-  enemyGround(kind, x, y, e);
+  enemyGround(kind, x, y, e, { deathPool: !e.boss && !e.elite && (kind === 'acid' || kind === 'lava') });
 }
 function enemyAttackTick(e, target, dist) {
-  const kind = e.def.attack;
-  if (!kind) return false;
+  if (e.special === false) return false;
   if (e.castUntil > G.t) return true;
-  if (G.t < 15 || G.enemyCastAt > G.t || e.castAt > G.t || dist > ENEMY_CASTS[kind][0] || !onScreen(e) || e.hidden) return false;
+  const kind = e.extraTurn ? (e.def.attack || e.def.extraAttack) : (e.def.extraAttack || e.def.attack);
+  if (!kind) return false;
+  if (G.t < 30 || G.enemyCastAt > G.t || e.castAt > G.t || dist > ENEMY_CASTS[kind][0] || !onScreen(e) || e.hidden) return false;
   const zone = kind === 'spit' ? 'acid' : kind;
   if ((zone === 'acid' || zone === 'web' || zone === 'vortex') && G.ehaz.some(z =>
-    z.kind === zone && d2(target.x, target.y, z.x, z.y) < z.r ** 2)) return false;
+    z.kind === zone && inPool(z, target.x, target.y))) return false;
   G.enemyCastAt = G.t + .75;
   e.castAt = G.t + rr(5, 8);
+  e.extraTurn = !e.extraTurn;
   enemyCast(e, kind, target);
   return true;
 }
@@ -8257,11 +8385,54 @@ function enemyCast(e, kind, target, ph2 = false) {
   const warnCircle = (cx, cy, r, dur = delay) => fx({ k: 'teleC', x: cx, y: cy, r, dur, col });
   e.castUntil = G.t + delay;
   switch (kind) {
+    case 'recoilJet': {
+      enemyLine(e, x, y, a, 68, 5, delay, col, .65, () => {
+        if (e.st?.frzT > 0 || e.hidden) return;
+        e.kx -= dx * 135; e.ky -= dy * 135;
+      });
+      break;
+    }
+    case 'doubleStab': {
+      e.castUntil = G.t + 1.08;
+      enemyLine(e, x, y, a, 40, 5, delay, col, .72);
+      after(delay, () => enemyLine(e, x, y, a, 63, 6, .45, col, .9));
+      break;
+    }
+    case 'windShot':
+      fx({ k: 'teleLine', x, y, a, len: 100, w: 3, dur: delay, col });
+      after(delay, () => ebullet(x, y, a, 58, power * .68, 'ebig', e.def.name, 1,
+        { wind: true, caster: e, col, life: 2.3 }));
+      break;
+    case 'scout': {
+      const dur = 1.2, width = .19, range = 106, begin = a - 1.06, sweep = 2.12, started = G.t;
+      let marked;
+      e.castUntil = G.t + dur;
+      fx({ k: 'scoutBeam', x, y, r: range, a: begin, sweep, width, col, dur, caster: e, started });
+      for (let i = 0; i < 12; i++) after((i + .5) * .1, () => {
+        if (marked) return;
+        const aim = begin + clamp((G.t - started) / dur, 0, 1) * sweep;
+        marked = G.heroes.find(h => d2(x, y, h.x, h.y) <= range * range &&
+          Math.abs(angDiff(Math.atan2(h.y - y, h.x - x), aim)) <= width);
+        if (marked) fx({ k: 'ring', x: marked.x, y: marked.y, r0: 10, r1: 5, dur: .36, col, w: 2 });
+      });
+      after(dur, () => {
+        if (!marked) return;
+        const aim = Math.atan2(marked.y - e.y, marked.x - e.x), ox = e.x, oy = e.y;
+        e.castUntil = G.t + .38;
+        fx({ k: 'teleLine', x: ox, y: oy, a: aim, len: 124, w: 2, dur: .38, col });
+        after(.38, () => ebullet(ox, oy, aim, 104, power * .82, 'ebig', e.def.name, 1, { col, life: 1.65 }));
+      });
+      break;
+    }
     case 'spit': case 'web': case 'vortex': {
       const zone = kind === 'spit' ? 'acid' : kind, r = ENEMY_GROUND[zone].r + (e.boss ? 5 : 0);
-      warnCircle(tx, ty, r);
-      if (kind === 'spit') fx({ k: 'enemyLob', x, y, tx, ty, dur: delay, col });
-      after(delay, () => enemyGround(zone, tx, ty, e, { r, arm: 0, dmg: power }));
+      if (kind === 'vortex') {
+        warnCircle(tx, ty, r);
+        after(delay, () => enemyGround(zone, tx, ty, e, { r, arm: 0, dmg: power }));
+      } else {
+        const field = enemyGround(zone, tx, ty, e, { r, arm: delay, dur: ENEMY_GROUND[zone].dur + delay, dmg: power, caster: e });
+        if (field && kind === 'spit') fx({ k: 'enemyLob', x, y, tx, ty, dur: delay, col });
+      }
       break;
     }
     case 'cone': {
@@ -8275,17 +8446,13 @@ function enemyCast(e, kind, target, ph2 = false) {
       });
       break;
     }
-    case 'lightning': {
-      const n = ph2 ? 5 : 3, r = e.boss ? 14 : 9, step = r * 2 + 3;
-      for (let i = 0; i < n; i++) {
-        const cx = tx + dx * step * (i - 1), cy = ty + dy * step * (i - 1), at = delay + i * .19;
-        warnCircle(cx, cy, r, at);
-        after(at, () => {
-          boltFx(cx - 10, cy - 50, cx, cy, col, 2);
-          fx({ k: 'ring', x: cx, y: cy, r0: 3, r1: r, dur: .25, col, w: 2 });
-          if (G.heroes.some(h => d2(h.x, h.y, cx, cy) < r ** 2)) hurtSquad(power * .85, src, e.def.name);
-        });
-      }
+    case 'electricOrb': {
+      fx({ k: 'teleLine', x, y, a, len: Math.min(120, Math.hypot(tx - x, ty - y) + 12), w: 2, dur: delay, col });
+      after(delay, () => {
+        const n = e.boss ? (ph2 ? 5 : 3) : 1;
+        for (let i = 0; i < n; i++) enemyElectricOrb(e, x, y, a + (i - (n - 1) / 2) * .18, 80, power * .64);
+        Snd.play('ebullet');
+      });
       break;
     }
     case 'quake':
@@ -8310,6 +8477,40 @@ function enemyCast(e, kind, target, ph2 = false) {
   }
 }
 
+function specialEnemyHit(e, o, el, crit) {
+  if (!e.special || e.boss || e.obs || e.civ || e.charmT > 0) return;
+  const tags = o.tags || [];
+  const melee = !o.isDot && (o.melee || (o.closeHit && (tags.includes('blunt') || tags.includes('pierce'))));
+  if (e.def.tail && !e.tailUsed && melee && e.hp > 0 && onScreen(e)) {
+    e.tailUsed = true;
+    e.castUntil = e.tailUntil = G.t + .56;
+    const front = e.front ?? Math.atan2(G.squad.y - e.y, G.squad.x - e.x);
+    e.tailPose = front + Math.PI;
+    enemyLine(e, e.x, e.y, front + Math.PI, 26, 4, .55, '#ffb272', .68);
+  }
+  if (!e.carryIce) return;
+  if (el === 'fire') {
+    e.carryIce = false;
+    tmpPool('water', e.x, e.y, 11, 5);
+    fx({ k: 'ring', x: e.x, y: e.y, r0: 3, r1: 12, dur: .32, col: '#d3f2ff', w: 1 });
+  } else if (!o.isDot && (o.melee === 'heavy' || (melee && (crit || tags.includes('blunt'))) || o.knock >= 20)) {
+    e.carryIce = false;
+    const [dx, dy] = hitDirection(e, o), x = e.x, y = e.y, tx = x + dx * 28, ty = y + dy * 28;
+    fx({ k: 'iceCargoRoll', x, y, tx, ty, dur: .46 });
+    G.timers.push({ t: .46, fn: () => tmpPool('ice', tx, ty, 9, 4) });
+  }
+}
+function updateHealCore(e, dt) {
+  e.ft += dt;
+  e.flash = Math.max(0, e.flash - dt);
+  if (G.t < e.healCoreEnd) return;
+  e.dead = true;
+  query(e.x, e.y, 36, other => {
+    if (other.obs || other.civ || other.healCoreEnd || other.charmT > 0) return;
+    other.hp = Math.min(other.maxHp, other.hp + other.maxHp * .22);
+  });
+  if (onScreen(e, 38)) fx({ k: 'ring', x: e.x, y: e.y, r0: 4, r1: 36, dur: .42, col: '#a8ffd6', w: 2 });
+}
 function updateEhaz(dt) {
   const sq = G.squad;
   G.enemyGroundSpeed = 1;
@@ -8318,6 +8519,7 @@ function updateEhaz(dt) {
   for (const z of G.ehaz) {
     const prev = z.t;
     z.t += dt;
+    if (prev < (z.arm || 0) && z.caster && (z.caster.dead || z.caster.charmT > 0 || z.caster.st?.frzT > 0 || z.caster.hidden)) z.t = z.dur;
     if (z.t >= z.dur || z.t < (z.arm || 0)) continue;
     if (z.kind === 'quake') {
       const front = z.r + z.speed * z.t, tail = z.r + z.speed * prev - 5;
@@ -8328,7 +8530,7 @@ function updateEhaz(dt) {
       continue;
     }
     if (z.kind === 'wave') { z.x += z.vx * dt; z.y += z.vy * dt; }
-    const hit = h => d2(z.x, z.y, h.x, h.y) < z.r ** 2;
+    const hit = h => inPool(z, h.x, h.y);
     if (z.kind === 'web') { if (hit(sq)) G.enemyGroundSpeed = .55; continue; }
     if (z.kind === 'vortex') {
       const d = Math.hypot(z.x - sq.x, z.y - sq.y);
@@ -8368,7 +8570,7 @@ function updateEhaz(dt) {
 }
 function drawEhaz() {
   for (const z of G.ehaz) {
-    if (!onScreen(z, z.kind === 'quake' ? z.speed * z.dur : z.r + 8)) continue;
+    if (!onScreen(z, z.kind === 'quake' ? z.speed * z.dur : z.r * (z.shape?.max || 1) + 8)) continue;
     const a = Math.min(1, (z.dur - z.t) * 3);
     if (z.kind === 'quake') {
       const r = z.r + z.t * z.speed;
@@ -8382,9 +8584,9 @@ function drawEhaz() {
       continue;
     }
     const armed = z.t >= z.arm;
-    circ(z.x, z.y, z.r, '#15101f', a * (armed ? .78 : .28));
-    circ(z.x, z.y, z.r - 1, z.col, a * (armed ? .5 : .15));
-    circ(z.x, z.y, z.r, z.col, a * (armed ? .95 : .48), true, 1);
+    drawPool(z, '#15101f', a * (armed ? .78 : .28));
+    drawPool(z, z.col, a * (armed ? .5 : .15), .96);
+    drawPool(z, z.col, a * (armed ? .95 : .48), 1, true);
     bx.globalAlpha = a * (armed ? .95 : .45);
     bx.fillStyle = z.col;
     if (z.kind === 'mine') {
@@ -8393,8 +8595,8 @@ function drawEhaz() {
     } else {
       const phase = z.kind === 'vortex' ? -z.t * 4 : z.a || z.x * .13;
       for (let i = 0; i < 6; i++) {
-        const angle = phase + i * 2.399963;
-        const r = z.r * (.32 + (i % 3) * .19);
+        const angle = ((phase + i * 2.399963) % TAU + TAU) % TAU;
+        const r = poolRadius(z, angle) * (.32 + (i % 3) * .19);
         const px = X(z.x + Math.cos(angle) * r), py = Y(z.y + Math.sin(angle) * r);
         bx.fillRect(px, py, i % 2 ? 3 : 2, 1);
         if (z.kind === 'lava' || z.kind === 'vortex') bx.fillRect(px + 1, py - 1, 1, 3);
@@ -8415,49 +8617,14 @@ function enemyStrike(e, x, y, r, delay, col, power, after) {
     if (after) after();
   });
 }
-function enemyLine(e, x, y, a, len, w, delay, col, power) {
+function enemyLine(e, x, y, a, len, w, delay, col, power, after) {
   const tx = x + Math.cos(a) * len, ty = y + Math.sin(a) * len;
   fx({ k: 'teleLine', x, y, a, len, w, dur: delay, col });
   enemyDelay(e, delay, () => {
     fx({ k: 'beam', x, y, a, len, w, dur: .24, col });
     if (G.heroes.some(h => distSeg(h.x, h.y, x, y, tx, ty) < w)) hurtSquad(e.dmg * power, e.boss ? 'boss' : e.type, e.def.name);
+    if (after) after();
   });
-}
-function enemyWalls(e, segments, delay, life, col) {
-  if ((G.enemyWalls?.length || 0) >= 9) return;
-  for (const [x, y, tx, ty] of segments) {
-    const a = Math.atan2(ty - y, tx - x);
-    fx({ k: 'teleLine', x, y, a, len: Math.hypot(tx - x, ty - y), w: 4, dur: delay, col });
-  }
-  enemyDelay(e, delay, () => {
-    const walls = G.enemyWalls || (G.enemyWalls = []);
-    for (const [x, y, tx, ty] of segments.slice(0, 12 - walls.length)) walls.push({ x, y, tx, ty, col, end: G.t + life });
-  });
-}
-function drawEnemyWalls() {
-  for (const w of G.enemyWalls || []) {
-    bx.globalAlpha = Math.min(1, (w.end - G.t) * 4);
-    pline(w.x, w.y, w.tx, w.ty, '#221526', 7);
-    pline(w.x, w.y - 3, w.tx, w.ty - 3, w.col, 4);
-    pline(w.x, w.y - 5, w.tx, w.ty - 5, '#f8ebdc', 1);
-    bx.globalAlpha = 1;
-  }
-}
-function wallDistance(w, x, y) {
-  return distSeg(x, y, w.x, w.y, w.tx, w.ty);
-}
-function enemyWallMove(sq, x, y) {
-  const walls = G.enemyWalls;
-  if (!walls?.length) { sq.x = x; sq.y = y; return; }
-  const dx = x - sq.x, dy = y - sq.y, steps = Math.max(1, Math.ceil(Math.hypot(dx, dy) / 3));
-  const clear = (px, py) => walls.every(w => w.end <= G.t || wallDistance(w, px, py) >= 6 ||
-    wallDistance(w, px, py) >= wallDistance(w, sq.x, sq.y));
-  for (let i=0;i<steps;i++) {
-    const nx = sq.x + dx / steps, ny = sq.y + dy / steps;
-    if (clear(nx, ny)) { sq.x = nx; sq.y = ny; }
-    else if (clear(nx, sq.y)) sq.x = nx;
-    else if (clear(sq.x, ny)) sq.y = ny;
-  }
 }
 function enemyLattice(e, points, links, delay, life, col, power) {
   for (const [i, j] of links) {
@@ -8533,10 +8700,14 @@ function bossSignature(e, target, phase2) {
         const [cx,cy]=polar(tx,ty,a+Math.PI/2,(i-(n-1)/2)*step);
         hit(cx,cy,wide+9,d+i*.14,.77);
       } break;
-    case 'maze': {
-      const points=[[-26,-24],[26,-24],[26,24],[-26,24]].map(([ox,oy])=>[tx+ox,ty+oy]);
-      enemyWalls(e,points.slice(0,n).map((p,i)=>[...p,...points[i+1]]),d,2.5,col);
-      hit(tx,ty,step+13,1.9,.92); break;
+    case 'sandSeal': {
+      const r = 24;
+      for (let i = 0; i < n; i++) {
+        const angle = a + i * TAU / n;
+        const [cx, cy] = polar(tx, ty, angle, r);
+        line(cx, cy, angle + Math.PI / 2, r * 1.5, wide + 2, d + i * .24, .63);
+      }
+      hit(tx, ty, step + 13, 1.9, .92); break;
     }
     case 'rails':
       for(let i=0;i<n+phase;i++) {
@@ -8633,7 +8804,11 @@ function bossSignature(e, target, phase2) {
     case 'beacon':
       for(let i=0;i<n+phase;i++) {
         const [cx,cy]=polar(tx,ty,a+Math.PI/2,(i-1)*step);
-        hit(cx,cy,wide,d+i*.27,.75,()=>boltFx(cx-18,cy-85,cx,cy,col,3));
+        warn(cx, cy, wide * .52, d + i * .27);
+        enemyDelay(e, d + i * .27, () => {
+          const aim = i === 1 ? a : Math.atan2(ty - cy, tx - cx);
+          for (const offset of [-.24, 0, .24]) enemyElectricOrb(e, cx, cy, aim + offset, 74, e.dmg * .52);
+        });
       } break;
   }
 }
@@ -8816,7 +8991,7 @@ function ignite(x, y) {
   const tx = Math.floor(x / TILE), ty = Math.floor(y / TILE);
   if (flammable(tx, ty)) G.fireC.set(ck(tx, ty), G.t);
 }
-function nearPool(x, y, kinds, pad) { for (const pr of G.props) if (kinds[pr.k] && d2(pr.x, pr.y, x, y) < (pr.r + (pad || 6)) ** 2) return pr; return null; }
+function nearPool(x, y, kinds, pad = 6) { for (const pr of G.props) if (kinds[pr.k] && inPool(pr, x, y, pad)) return pr; return null; }
 function elemTerrain(el, x, y, e) {
   if (!G.fireC) return;
   elemTerrain2(el, x, y, e);
@@ -8888,8 +9063,11 @@ function elemTick(dt) {
       p.ct = (p.ct || 0) - dt;
       if (p.ct <= 0) {
         p.ct = .3;
-        query(p.x, p.y, p.r, e => { hurtEnemy(e, 6 * sc ** .8, { tags: ['thunder'], status: { shock: 1 }, src: 'terrain', noReact: true }); e.wetT = G.t + 2; });
-        if (G.heroes.some(h => d2(h.x, h.y, p.x, p.y) < p.r * p.r) && sq.invT <= 0) hurtSquad(2 + G.t / 160, 'shockwater', '导电的水面');
+        query(p.x, p.y, p.r * (p.shape?.max || 1), e => {
+          if (!inPool(p, e.x, e.y, e.r)) return;
+          hurtEnemy(e, 6 * sc ** .8, { tags: ['thunder'], status: { shock: 1 }, src: 'terrain', noReact: true }); e.wetT = G.t + 2;
+        });
+        if (G.heroes.some(h => inPool(p, h.x, h.y)) && sq.invT <= 0) hurtSquad(2 + G.t / 160, 'shockwater', '导电的水面');
       }
     }
   }
@@ -8913,8 +9091,8 @@ function drawElem(T) {
     for (let i = 0; i < 3; i++) { const fx_ = px + ((tx * 7 + i * 3) % 7), fh = 2 + ((T * 12 + i * 5 + tx) % 4 | 0); bx.fillStyle = i ? '#ff7a2a' : '#ffd84a'; bx.fillRect(fx_, py + TILE - fh - (age > 2.4 ? 0 : 1), 1, fh); }
   }
   for (const p of G.props) if (p.charge > G.t && Math.abs(p.x - G.cam.x) < VW / 2 + 40 && Math.abs(p.y - G.cam.y) < VH / 2 + 40) {
-    circ(p.x, p.y, p.r, '#ffe85a', .5 + .3 * Math.sin(T * 30), true, 1);
-    for (let i = 0; i < 3; i++) { const a = Math.random() * TAU, r = Math.random() * p.r; bx.fillStyle = '#fff8c0'; bx.fillRect(X(p.x + Math.cos(a) * r), Y(p.y + Math.sin(a) * r * .72), 1, 1); }
+    drawPool(p, '#ffe85a', .5 + .3 * Math.sin(T * 30), 1, true);
+    for (let i = 0; i < 3; i++) { const a = Math.random() * TAU, r = Math.random() * poolRadius(p, a); bx.fillStyle = '#fff8c0'; bx.fillRect(X(p.x + Math.cos(a) * r), Y(p.y + Math.sin(a) * r), 1, 1); }
   }
 }
 
@@ -8943,14 +9121,15 @@ function tmpPool(k, x, y, r, dur) {
   let n = 0, oldest = null;
   for (const p of G.props) if (p.tmp) {
     n++; if (!oldest || p.tmp < oldest.tmp) oldest = p;
-    if (d2(p.x, p.y, x, y) < (p.r * .8) ** 2) { if (p.k !== k) { p.k = k; p.k0 = k; p.until = 0; } p.tmp = Math.max(p.tmp, G.t + dur); return p; }
+    if (inPool(p, x, y)) { if (p.k !== k) { p.k = k; p.k0 = k; p.until = 0; } p.tmp = Math.max(p.tmp, G.t + dur); return p; }
   }
   if (n >= 14 && oldest) oldest.tmp = 1;
-  const p = { k, k0: k, x, y, r, t: 0, cd: 0, used: false, fuse: 0, act: 0, seed: Math.random(), tmp: G.t + dur };
+  const seed = Math.random();
+  const p = { k, k0: k, x, y, r: r * (.8 + Math.random() * .45), shape: poolShape(seed), t: 0, cd: 0, used: false, fuse: 0, act: 0, seed, tmp: G.t + dur };
   G.props.push(p); return p;
 }
 function envLabel(x, y, s, col) { if ((G.envLblT || 0) > G.t) return; G.envLblT = G.t + .6; addLabel(x, y - 10, s, col, 12); }
-function nearProp(x, y, k, pad) { for (const p of G.props) if (p.k === k && !p.used && d2(p.x, p.y, x, y) < (p.r + pad) ** 2) return p; return null; }
+function nearProp(x, y, k, pad) { for (const p of G.props) if (p.k === k && !p.used && inPool(p, x, y, pad)) return p; return null; }
 const coldE = e => e && (e.st.frzT > 0 || e.chillT > G.t);
 
 function elemTerrain2(el, x, y, e) {
@@ -9036,8 +9215,8 @@ function drawEnvProp(pr, x, y, T) {
       return true;
     }
     case 'oil': {
-      if (pr.used) { blob(pr.x, pr.y, pr.r, '#1a1210', .5, pr.seed); return true; }
-      blob(pr.x, pr.y, pr.r + 1, '#120c10', .7, pr.seed); blob(pr.x, pr.y, pr.r * .75, '#2a2028', .8, pr.seed + .2);
+      if (pr.used) { drawPool(pr, '#1a1210', .5); return true; }
+      drawPool(pr, '#120c10', .7); drawPool(pr, '#2a2028', .8, .75);
       const a = T * .8 + pr.seed * 9; bx.fillStyle = Math.sin(a) > 0 ? '#8a5ab8' : '#5ab8a8'; bx.globalAlpha = .5; bx.fillRect(Math.round(x - 4 + Math.cos(a) * 3), Math.round(y - 1), 5, 1); bx.globalAlpha = 1;
       return true;
     }
@@ -9122,21 +9301,50 @@ function obsNear(x, y, fn) {
   const cx = Math.floor(x / OG), cy = Math.floor(y / OG);
   for (let dy = -1; dy <= 1; dy++) for (let dx = -1; dx <= 1; dx++) { const a = G.obsGrid.get((cx + dx) + ',' + (cy + dy)); if (a) for (const o of a) if (!o.dead && fn(o) === false) return; }
 }
+const GROVE_OBS = new Set(['tree', 'pine', 'deadtree', 'bush', 'mushroom', 'cactus', 'coral']);
+const CLUSTER_OBS = new Set(['rock', 'obsidian', 'iceblock', 'crystal', 'column', 'tomb', 'eggs', 'bones']);
+function terrainTrail(x, y, seed) {
+  return Math.abs(vnoise(x / 212, y / 212, seed + 81) - .5) < .062;
+}
+function obstaclePatch(x, y, seed) {
+  const cover = fbm(x / 168, y / 168, seed);
+  const trail = terrainTrail(x, y, seed);
+  const form = vnoise(x / 132, y / 132, seed + 153);
+  return { cover, trail, form };
+}
 function genObstacles() {
   if (!G.obsGrid) return;
-  const sq = G.squad, R = Math.max(VW, VH) * .85, list = THEME_OBS[THEME.id] || THEME_OBS.huaguo, tot = list.reduce((a, b) => a + b[1], 0), seed = WORLD_SEED + 991;
+  const sq = G.squad, R = Math.max(VW, VH) * .85, list = THEME_OBS[THEME.id] || THEME_OBS.huaguo;
+  const seed = WORLD_SEED + 991, city = THEME.id === 'city';
+  const groves = list.filter(([k]) => GROVE_OBS.has(k)), formations = list.filter(([k]) => CLUSTER_OBS.has(k));
   const c0 = Math.floor((sq.x - R) / OC), c1 = Math.floor((sq.x + R) / OC), r0 = Math.floor((sq.y - R) / OC), r1 = Math.floor((sq.y + R) / OC);
   for (let cy = r0; cy <= r1; cy++) for (let cx = c0; cx <= c1; cx++) {
     const key = cx + ',' + cy; if (G.obsCells.has(key)) continue; G.obsCells.add(key);
-    const n = THEME.id === 'city' ? 4 + (hash2(cx, cy, seed + 9) < .5 ? 1 : 0) : hash2(cx, cy, seed) < .55 ? (hash2(cx, cy, seed + 9) < .3 ? 2 : 1) : 0;
+    const local = obstaclePatch((cx + .5) * OC, (cy + .5) * OC, seed);
+    const n = city ? 4 + (hash2(cx, cy, seed + 9) < .5 ? 1 : 0) :
+      local.cover > .55 ? 6 : local.cover > .48 ? 3 : 1;
     for (let i = 0; i < n; i++) {
-      const x = (cx + .1 + hash2(cx, cy, seed + 1 + i * 7) * .8) * OC, y = (cy + .1 + hash2(cx, cy, seed + 2 + i * 7) * .8) * OC;
+      const inset = city ? .1 : .07, jitter = 1 - 2 * inset;
+      const x = (cx + inset + hash2(cx, cy, seed + 1 + i * 7) * jitter) * OC, y = (cy + inset + hash2(cx, cy, seed + 2 + i * 7) * jitter) * OC;
       if (d2(x, y, 0, 0) < 60 * 60 || d2(x, y, sq.x, sq.y) < 40 * 40) continue;
-      if (G.props.some(p => d2(p.x, p.y, x, y) < (p.r + 10) ** 2)) continue;
-      { let near = false; obsNear(x, y, o => { if (d2(o.ox, o.oy, x, y) < (THEME.id === 'city' ? 17 : 22) ** 2) near = true; }); if (near) continue; }
-      let u = hash2(cx, cy, seed + 3 + i * 7) * tot, k = list[0][0];
-      for (const [nm, w] of list) { if ((u -= w) <= 0) { k = nm; break; } }
-      if (THEME.id === 'city' && cityRoad(x, y) !== (k === 'car')) continue; // 楼房在街区里，汽车停在马路上
+      const patch = city ? local : obstaclePatch(x, y, seed);
+      const roll = hash2(cx, cy, seed + 4 + i * 7);
+      if (!city && (patch.trail || (patch.cover < .53 && roll > .12))) continue;
+      if (G.props.some(p => inPool(p, x, y, 10))) continue;
+      const spacing = city ? 17 : patch.cover > .53 ? 15 : 20;
+      let near = false;
+      obsNear(x, y, o => { if (d2(o.ox, o.oy, x, y) < spacing ** 2) { near = true; return false; } });
+      if (near) continue;
+      let pool = list;
+      if (!city && patch.cover >= .53) {
+        const biome = biomeAt(Math.floor(x / TILE), Math.floor(y / TILE));
+        const natural = biome === 'grass' || biome === 'meadow';
+        const cluster = natural && patch.form > .37 && groves.length ? groves : formations.length ? formations : groves;
+        if (cluster.length && roll < .93) pool = cluster;
+      }
+      let u = hash2(cx, cy, seed + 3 + i * 7) * pool.reduce((sum, [, w]) => sum + w, 0), k = pool[0][0];
+      for (const [nm, w] of pool) { if ((u -= w) <= 0) { k = nm; break; } }
+      if (city && cityRoad(x, y) !== (k === 'car')) continue;
       const e = spawnEnemy('obs_' + k, x, y);
       e.obs = k; e.ox = x; e.oy = y; e.hp = e.maxHp = OBS[k].hp * (1 + G.t / 240); e.lag = 1; e.spd = 0; e.dmg = 0;
       obsIndex(e, true); G.obsN = (G.obsN || 0) + 1;
@@ -9283,7 +9491,6 @@ function weatherTick(dt) {
       G.timers.push({ t: .6, fn: () => {
         skyBolt(x, y); Snd.play('thunder'); G.flash = Math.max(G.flash, .15); G.flashCol = '#e8f0ff';
         query(x, y, 18, e => hurtEnemy(e, 30 * sc, { tags: ['thunder'], el: 'thunder', status: { shock: 1 }, src: 'weather', knock: 10, fx: x, fy: y }));
-        if (G.heroes.some(h => d2(h.x, h.y, x, y) < 18 * 18)) hurtSquad(8 + G.t / 40, 'weather', '天雷');
         elemTerrain('thunder', x, y);
       } });
     }
@@ -10233,7 +10440,6 @@ function render(dt) {
   drawElem(T);
   drawProps(T);
   drawEhaz();
-  drawEnemyWalls();
   // 地面区域
   for (const z of G.zones) drawZone(z, T);
   // 光环
@@ -10302,6 +10508,25 @@ function render(dt) {
     sprC(img, pr.x, pr.y, ang, sc);
   }
   for (const b of G.ebullets) {
+    if (b.wind) {
+      const color = b.friendly ? '#b8ffc1' : '#cefff5';
+      circ(b.x, b.y, b.r + 1, color, .27);
+      circ(b.x, b.y, b.r, color, .85, true, 1);
+      const a = b.t * 20;
+      R2(X(b.x + Math.cos(a) * b.r) - 1, Y(b.y + Math.sin(a) * b.r), 3, 1, color);
+      continue;
+    }
+    if (b.electric) {
+      const a = b.t * 18, r = b.r;
+      circ(b.x, b.y, r + 2, '#437bc6', .8);
+      circ(b.x, b.y, r, b.col, .92);
+      circ(b.x, b.y, r * .48, '#f7fcff', .95);
+      for (let i = 0; i < 3; i++) {
+        const t = a + i * TAU / 3;
+        R2(X(b.x + Math.cos(t) * (r + 2)), Y(b.y + Math.sin(t) * (r + 2)), 2, 1, '#d1fcff');
+      }
+      continue;
+    }
     if (b.col) {
       const pulse = b.turn && Math.abs(b.t - b.turn) < .13;
       circ(b.x, b.y, b.r + (pulse ? 3 : 1), b.col, pulse ? .95 : .65, true, 1);
@@ -10452,6 +10677,14 @@ function drawDeathDissolve(d, k, left) {
 function drawEnemy(e, T) {
   if (e.obs) { drawObs(e, T); return; }
   if (e.civ) { drawCiv(e, T); return; }
+  if (e.healCoreEnd) {
+    const pulse = .5 + .5 * Math.sin(e.ft * (e.healCoreEnd - G.t < .8 ? 20 : 10));
+    circ(e.x, e.y, 5 + pulse * 4, '#83f4bb', .22 + pulse * .26);
+    const x = X(e.x), y = Y(e.y);
+    R2(x - 2, y - 4, 4, 8, '#2a7453'); R2(x - 4, y - 2, 8, 4, '#2a7453');
+    R2(x - 1, y - 3, 2, 6, '#c0ffe6'); R2(x - 3, y - 1, 6, 2, '#c0ffe6');
+    return;
+  }
   const art = e.art, fr = e.frame;
   if (e.hidden) { const x = X(e.x), y = Y(e.y); bx.fillStyle = '#5a4020'; bx.fillRect(x - Math.round(e.r * .8), y, Math.round(e.r * 1.6), 2); bx.fillStyle = '#a08050'; bx.fillRect(x - Math.round(e.r * .5), y - 1, Math.round(e.r), 1); return; }
   shadow(e.x, e.y + e.r * .6, e.r * 2);
@@ -10476,6 +10709,13 @@ function drawEnemy(e, T) {
     bx.restore();
   } else spr(img, e.x, foot, flip, e.phased ? .3 : null);
   if (e.elite) drawEliteAura(e,T,hop);
+  if (e.carryIce) drawIceCargo(e.x, e.y - hop - e.r * .68);
+  if (e.tailUntil > G.t) {
+    const a = e.tailPose, x = e.x + Math.cos(a) * e.r * .8, y = e.y - hop + Math.sin(a) * e.r * .8;
+    const tx = x + Math.cos(a) * 5, ty = y + Math.sin(a) * 5 - 5;
+    pline(x, y, tx, ty, '#85452d', 2);
+    R2(X(tx) - 1, Y(ty) - 1, 2, 2, '#ffd294');
+  }
   if (e.shield > 0 && !e.elite) circ(e.x, e.y - hop, e.r + 3, '#9fd8ff', .35 + .4 * e.shield / e.shieldMax, true, 1);
   if (e.mode === 'tele' && !e.boss) circ(e.x, e.y, e.r + 4, '#ff3a3a', .5 + Math.sin(T * 30) * .3, true, 1);
   if (e.st.markT > 0) { const r = e.r + 3, x = X(e.x), y = Y(e.y); bx.fillStyle = '#ff4a4a'; for (const [dx, dy] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) { bx.fillRect(x + dx * r - (dx > 0 ? 1 : 0), y + dy * r, 2, 1); bx.fillRect(x + dx * r, y + dy * r - (dy > 0 ? 1 : 0), 1, 2); } }
@@ -10640,6 +10880,36 @@ function drawEntryScene(f, k) {
   bx.drawImage(crest, Math.round(cx - size / 2), Math.round(cy - size * .95), size, size);
   bx.restore();
 }
+function drawStaffSwing(f, progress, fade) {
+  const dir = f.rev ? -1 : 1;
+  const angle = f.a + dir * f.arc * (.08 + progress * .37);
+  const gap = Math.min(.33, f.arc * .16);
+  const x = X(lerp(f.staff.x, f.x, fade * .68)), y = Y(lerp(f.staff.y, f.y, fade * .68) - 4);
+  const reach = Math.max(9, f.r - 2), end = clamp(Math.round(reach * .17), 3, 7);
+  const half = f.style === 'heavy' ? 3 : 2;
+  for (let i = 2; i >= 0; i--) {
+    bx.save();
+    bx.translate(x, y);
+    bx.rotate(angle - i * dir * gap);
+    bx.globalAlpha = fade * (i === 2 ? .18 : i === 1 ? .37 : .96);
+    bx.fillStyle = '#42212a';
+    bx.fillRect(1, -half - 1, reach, 2 * half + 2);
+    bx.fillStyle = '#ac392f';
+    bx.fillRect(2, -half, reach - 2, 2 * half);
+    bx.fillStyle = '#ffcb55';
+    bx.fillRect(2, -half, end, 2 * half);
+    bx.fillRect(reach - end, -half, end, 2 * half);
+    bx.fillStyle = '#fff0b7';
+    bx.fillRect(reach - end, -half, end, 1);
+    bx.restore();
+  }
+}
+function drawIceCargo(wx, wy) {
+  const x = X(wx), y = Y(wy);
+  R2(x - 4, y - 2, 8, 4, '#315d84'); R2(x - 2, y - 4, 4, 8, '#315d84');
+  R2(x - 3, y - 1, 6, 2, '#9fe8ff'); R2(x - 2, y - 3, 4, 5, '#9fe8ff');
+  R2(x - 2, y - 2, 2, 2, '#f1ffff');
+}
 function drawFx(f) {
   const k = f.t / f.dur, a = 1 - k;
   switch (f.k) {
@@ -10665,6 +10935,7 @@ function drawFx(f) {
         bx.strokeStyle = f.col; bx.lineWidth = wide; bx.stroke();
         bx.strokeStyle = '#fff1cb'; bx.lineWidth = 2;
         bx.beginPath(); bx.arc(x, y, r, start, end); bx.stroke();
+        if (f.staff) drawStaffSwing(f, progress, fade);
       }
       bx.restore(); break;
     }
@@ -10829,6 +11100,19 @@ function drawFx(f) {
       }
       for (const [x,y] of f.points) eliteSigil('lattice',X(x)-2,Y(y)-3,f.col);
       bx.globalAlpha=1;
+      break;
+    }
+    case 'iceCargoRoll':
+      drawIceCargo(lerp(f.x, f.tx, k), lerp(f.y, f.ty, k) - Math.sin(k * Math.PI) * 6);
+      break;
+    case 'scoutBeam': {
+      const e = f.caster;
+      if (e.dead || e.charmT > 0 || e.st?.frzT > 0 || e.hidden) break;
+      const angle = f.a + clamp((G.t - f.started) / f.dur, 0, 1) * f.sweep;
+      const x = X(f.x), y = Y(f.y);
+      bx.save(); bx.globalAlpha = .26; bx.fillStyle = f.col;
+      bx.beginPath(); bx.moveTo(x, y); bx.arc(x, y, f.r, angle - f.width, angle + f.width); bx.closePath(); bx.fill();
+      bx.globalAlpha = .78; bx.strokeStyle = f.col; bx.lineWidth = 1; bx.stroke(); bx.restore();
       break;
     }
     case 'enemyLob': {
@@ -12071,7 +12355,7 @@ const UI = (() => {
       G.state = 'play'; grace();
       if (!first && TAL('rain')) { const sq = G.squad; sq.hp = sq.maxHp; sq.shield = Math.max(sq.shield || 0, sq.maxHp * .3); G.timers.push({ t: .3, fn: () => addLabel(sq.x, sq.y - 30, '神降甘霖', '#9fe8ff', 14) }); }
       if (TAL('choose') && !G.bot) G.timers.push({ t: .15, fn: () => chooseStart(def, initial) });
-      if (!first) { G.newHeroBoost = 3; proc('join'); }
+      if (!first) proc('join');
       if (first && G.giftTre) G.timers.push({ t: 1.1, fn: () => gift() });
       if (G.heroes.length === 3 && Meta.lv('trinity')) G.timers.push({ t: 1.45, fn: () => { G.heroes.slice(0, 2).forEach((x, i) => G.timers.push({ t: i * .35, fn: () => fireEntry(x, false) })); addLabel(G.squad.x, G.squad.y - 34, '三神同心', '#ffd84a', 18); } });
       h.spawnT = G.t + .32; h.whiteT = G.t + .62; G.pillars = G.pillars || []; G.pillars.push({ h, t0: G.t });
@@ -12117,38 +12401,47 @@ const UI = (() => {
     if (s.def.slot === 1) { const ms = getSkill(sk[0]); return !!ms && ms.lv >= 3; }
     return false;
   }
-  function choices(openingOffer) {
+  function choices(openingOffer, arrival = 0) {
+    const latest = G.heroes.at(-1), exclusive = arrival === 4;
+    const biasedPick = (pool, owner) => {
+      if (!arrival || exclusive) return pick(pool);
+      return pick(pool.concat(pool.filter(item => owner(item) === latest)));
+    };
     const evo = [], bonds = [], news = [], ups = [], hid = [];
-    for (const h of G.heroes) for (const sd of h.def.skills) {
+    for (const h of exclusive ? [latest] : G.heroes) for (const sd of h.def.skills) {
       const s = getSkill(sd), max = sd.kind === 'passive' ? 3 : 5;
       if (!s && sd.hidden) { if (hiddenReady(sd)) hid.push({ type: 'new', sd, h, hid: 1 }); continue; }
       if (!s) news.push({ type: 'new', sd, h });
       else if (s.lv < max) ups.push({ type: 'up', s, sd, h });
       else if (sd.evo && !s.evo && evoReady(s)) evo.push({ type: 'evo', s, sd, h });
     }
-    for (const b of availableBonds()) bonds.push({ type: 'bond', b });
+    if (!exclusive) for (const b of availableBonds()) bonds.push({ type: 'bond', b });
     const out = [], used = new Set(), NC = TAL('wide') ? 4 : 3;
     const take = c => { if (!c) return; const k = c.sd ? c.sd.id : c.b ? c.b.id : c.type; if (used.has(k)) return; used.add(k); out.push(c); };
-    if (openingOffer) take(news.find(c => c.sd === openingOffer));
-    if (hid.length && (Meta.lv('hidden') || hid.some(hiddenSure) || Math.random() < .4)) take(hid.find(hiddenSure) || pick(hid));
+    if (!exclusive && openingOffer) take(news.find(c => c.sd === openingOffer));
+    if (hid.length && (Meta.lv('hidden') || hid.some(hiddenSure) || Math.random() < .4)) take(hid.find(hiddenSure) || biasedPick(hid, c => c.h));
     if (bonds.length) take(pick(bonds));
-    if (evo.length) take(pick(evo));
-    if (G.newHeroBoost > 0) {
-      const nh = G.heroes[G.heroes.length - 1], pool = news.concat(ups).filter(c => c.h === nh && !used.has(c.sd.id));
-      if (pool.length) take(pick(pool)); G.newHeroBoost--;
-    }
+    if (evo.length) take(biasedPick(evo, c => c.h));
     const lines = G.skills.length;
     let guard = 0;
     while (out.length < NC && guard++ < 50) {
       const heroes = G.heroes.filter(h => news.concat(ups).some(c => c.h === h && !used.has(c.sd.id)));
       if (!heroes.length) break;
-      const h = pick(heroes), pool = [];
+      const h = biasedPick(heroes, h => h), pool = [];
       for (const c of news) if (c.h === h && !used.has(c.sd.id)) { pool.push(c); if (lines < 6 + G.heroes.length) pool.push(c); }
       for (const c of ups) if (c.h === h && !used.has(c.sd.id)) pool.push(c);
       take(pick(pool));
     }
-    if (out.length < NC) take({ type: 'heal' });
-    if (out.length < NC) take({ type: 'power' });
+    if (exclusive) {
+      while (out.length < NC) {
+        const extras = hid.concat(evo).filter(c => !used.has(c.sd.id));
+        if (!extras.length) break;
+        take(pick(extras));
+      }
+    } else {
+      if (out.length < NC) take({ type: 'heal' });
+      if (out.length < NC) take({ type: 'power' });
+    }
     const el0 = G.heroes[0] && G.heroes[0].def.skills[0].el;
     for (const c of out) if (c.type === 'new' || c.type === 'up') { c.rar = rollUpRar(TAL('affinity') && el0 && c.sd.el === el0 ? 1 : 0); if (G.reviewBoost && c.rar === 'c') c.rar = 'r'; }
     G.reviewBoost = 0;
@@ -12215,9 +12508,11 @@ const UI = (() => {
           !getSkill(sd) && (sd.base.dmg > 0 || sd.base.dps > 0 || sd.base.mine > 0));
       }
     }
-    openPicker('等级提升', 'LV.' + G.level, choices(openingOffer), c => applyChoice(c), true, openingOffer);
+    const arrival = G.arrivalOffers || 0;
+    if (arrival) G.arrivalOffers--;
+    openPicker('等级提升', 'LV.' + G.level, choices(openingOffer, arrival), c => applyChoice(c), true, openingOffer, arrival);
   }
-  function openPicker(title, sub, list, onPick, canReroll, openingOffer) {
+  function openPicker(title, sub, list, onPick, canReroll, openingOffer, arrival = 0) {
     show('modal');
     const m = $('modal');
     m.querySelector('.micon').hidden = true;
@@ -12236,7 +12531,7 @@ const UI = (() => {
     rb.hidden = !canReroll || (Records.d.runs <= 1 && G.heroes.length < 2); if ($('giveupBtn')) $('giveupBtn').hidden = true; if ($('gambleBtn')) $('gambleBtn').hidden = true; if ($('takeAllBtn')) $('takeAllBtn').hidden = true;
     rb.classList.add('adbtn'); rb.innerHTML = adBtnHTML('刷新', G.adRefresh); rb.disabled = G.adRefresh <= 0;
     rb.onclick = () => { if (G.adRefresh <= 0 || picked) return; Snd.play('click'); picked = true;
-      Ads.show(() => { G.adRefresh--; const nl = choices(openingOffer); if (TAL('reroll')) { const up = { c: 'r', r: 'e', e: 'l', l: 'l' }; nl.forEach(c => { if (c.rar) c.rar = up[c.rar]; }); } openPicker(title, sub, nl, onPick, true, openingOffer); }); };
+      Ads.show(() => { G.adRefresh--; const nl = choices(openingOffer, arrival); if (TAL('reroll')) { const up = { c: 'r', r: 'e', e: 'l', l: 'l' }; nl.forEach(c => { if (c.rar) c.rar = up[c.rar]; }); } openPicker(title, sub, nl, onPick, true, openingOffer, arrival); }); };
     let sk = $('skipBtn'); if (!sk) { sk = el('button', 'reroll'); sk.id = 'skipBtn'; sk.type = 'button'; rb.after(sk); }
     sk.hidden = !(canReroll && TAL('skip')); sk.textContent = '舍得：放弃，换 3 香火和 10% 生命';
     sk.onclick = () => { if (picked) return; picked = true; inc('skip'); Snd.play('click'); hideAll(); gainCoin(3, G.squad.x, G.squad.y); healSquadRaw(G.squad.maxHp * .1); G.state = 'play'; grace(); };
