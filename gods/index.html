@@ -5216,7 +5216,12 @@ function MODS0() {
     burstAmp: 1, burstR: 1, shatterAmp: 1, shardAdd: 0, spreadAmp: 1, callAmp: 1, callJumps: 2, pierceAdd: 0, chestLuck: 0, power: 0
   };
 }
-function xpNeed(l) { return Math.round(5 + l * 3 + l * l * .3); }
+function xpNeed(level) {
+  const ramp = Math.max(0, level - 3);
+  const lateRamp = Math.max(0, level - 40);
+  // 从 1 到 32 级共需 8699 经验，对齐旧曲线升到 40 级的总量。
+  return Math.round(5 + 3 * level + .3 * level ** 2 + .02385 * ramp ** 3 + 3 * lateRamp ** 2);
+}
 const scaleT = () => 1 + G.t / 140;
 
 function newGame() {
@@ -5549,6 +5554,7 @@ function endlessK(t) {
   if (t >= 540) k *= 2 * Math.pow(1.6, (t - 540) / 60);
   return k;
 }
+const HP_AT_FIVE_MINUTES = [5, 7, 10, 12, 15, 16];
 function bossSizeScale(opt) {
   return opt?.final || opt?.endlessBoss ? 2 : 1.5;
 }
@@ -5557,12 +5563,13 @@ function spawnEnemy(type, x, y, opt) {
   const def = ENEMIES[type] || BOSSES[type], boss = !!BOSSES[type], elite = !!opt.elite;
   const sizeScale = boss ? bossSizeScale(opt) : 1;
   const hpProgress = G.t / RUN_BOSS_T;
-  const initialHp = G.asc ? ascF('hp') : .5;
-  const hpAtFiveMinutes = 5 + (G.asc || 0);
+  const asc = G.asc || 0;
+  const initialHp = asc ? ascF('hp') : .5;
+  const hpAtFiveMinutes = HP_AT_FIVE_MINUTES[asc] ?? (16 + asc - 5);
   const initialWeight = Math.max(0, 1 - hpProgress);
   const hpS = 1 + hpProgress * (hpAtFiveMinutes - 1) + (initialHp - 1) * initialWeight;
   const bossHpScale = lerp(initialHp, hpAtFiveMinutes / 5, Math.min(1, hpProgress));
-  const bossDifficultyScale = boss && (G.asc || 0) <= 1 ? .5 : 1;
+  const bossDifficultyScale = boss && asc <= 1 ? .5 : 1;
   const lateHp = Math.max(0, G.t - 360) / 30;
   const es = G.endless ? Math.max(0, G.t - G.endlessT - 60) : 0;
   const endlessHp = 1 + es / 22 + es * es / 2600;
