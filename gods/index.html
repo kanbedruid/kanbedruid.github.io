@@ -1774,6 +1774,15 @@ const add = (k, v) => p => { p[k] = (p[k] || 0) + v; };
 const set = (k, v) => p => { p[k] = v; };
 const all = (...fs) => p => fs.forEach(f => f(p));
 const madd = (k, v) => m => { m[k] = (m[k] || 0) + v; };
+function addDodge(m, bonus) {
+  const flatBonus = Math.min(bonus, Math.max(0, .7 - m.dodge));
+  m.dodge += flatBonus;
+  bonus -= flatBonus;
+  const halfBonus = Math.min(bonus * .5, Math.max(0, .9 - m.dodge));
+  m.dodge += halfBonus;
+  bonus -= halfBonus * 2;
+  m.dodge += (1 - m.dodge) * bonus;
+}
 const mmul = (k, v) => m => { m[k] *= v; };
 const mset = (k, v) => m => { m[k] = v; };
 
@@ -2259,7 +2268,7 @@ const TREASURES = [
   T('zhaohun', '招魂幡', 'c', '召唤物伤害 +25%', m => { m.summonDmg += .25; }, { need: 'summon' }),
   T('luopan', '罗盘', 'c', '拾取范围 +60%', m => { m.magnet *= 1.6; }),
   T('hulujiu', '葫芦酒', 'c', '生命低于 40% 时，伤害 +25%', m => { m.lowHpDmg += .25; }),
-  T('hushen', '护身符', 'c', '完全躲开伤害的几率 +6%', m => { m.dodge += .06; }),
+  T('hushen', '护身符', 'c', '完全躲开伤害的几率 +6%', m => { addDodge(m, .06); }),
   T('bagualu', '八卦炉', 'r', '燃烧伤害 +50%，燃烧可叠加的层数 +2', m => { m.burnDmg *= 1.5; m.burnMaxAdd += 2; }, { need: 'burn' }),
   T('leigong', '雷公鼓', 'r', '带电的敌人额外受到 +15% 伤害，带电时间 +50%', m => { m.shockAmp += .15; m.shockDur *= 1.5; }, { need: 'shock' }),
   T('jingang', '金刚琢', 'r', '钝器伤害 +30%，击退距离 +40%', m => { m.bluntDmg += .3; m.knock *= 1.4; }, { need: 'blunt' }),
@@ -2384,7 +2393,7 @@ const PSV = {
   xp: [['经验获取 +10%', mmul('xp', 1.1)], ['拾取范围 +50%', mmul('magnet', 1.5)], ['经验获取 +12%', mmul('xp', 1.12)]],
   armor: [['受到的伤害 -1', madd('armor', 1)], ['最大生命 +30', madd('maxHp', 30)], ['受到的伤害 -2', madd('armor', 2)]],
   boss: [['对精英与首领伤害 +25%', madd('bossDmg', .25)], ['对精英与首领伤害 +25%', madd('bossDmg', .25)], ['对满血的敌人伤害 +40%', madd('fullHpDmg', .4)]],
-  dodge: [['完全躲开伤害的几率 +6%', madd('dodge', .06)], ['完全躲开伤害的几率 +6%', madd('dodge', .06)], ['每次暴击回复少量生命', madd('critHeal', .3)]],
+  dodge: [['完全躲开伤害的几率 +6%', m => addDodge(m, .06)], ['完全躲开伤害的几率 +6%', m => addDodge(m, .06)], ['每次暴击回复少量生命', madd('critHeal', .3)]],
   regen: [['每秒生命回复 +0.8', madd('regen', .8)], ['每秒生命回复 +1', madd('regen', 1)], ['每击败 30 个敌人回复 5 点生命', madd('killHeal', 5)]],
   orbit: [['环绕技能伤害 +30%', madd('orbitDmg', .3)], ['环绕转速 +30%', madd('orbitSpd', .3)], ['环绕技能伤害 +30%', madd('orbitDmg', .3)]],
   move: [['移动中伤害 +12%', madd('moveDmg', .12)], ['移动速度 +20%', madd('speedAdd', 0.2)], ['移动中伤害 +15%', madd('moveDmg', .15)]],
@@ -3170,7 +3179,7 @@ const GLOBS = {
   summon: ['召唤物伤害 +35%', m => { m.summonDmg += .35; }],
   frost: ['冻住时间 +50%', m => { m.frzDur *= 1.5; }],
   mark: ['被标记的敌人受到伤害 +20%', m => { m.markDmg += .2; }],
-  dodge: ['完全躲开伤害的几率 +8%', m => { m.dodge += .08; }],
+  dodge: ['完全躲开伤害的几率 +8%', m => { addDodge(m, .08); }],
   boss: ['对精英与首领伤害 +30%', m => { m.bossDmg += .3; }],
   magnet: ['拾取范围 +60%', m => { m.magnet *= 1.6; }],
   cdg: ['全部冷却 -10%', m => { m.cd *= .9; }],
@@ -3739,7 +3748,7 @@ const WXOF = h => ({ fire: 'firerain', water: 'rain', thunder: 'thunder', ice: '
 const EASY_COND = [
   { id: 'theme', txt: (h, c) => `在「${THEMES.find(t => t.id === c.v).name}」作战时`, ok: c => THEME.id === c.v },
   { id: 'bond', txt: h => `${h.name}与两位同伴都结成天作之合后`, ok: (c, h) => G.bonds.filter(b => b.ids.includes(h.id)).length >= 2 },
-  { id: 'crit', txt: () => '暴击率达到 35% 后', ok: () => G.mods.crit >= .35 },
+  { id: 'crit', txt: () => '', ok: () => G.mods.crit >= 1 - 4 * Number.EPSILON },
   { id: 'shrine', txt: () => '本局在 4 座神龛祈福后', ok: () => (AS().shrine || 0) >= 4 },
   { id: 'elite', txt: () => '本局击败 30 个精英后', ok: () => (AS().eliteK || 0) >= 30 },
   { id: 'react', txt: () => '本局触发 4 种不同的元素反应后', ok: () => Object.keys(AS().rx || {}).length >= 4 },
@@ -3840,7 +3849,7 @@ TREASURES.push(
   T('x_caoxie', '草鞋', 'c', '移动速度 +16%，拾取范围 +10%', m => { m.speedAdd += 0.16; m.magnet *= 1.1; }),
   T('x_tieqiu', '铁球', 'c', '钝器伤害 +12%，受到的伤害 -1', m => { m.bluntDmg += 0.12; m.armor += 1; }),
   T('x_denglong', '灯笼', 'c', '攻击范围 +8%，被标记的敌人受到伤害 +8%', m => { m.area *= 1.08; m.markDmg += 0.08; }),
-  T('x_yupei', '玉佩', 'c', '最大生命 +20，完全躲开伤害的几率 +3%', m => { m.maxHp += 20; m.dodge += 0.03; }),
+  T('x_yupei', '玉佩', 'c', '最大生命 +20，完全躲开伤害的几率 +3%', m => { m.maxHp += 20; addDodge(m, 0.03); }),
   T('x_shuangjian', '霜剑', 'c', '冻住时间 +20%，对减速中的敌人伤害 +10%', m => { m.frzDur *= 1.2; m.slowDmg += 0.1; }, { need: ['frz', 'slow'] }),
   T('x_fuzhou', '符咒', 'c', '召唤物伤害 +15%', m => { m.summonDmg += 0.15; }, { need: 'summon' }),
   T('x_guqin', '古琴', 'c', '全部技能冷却 -6%', m => { m.cd *= 0.94; }),
@@ -3857,7 +3866,7 @@ TREASURES.push(
   T('x_ankh', '生命之符', 'c', '最大生命 +30', m => { m.maxHp += 30; }),
   T('x_udjat', '荷鲁斯之眼', 'c', '暴击率 +6%', m => { m.crit += 0.06; }),
   T('x_papyrus', '莎草纸卷', 'c', '经验获取 +8%，全部技能冷却 -3%', m => { m.xp *= 1.08; m.cd *= 0.97; }),
-  T('x_olive', '橄榄枝', 'c', '每秒生命回复 +0.4，完全躲开伤害的几率 +2%', m => { m.regen += 0.4; m.dodge += 0.02; }),
+  T('x_olive', '橄榄枝', 'c', '每秒生命回复 +0.4，完全躲开伤害的几率 +2%', m => { m.regen += 0.4; addDodge(m, 0.02); }),
   T('x_laurel', '月桂冠', 'c', '经验获取 +8%，全部伤害 +4%', m => { m.xp *= 1.08; m.dmgAdd += 0.04; }),
   T('x_amphora', '双耳酒壶', 'c', '生命低于 40% 时伤害 +15%，每秒生命回复 +0.3', m => { m.lowHpDmg += 0.15; m.regen += 0.3; }),
   T('x_owlcoin', '猫头鹰银币', 'c', '拾取范围 +30%，经验获取 +5%', m => { m.magnet *= 1.3; m.xp *= 1.05; }),
@@ -3866,9 +3875,9 @@ TREASURES.push(
   T('x_mead', '蜂蜜酒', 'c', '最大生命 +15，生命低于 40% 时伤害 +12%', m => { m.maxHp += 15; m.lowHpDmg += 0.12; }),
   T('x_horn', '号角', 'c', '移动中伤害 +10%，移动速度 +8%', m => { m.moveDmg += 0.1; m.speedAdd += 0.08; }),
   T('x_magatama', '勾玉', 'c', '暴击率 +3%，全部技能冷却 -3%', m => { m.crit += 0.03; m.cd *= 0.97; }),
-  T('x_omamori', '御守', 'c', '完全躲开伤害的几率 +4%', m => { m.dodge += 0.04; }),
+  T('x_omamori', '御守', 'c', '完全躲开伤害的几率 +4%', m => { addDodge(m, 0.04); }),
   T('x_sake', '御神酒', 'c', '站着不动时伤害 +12%，每秒生命回复 +0.3', m => { m.stillDmg += 0.12; m.regen += 0.3; }),
-  T('x_kitsune', '狐面', 'c', '完全躲开伤害的几率 +3%，移动速度 +10%', m => { m.dodge += 0.03; m.speedAdd += 0.1; }),
+  T('x_kitsune', '狐面', 'c', '完全躲开伤害的几率 +3%，移动速度 +10%', m => { addDodge(m, 0.03); m.speedAdd += 0.1; }),
   T('x_rudraksha', '菩提子', 'c', '全部技能冷却 -4%，每秒生命回复 +0.3', m => { m.cd *= 0.96; m.regen += 0.3; }),
   T('x_lotusseed', '莲子', 'c', '最大生命 +15，经验获取 +6%', m => { m.maxHp += 15; m.xp *= 1.06; }),
   T('x_conch', '法螺', 'c', '攻击范围 +7%，击退距离 +20%', m => { m.area *= 1.07; m.knock *= 1.2; }),
@@ -3876,7 +3885,7 @@ TREASURES.push(
   T('x_quetzal', '绿咬鹃羽', 'c', '飞行道具速度 +15%，技能持续时间 +8%', m => { m.pspeed *= 1.15; m.dur *= 1.08; }),
   T('x_obsidian', '黑曜石刃', 'c', '穿刺伤害 +12%，暴击率 +3%', m => { m.pierceDmg += 0.12; m.crit += 0.03; }),
   T('x_cacao', '可可豆', 'c', '移动速度 +12%，每秒生命回复 +0.3', m => { m.speedAdd += 0.12; m.regen += 0.3; }),
-  T('x_shamrock', '三叶草', 'c', '宝箱更容易开出高品质宝物，完全躲开伤害的几率 +2%', m => { m.dodge += 0.02; }, { onPick: G => { G.luck = (G.luck || 0) + 1; } }),
+  T('x_shamrock', '三叶草', 'c', '宝箱更容易开出高品质宝物，完全躲开伤害的几率 +2%', m => { addDodge(m, 0.02); }, { onPick: G => { G.luck = (G.luck || 0) + 1; } }),
   T('x_ogham', '欧甘木签', 'c', '召唤物伤害 +10%，全部技能冷却 -3%', m => { m.summonDmg += 0.1; m.cd *= 0.97; }),
   T('x_drum', '萨满鼓', 'c', '召唤物伤害 +12%，攻击范围 +5%', m => { m.summonDmg += 0.12; m.area *= 1.05; }),
   T('x_totem', '图腾木偶', 'c', '召唤物数量 +1', m => { m.summonCount += 1; }, { need: 'summon' }),
@@ -3890,7 +3899,7 @@ TREASURES.push(
   T('x_yuxi', '传国玉玺', 'r', '全部伤害 +12%，经验获取 +8%', m => { m.dmgAdd += 0.12; m.xp *= 1.08; }),
   T('x_qilin', '麒麟角', 'r', '最大生命 +30，受到的伤害 -1，每秒生命回复 +0.4', m => { m.maxHp += 30; m.armor += 1; m.regen += 0.4; }),
   T('x_longzhu', '龙珠', 'r', '环绕技能伤害 +25%，攻击范围 +8%', m => { m.orbitDmg += 0.25; m.area *= 1.08; }),
-  T('x_gouyu', '阴阳鱼', 'r', '全部技能冷却 -8%，完全躲开伤害的几率 +4%', m => { m.cd *= 0.92; m.dodge += 0.04; }),
+  T('x_gouyu', '阴阳鱼', 'r', '全部技能冷却 -8%，完全躲开伤害的几率 +4%', m => { m.cd *= 0.92; addDodge(m, 0.04); }),
   T('x_sanmei', '三昧真火', 'r', '燃烧伤害 +30%，火焰伤害 +10%', m => { m.burnDmg *= 1.3; m.fireDmg += 0.1; }, { need: ['burn', 'fire'] }),
   T('x_jiaolong', '蛟龙筋', 'r', '穿刺攻击额外穿透 +1，飞行道具速度 +15%', m => { m.pierceAdd += 1; m.pspeed *= 1.15; }),
   T('x_xuanyuan', '轩辕剑穗', 'r', '暴击率 +8%，暴击伤害 +20%', m => { m.crit += 0.08; m.critDmg += 0.2; }),
@@ -3921,7 +3930,7 @@ TREASURES.push(
   T('x_sun_disk', '太阳圆盘', 'r', '火焰伤害 +18%，攻击范围 +8%', m => { m.fireDmg += 0.18; m.area *= 1.08; }),
   T('x_djed', '杰德柱', 'r', '受到的伤害 -2，最大生命 +20', m => { m.armor += 2; m.maxHp += 20; }),
   T('x_was', '瓦斯权杖', 'r', '召唤物伤害 +20%，全部技能冷却 -5%', m => { m.summonDmg += 0.2; m.cd *= 0.95; }),
-  T('x_feather_maat', '玛特之羽', 'r', '完全躲开伤害的几率 +6%，暴击率 +4%', m => { m.dodge += 0.06; m.crit += 0.04; }),
+  T('x_feather_maat', '玛特之羽', 'r', '完全躲开伤害的几率 +6%，暴击率 +4%', m => { addDodge(m, 0.06); m.crit += 0.04; }),
   T('x_jaguar', '美洲豹皮', 'r', '移动中伤害 +15%，暴击率 +4%', m => { m.moveDmg += 0.15; m.crit += 0.04; }),
   T('x_xiuhcoatl', '火蛇', 'r', '火焰伤害 +15%，燃烧伤害 +20%', m => { m.fireDmg += 0.15; m.burnDmg *= 1.2; }, { need: ['fire', 'burn'] }),
   T('x_gae_bolg', '穿心枪头', 'r', '穿刺攻击额外穿透 +1，穿刺伤害 +12%', m => { m.pierceAdd += 1; m.pierceDmg += 0.12; }, { need: 'pierce' }),
@@ -3941,19 +3950,19 @@ TREASURES.push(
   T('x_wanhun', '万魂幡', 'e', '召唤物伤害 +35%，召唤物数量 +1', m => { m.summonDmg += 0.35; m.summonCount += 1; }, { need: 'summon' }),
   T('x_lingbao', '灵宝天尊印', 'e', '经验获取 +20%，全部技能冷却 -8%', m => { m.xp *= 1.2; m.cd *= 0.92; }),
   T('x_harpe', '哈耳珀镰刀', 'e', '生命低于 10% 的普通敌人直接消灭，对精英与首领伤害 +15%', m => { m.execute = Math.max(m.execute, 0.1); m.bossDmg += 0.15; }),
-  T('x_helm_hades', '隐身头盔', 'e', '完全躲开伤害的几率 +12%，移动中伤害 +10%', m => { m.dodge += 0.12; m.moveDmg += 0.1; }),
+  T('x_helm_hades', '隐身头盔', 'e', '完全躲开伤害的几率 +12%，移动中伤害 +10%', m => { addDodge(m, 0.12); m.moveDmg += 0.1; }),
   T('x_golden_fleece', '金羊毛', 'e', '最大生命 +60，每秒生命回复 +1.2', m => { m.maxHp += 60; m.regen += 1.2; }),
   T('x_pandora', '潘多拉魔盒', 'e', '全部伤害 +22%，受到的伤害 +1', m => { m.dmgAdd += 0.22; m.armor += -1; }),
   T('x_megingjord', '力量腰带', 'e', '钝器伤害 +35%，击退距离 +40%，最大生命 +20', m => { m.bluntDmg += 0.35; m.knock *= 1.4; m.maxHp += 20; }),
   T('x_hofund', '霍夫德剑', 'e', '暴击率 +10%，穿刺伤害 +20%', m => { m.crit += 0.1; m.pierceDmg += 0.2; }),
   T('x_odin_eye', '奥丁之眼', 'e', '暴击率 +10%，被标记的敌人受到伤害 +20%，标记持续 +2 秒', m => { m.crit += 0.1; m.markDmg += 0.2; m.markDur += 2; }),
-  T('x_yasakani', '八尺琼勾玉', 'e', '全部技能冷却 -10%，暴击率 +6%，完全躲开伤害的几率 +4%', m => { m.cd *= 0.9; m.crit += 0.06; m.dodge += 0.04; }),
+  T('x_yasakani', '八尺琼勾玉', 'e', '全部技能冷却 -10%，暴击率 +6%，完全躲开伤害的几率 +4%', m => { m.cd *= 0.9; m.crit += 0.06; addDodge(m, 0.04); }),
   T('x_amenonuhoko', '天之琼矛', 'e', '穿刺攻击额外穿透 +2，穿刺伤害 +15%', m => { m.pierceAdd += 2; m.pierceDmg += 0.15; }, { need: 'pierce' }),
   T('x_brahmastra', '梵天法宝', 'e', '全部伤害 +18%，攻击范围 +10%', m => { m.dmgAdd += 0.18; m.area *= 1.1; }),
   T('x_kaustubha', '考斯图巴宝石', 'e', '最大生命 +40，经验获取 +15%，每秒生命回复 +0.6', m => { m.maxHp += 40; m.xp *= 1.15; m.regen += 0.6; }),
   T('x_eye_ra', '拉之眼', 'e', '火焰伤害 +25%，暴击率 +8%', m => { m.fireDmg += 0.25; m.crit += 0.08; }),
   T('x_book_thoth', '托特之书', 'e', '经验获取 +25%，全部技能冷却 -6%', m => { m.xp *= 1.25; m.cd *= 0.94; }),
-  T('x_obsidian_mirror', '烟雾镜', 'e', '召唤物数量 +1，召唤物伤害 +20%，完全躲开伤害的几率 +4%', m => { m.summonCount += 1; m.summonDmg += 0.2; m.dodge += 0.04; }),
+  T('x_obsidian_mirror', '烟雾镜', 'e', '召唤物数量 +1，召唤物伤害 +20%，完全躲开伤害的几率 +4%', m => { m.summonCount += 1; m.summonDmg += 0.2; addDodge(m, 0.04); }),
   T('x_lia_fail', '命运之石', 'e', '生命低于 40% 时伤害 +35%，受到的伤害 -2', m => { m.lowHpDmg += 0.35; m.armor += 2; }),
   T('x_qiankunding', '乾坤鼎', 'l', '全部伤害 +20%，全部技能冷却 -12%，攻击范围 +12%', m => { m.dmgAdd += 0.2; m.cd *= 0.88; m.area *= 1.12; }),
   T('x_hongmeng', '鸿蒙紫气', 'l', '经验获取 +30%，最大生命 +60，每秒生命回复 +1.5', m => { m.xp *= 1.3; m.maxHp += 60; m.regen += 1.5; }),
@@ -3965,7 +3974,7 @@ TREASURES.push(
   T('x_amaterasu', '天照之镜', 'l', '火焰伤害 +35%，攻击范围 +15%，暴击率 +8%', m => { m.fireDmg += 0.35; m.area *= 1.15; m.crit += 0.08; }),
   T('x_sudarshana_l', '善见神轮', 'l', '环绕技能伤害 +50%，环绕转速 +40%，飞行道具、召唤物与落雷的数量 +1', m => { m.orbitDmg += 0.5; m.orbitSpd += 0.4; m.count += 1; }),
   T('x_ankh_ra', '太阳神之符', 'l', '生命归零时复活一次，最大生命 +30', m => { m.revive += 1; m.maxHp += 30; }),
-  T('x_quetzal_l', '羽蛇神之冠', 'l', '移动速度 +40%，飞行道具速度 +30%，技能持续时间 +20%，完全躲开伤害的几率 +6%', m => { m.speedAdd += 0.4; m.pspeed *= 1.3; m.dur *= 1.2; m.dodge += 0.06; }),
+  T('x_quetzal_l', '羽蛇神之冠', 'l', '移动速度 +40%，飞行道具速度 +30%，技能持续时间 +20%，完全躲开伤害的几率 +6%', m => { m.speedAdd += 0.4; m.pspeed *= 1.3; m.dur *= 1.2; addDodge(m, 0.06); }),
   T('x_dagda', '达格达之琴', 'l', '全部技能冷却 -20%，召唤物伤害 +30%', m => { m.cd *= 0.8; m.summonDmg += 0.3; }),
 );
 
@@ -5233,7 +5242,7 @@ function newGame() {
     heroes: [], skills: [], mods: MODS0(), level: 1, xp: 0, xpNext: xpNeed(1), kills: 0,
     enemies: [], projs: [], ebullets: [], zones: [], pickups: [], minions: [], fx: [], parts: [], nums: [], labels: [], timers: [],
     trail: [{ x: 0, y: 0 }], cam: { x: 0, y: 0 }, shake: 0, flash: 0, flashCol: '#fff', nextId: 1, spawnAcc: 0, evDone: {},
-    boss: null, rerolls: 0, adRefresh: 3, adTake: 3, adRevive: 1, adSummon: 1, treasures: [], synergies: [], dmgBy: {}, pendingLv: 0, pendingChest: 0, newHeroBoost: 0,
+    boss: null, rerolls: 0, adRefresh: 3, adTake: 3, adRevive: 1, adSummon: 1, treasures: [], synergies: [], dmgBy: {}, pendingLv: 0, pendingChests: [], newHeroBoost: 0,
     won: false, endless: false, nextEndlessBoss: 0, roster: shuffle(HEROES.map(h => h.id)), summonIdx: 0, lsAcc: 0, autoMarkT: 5,
     discovered: [], evoFound: [], power: 0, bonds: [], heroBuff: {}, crossMap: {}, crossCd: {}, healFull: false, killsAtEvo: {}, finalWave: false, props: [], propCells: new Set(), ehaz: [], fireC: new Map(), scorch: new Set(), obsGrid: new Map(), obsCells: new Set(), obsN: 0, weather: null, wSeen: {}, ast: { minHp: 1 }, terrSpd: 1, tbuff: null, themeShown: false
   };
@@ -5243,10 +5252,19 @@ function newGame() {
 /* ---------- 技能 ---------- */
 const getSkill = sd => G.skills.find(s => s.def === sd);
 function heroOfSkill(sd) { return G.heroes.find(h => h.def === sd.hero); }
+function resetUpgradedSkillCooldown(s) {
+  if (s.def.kind === 'passive') return;
+  s.cdT = 0;
+  if (s.st.rsT > 0) s.st.rsT = 0;
+}
 function learn(sd) {
   let s = getSkill(sd);
   const max = sd.kind === 'passive' ? 3 : 5;
-  if (s) { if (s.lv >= max) return s; s.lv++; }
+  if (s) {
+    if (s.lv >= max) return s;
+    s.lv++;
+    resetUpgradedSkillCooldown(s);
+  }
   else {
     s = { def: sd, lv: 1, cdT: .3 + Math.random() * .4, evo: false, st: { n: 0, hit: new Map(), ang: Math.random() * TAU }, hero: heroOfSkill(sd) };
     G.skills.push(s);
@@ -5255,7 +5273,12 @@ function learn(sd) {
   Codex.skill(sd.id);
   return s;
 }
-function evolve(s) { s.evo = true; computeParams(s); recomputeMods(); Codex.evo(s.def.id); G.evoFound.push(s.def.id); }
+function evolve(s) {
+  s.evo = true;
+  resetUpgradedSkillCooldown(s);
+  computeParams(s); recomputeMods();
+  Codex.evo(s.def.id); G.evoFound.push(s.def.id);
+}
 function computeParams(s) {
   const d = s.def;
   if (d.kind === 'passive') { s.p = null; s.kind = 'passive'; return; }
@@ -5554,7 +5577,7 @@ function endlessK(t) {
   if (t >= 540) k *= 2 * Math.pow(1.6, (t - 540) / 60);
   return k;
 }
-const HP_AT_FIVE_MINUTES = [5, 7, 10, 12, 15, 16];
+const ENEMY_DAMAGE_SCALE = .75;
 function bossSizeScale(opt) {
   return opt?.final || opt?.endlessBoss ? 2 : 1.5;
 }
@@ -5565,7 +5588,7 @@ function spawnEnemy(type, x, y, opt) {
   const hpProgress = G.t / RUN_BOSS_T;
   const asc = G.asc || 0;
   const initialHp = asc ? ascF('hp') : .5;
-  const hpAtFiveMinutes = HP_AT_FIVE_MINUTES[asc] ?? (16 + asc - 5);
+  const hpAtFiveMinutes = 5 * (asc + 1);
   const initialWeight = Math.max(0, 1 - hpProgress);
   const hpS = 1 + hpProgress * (hpAtFiveMinutes - 1) + (initialHp - 1) * initialWeight;
   const bossHpScale = lerp(initialHp, hpAtFiveMinutes / 5, Math.min(1, hpProgress));
@@ -5585,7 +5608,7 @@ function spawnEnemy(type, x, y, opt) {
     st: { burn: 0, burnT: 0, burnTick: .5, shockT: 0, markT: 0, frzT: 0, slowT: 0, slow: 0 }
   };
   e.spd *= ENEMY_SPEED_SCALE * ascF('spd') * Math.min(1.5, 1 + (EK - 1) * .04);
-  e.dmg *= bossDifficultyScale * ascF('dmg') * (1 + (EK - 1) * .5);
+  e.dmg *= ENEMY_DAMAGE_SCALE * bossDifficultyScale * ascF('dmg') * (1 + (EK - 1) * .5);
   if ((elite || boss) && ascX('enrage')) { e.enraged = 1; e.spd *= 1.3; e.dmg *= 1.3; }
   initAffix(e, opt);
   G.enemies.push(e);
@@ -5617,6 +5640,9 @@ function spawnAtEdge(type, opt) {
 function ringSpawn(type, n, rad, opt) {
   for (let i = 0; i < n; i++) { const a = i / n * TAU; spawnEnemy(type, G.squad.x + Math.cos(a) * rad, G.squad.y + Math.sin(a) * rad, opt); }
 }
+function eliteChestChance(treasureCount) {
+  return [1, .8, .6, .4, .2][Math.min(4, Math.floor(Math.max(0, treasureCount - 1) / 5))];
+}
 function killEnemy(e, o) {
   if (e.dead) return; e.dead = true; o = o || {};
   if (e.obs) { obsBreak(e); return; }
@@ -5631,7 +5657,6 @@ function killEnemy(e, o) {
   if (TAL('feast') && G.kills % 100 === 0) healSquad(8);
   if (e.elite && !e.boss) {
     if (TAL('ember')) { const sc = scaleT(); explosion(e.x, e.y, 34, '#ff7a2a', 'boom'); query(e.x, e.y, 36, o => { if (o !== e) hurtEnemy(o, 45 * sc, { tags: ['fire'], status: { burn: 2 }, src: 'terrain', knock: 20, fx: e.x, fy: e.y }); }); }
-    if (TAL('loot') && Math.random() < .2 * ascF('chest')) dropChest(e.x - 10, e.y);
   }
   terrainKill(e);
   if (G.crossOn) bondKill(e, o);
@@ -5645,9 +5670,14 @@ function killEnemy(e, o) {
   dropEnemyXp(e, v, .72);
   if (Math.random() < .01) dropPickup('coin', e.x + 6, e.y + 4, 1);
   if (e.elite) {
-    const cr = ascF('chest'); // 神格：宝箱掉率降低
-    if (Math.random() < cr) dropChest(e.x, e.y);
-    if (Math.random() < m.chestLuck * cr) dropChest(e.x + 10, e.y);
+    if (Math.random() < eliteChestChance(G.treasures.length)) {
+      dropChest(e.x, e.y);
+      const cr = ascF('chest');
+      if (TAL('loot') && Math.random() < .2 * cr) dropChest(e.x - 10, e.y);
+      if (Math.random() < m.chestLuck * cr) dropChest(e.x + 10, e.y);
+    } else {
+      spawnShrine(e.x, e.y);
+    }
     if (Math.random() < .5) dropPickup('peach', e.x - 8, e.y);
   } else {
     const r = Math.random();
@@ -5674,7 +5704,7 @@ function bossDown(e, o) {
   explosion(e.x, e.y, 70, '#d8a0ff', 'boom'); G.shake = 1.2; G.flash = .8; G.flashCol = '#fff';
   for (let i = 0; i < 6; i++) G.timers.push({ t: i * .15, fn: () => explosion(e.x + rr(-30, 30), e.y + rr(-25, 25), rr(18, 34), pick(['#ff9a3a', '#d8a0ff', '#ffe85a']), 'boom') });
   for (let i = 0; i < 20; i++) dropGem(e.x + rr(-30, 30), e.y + rr(-30, 30), 20);
-  dropChest(e.x, e.y + 10);
+  dropChest(e.x, e.y + 10, true);
   gainCoin(3, e.x, e.y);
   Snd.play('roar');
   if (e.final && !G.won) {
@@ -5768,7 +5798,7 @@ function dropGem(x, y, v) {
   G.pickups.push({ kind: 'gem', x: x + rr(-2, 2), y: y + rr(-2, 2), v, tier: gemTier(v), fly: false, vx: 0, vy: 0, t: 0 });
 }
 const gemTier = v => v >= 20 ? 3 : v >= 6 ? 2 : v >= 2 ? 1 : 0;
-function dropChest(x, y) { G.pickups.push({ kind: 'chest', x, y, t: 0 }); }
+function dropChest(x, y, advanced = false) { G.pickups.push({ kind: 'chest', x, y, t: 0, advanced }); }
 function dropPickup(kind, x, y, v) { G.pickups.push({ kind, x, y, t: 0, v }); }
 // 香火：局内实时获得，拾取/达成时有明确提示
 function gainCoin(n, x, y) {
@@ -6821,7 +6851,7 @@ function bombExplode(e) {
   e.dead = true; e.hp = 0;
   explosion(e.x, e.y, 22, '#ff7a3a', 'boom'); elemTerrain('fire', e.x, e.y);
   for (const h of G.heroes) if (d2(h.x, h.y, e.x, e.y) < 22 * 22) { hurtSquad(e.dmg, 'bomb', e.def.name + '的爆炸'); break; }
-  query(e.x, e.y, 22, o => { if (o !== e) hurtEnemy(o, 20 * scaleT(), { src: 'alien', noReact: true }); });
+  query(e.x, e.y, 22, o => { if (o !== e) hurtEnemy(o, 20 * scaleT() * ENEMY_DAMAGE_SCALE, { src: 'alien', noReact: true }); });
   dropEnemyXp(e, e.xp, 1);
   G.kills++;
 }
@@ -6964,7 +6994,7 @@ function updatePickups(dt) {
       if (p.fly && d < 7) { p.dead = true; gainXp(p.v); Snd.play('xp'); G.gemN = (G.gemN || 0) + 1; if (G.gemN % 25 === 0) taEvent('gem'); }
     } else if ((p.fly && d < 9) || hs.some(h => { const dx = p.x - h.x, dy = p.y - (h.y - 7); return dx * dx / 144 + dy * dy / 256 < 1; })) { // 碰到任意一位神明的身体就算捡到
       p.dead = true;
-      if (p.kind === 'chest') { G.pendingChest++; proc('chest'); Snd.play('chest'); }
+      if (p.kind === 'chest') { G.pendingChests.push(p.advanced); proc('chest'); Snd.play('chest'); }
       else if (p.kind === 'coin') gainCoin(p.v || 1, p.x, p.y);
       else if (p.kind === 'crystal') { G.squad.shield = Math.max(G.squad.shield, G.squad.maxHp * .12); Snd.play('shield'); addLabel(tg.x, tg.y - 18, '结晶护盾', '#ffe0a0', 12); }
       else if (p.kind === 'peach') { inc('peach'); proc('peach'); healSquad(G.squad.maxHp * .25 * ascF('peach')); Snd.play('heal'); }
@@ -7044,7 +7074,7 @@ function update(dt) {
   const ST = G.summonTimes || SUMMON_TIMES;
   if (G.summonIdx < ST.length && G.t >= ST[G.summonIdx] && G.squad.deadT <= 0 && G.heroes.length === G.summonIdx + 1) { G.summonIdx++; UI.summonFlow(G.summonIdx); return; }
   if (G.squad.deadT > 0) return;
-  if (G.pendingChest > 0 && G.state === 'play') { G.pendingChest--; if (Math.random() < .1) gainCoin(1, G.squad.x, G.squad.y); UI.chest(); return; }
+  if (G.pendingChests.length && G.state === 'play') { const advanced = G.pendingChests.shift(); if (Math.random() < .1) gainCoin(1, G.squad.x, G.squad.y); UI.chest(advanced); return; }
   if (G.pendingLv > 0 && G.state === 'play') { G.pendingLv--; UI.levelUp(); return; }
 }
 
@@ -7250,6 +7280,7 @@ function genProps() {
   if (G.props.length > 160) G.props = G.props.filter(p => d2(p.x, p.y, sq.x, sq.y) < 900 * 900);
 }
 const POOLS = { lava: 1, water: 1, ice: 1, sand: 1, acid: 1, rock: 1 };
+const POOL_PLAYER_SPEED = { sand: .4, acid: .55, mud: .55, lava: .7, water: .7, ice: 1.6 };
 const SHRINE_BUFFS = [
   { name: '战意', d: '20 秒内全部伤害 +35%', col: '#ff7a5a', f: m => { m.dmgAdd += .35; } },
   { name: '迅捷', d: '20 秒内移动速度 +60%，冷却 -20%', col: '#8affc8', f: m => { m.speedAdd += 0.6; m.cd *= .8; } },
@@ -7270,7 +7301,7 @@ function updateTerrain(dt) {
     if (POOLS[pr.k]) {
       if (heroIn && !pr.tmp) {
         inc(pr.k + 'T', dt);
-        if (pr.k === 'water') spd *= .85; else if (pr.k === 'ice') spd *= 1.3; else if (pr.k === 'sand') spd *= .72; else if (pr.k === 'acid') spd *= .8; else if (pr.k === 'mud') spd *= .8;
+        spd *= POOL_PLAYER_SPEED[pr.k] ?? 1;
         if ((pr.k === 'lava' || pr.k === 'acid') && sq.invT <= 0) { pr.hurtT = (pr.hurtT || 0) - dt; if (pr.hurtT <= 0) { pr.hurtT = .6; hurtSquad(2 + G.t / 120, pr.k, pr.k === 'lava' ? '熔岩' : '酸池'); } }
       }
       if (pr.cd <= 0) {
@@ -7531,7 +7562,7 @@ function updateEhaz(dt) {
   for (const z of G.ehaz) z.t += dt;
   G.ehaz = G.ehaz.filter(z => z.t < z.dur);
   G.ehazT = (G.ehazT || 0) - dt;
-  if (G.ehazT <= 0 && G.squad.invT <= 0 && G.ehaz.some(z => d2(z.x, z.y, G.squad.x, G.squad.y) < (z.r + 2) ** 2)) { G.ehazT = .7; hurtSquad(3 + G.t / 80, 'hazard', '腐蚀痕迹'); }
+  if (G.ehazT <= 0 && G.squad.invT <= 0 && G.ehaz.some(z => d2(z.x, z.y, G.squad.x, G.squad.y) < (z.r + 2) ** 2)) { G.ehazT = .7; hurtSquad((3 + G.t / 80) * ENEMY_DAMAGE_SCALE, 'hazard', '腐蚀痕迹'); }
 }
 function drawEhaz() {
   for (const z of G.ehaz) { const a = Math.min(1, (z.dur - z.t) * 2) * .55; circ(z.x, z.y, z.r, z.col, a); circ(z.x, z.y, z.r, '#0a0612', a * .6, true, 1); }
@@ -8326,7 +8357,7 @@ function drawWeather(T) {
       props: [['ice', 2], ['shrine', 2], ['statue', 1]], obs: [['stupa', 3], ['crystal', 2], ['rock', 1]], comp: { tank: 1.3, brute: 1.3 }, bonus: m => { m.dmgAdd += .1; } },
     { id: 'stonehenge', base: 'storm', name: '巨石阵', civ: '凯尔特', sub: '更容易躲开伤害', bias: 0,
       pal: pals(['#4a6a4a'], ['#5a7a50'], ['#7a7a80', '#c8f0a0'], ['#4a5048'], ['#2a3a3a', '#8affc8']), recolor: {},
-      props: [['totem', 2], ['water', 2], ['shrine', 1.2]], obs: [['menhir', 3], ['rock', 2], ['tree', 1]], comp: { ranged: 1.3, sp2: 1.3 }, bonus: m => { m.dodge += .06; } },
+      props: [['totem', 2], ['water', 2], ['shrine', 1.2]], obs: [['menhir', 3], ['rock', 2], ['tree', 1]], comp: { ranged: 1.3, sp2: 1.3 }, bonus: m => { addDodge(m, .06); } },
     { id: 'babylon', base: 'desert', name: '巴别塔', civ: '美索不达米亚', sub: '经验获取提高', bias: .08,
       pal: pals(['#c89a5a'], ['#b88a4a'], ['#3a5aa8', '#ffd84a'], ['#a87a40'], ['#7a5a3a']), recolor: {},
       props: [['urn', 2], ['water', 2], ['statue', 1.5], ['shrine', 1]], obs: [['ruinwall', 3], ['column', 2], ['amphora', 1]], comp: { grunt: 1.4, brute: 1.2 }, bonus: m => { m.xp *= 1.15; } },
@@ -8955,7 +8986,7 @@ function trEnemyTick(e, dt) {
     lijing: ['被标记的敌人受到伤害 +20%', A('markDmg', .2)],
     niumowang: ['被碰到时反弹伤害 +20', A('thorns', 20)],
     houtu: ['最大生命 +50', A('maxHp', 50)],
-    baldr: ['完全躲开伤害的几率 +10%', A('dodge', .1)],
+    baldr: ['完全躲开伤害的几率 +10%', m => addDodge(m, .1)],
     aoguang: ['攻击范围 +15%', M('area', 1.15)],
     dionysus: ['暴击时回复少量生命', A('critHeal', .3)],
     isis: ['每秒生命回复 +1.5', A('regen', 1.5)],
@@ -8963,7 +8994,7 @@ function trEnemyTick(e, dt) {
     goumang: ['技能持续时间 +20%', M('dur', 1.2)],
     artemis: ['穿刺伤害 +25%', A('pierceDmg', .25)],
     tsukuyomi: ['冻住时间 +40%', M('frzDur', 1.4)],
-    tezcatlipoca: ['完全躲开伤害的几率 +8%', A('dodge', .08)],
+    tezcatlipoca: ['完全躲开伤害的几率 +8%', m => addDodge(m, .08)],
     hecate: ['召唤物伤害 +30%', A('summonDmg', .3)],
     jiuweihu: ['暴击时标记敌人', A('critMark', 1)],
     lvdongbin: ['穿刺攻击多穿透 1 个敌人', A('pierceAdd', 1)],
@@ -9595,7 +9626,7 @@ const TREE = [
   { id: 'late3', row: 17, col: 'm', n: '后来居上·叁', ic: 'goldarrow', k: 'late', l: 3, cost: 600, req: 'late2', leg: 1, d: '第三位神明的技能每次升级时，额外多升 2 级（第二位仍为 1 级）' },
   { id: 's_cd1', row: 17, col: 'r', n: '凝神', ic: 'note', k: 'cd', v: .05, cost: 265, sm: 1, d: '技能冷却 -5%' },
   { id: 't_skip', row: 18, col: 'l', n: '舍得', ic: 'coin', k: 'skip', cost: 410, d: '升级时可以放弃选择，换取少量香火和生命' },
-  { id: 't_bio', row: 18, col: 'm', n: '神明传记', ic: 'soul', k: 'bio', cost: 410, d: '与你并肩作战满 10 局的神明，在队中时伤害 +5%' },
+  { id: 't_bio', row: 18, col: 'm', n: '神明传记', ic: 'soul', k: 'bio', cost: 410, d: '曾经并肩作战过的神明，伤害+10%' },
   { id: 's_dmg3', row: 18, col: 'r', n: '锐气·叁', ic: 'blade', k: 'dmg', v: .08, cost: 290, sm: 1, d: '全部伤害 +8%' },
   { id: 't_sure', row: 19, col: 'l', n: '踏雪无痕', ic: 'feather', k: 'sure', cost: 450, d: '不再被流沙、冰面、水域等地形减速' },
   { id: 's_hp2', row: 19, col: 'm', n: '筋骨·贰', ic: 'heart', k: 'hp', v: 14, dr: .04, cost: 315, sm: 1, d: '最大生命 +14，受到的伤害 -4%' },
@@ -10594,7 +10625,8 @@ const UI = (() => {
     box.hidden = mx < 1; if (mx < 1) return;
     const v = ascPick();
     $('ascV').textContent = v ? '神格 ' + v : '普通';
-    $('ascD').innerHTML = v ? `<span class="adn">${esc((v > 1 ? '在此前基础上，' : '') + ASC[v - 1].n.join(' · '))}</span><span class="adc">香火 +${Math.round(v * 20 / 3)}%</span>` : '';
+    const effects = v ? ASC[v - 1].n.filter(n => !n.startsWith('敌人初始生命')) : [];
+    $('ascD').innerHTML = v ? `${effects.length ? `<span class="adn">${esc((v > 1 ? '在此前基础上，' : '') + effects.join(' · '))}</span>` : ''}<span class="adc">香火 +${Math.round(v * 20 / 3)}%</span>` : '';
     $('ascL').disabled = v <= 0; $('ascR').disabled = v >= mx;
     { const g = !!Store.get('ascGuide', 0) && v < mx; $('ascR').classList.toggle('guide', g); $('ascR').classList.toggle('gtxt', g && !Store.get('ascGuided', 0)); }
   }
@@ -10717,7 +10749,11 @@ const UI = (() => {
       if (done || G !== g0 || G.state !== 'summon') return; done = true; s.onclick = null;
       hideAll();
       const h = addHero(def);
-      if (TAL('bio') && (Records.d.heroRuns[def.id] || 0) >= 10) { G.heroBuff[def.id] = G.heroBuff[def.id] || { dmg: 0, cd: 0 }; G.heroBuff[def.id].dmg += .05; for (const s of G.skills) if (s.def.hero === def) computeParams(s); }
+      if (TAL('bio') && (Records.d.heroRuns[def.id] || 0) >= 1) {
+        const buff = G.heroBuff[def.id] = G.heroBuff[def.id] || { dmg: 0, cd: 0 };
+        buff.dmg += .1;
+        for (const s of G.skills) if (s.def.hero === def) computeParams(s);
+      }
       if (TAL('reunion') && (Records.d.lastTeam || []).includes(def.id)) { learn(def.skills[0]); G.timers.push({ t: .4, fn: () => addLabel(G.squad.x, G.squad.y - 36, '故人重逢', '#ffb0d0', 14) }); }
       buildParty();
       G.state = 'play'; grace();
@@ -10885,17 +10921,28 @@ const UI = (() => {
   }
 
   /* ---------- 宝箱 ---------- */
-  function rollTreasures(n) {
+  function rollTreasures(n, advanced) {
     const tr = teamTraits();
-    const ok = t => (t.stack || !G.treasures.includes(t)) && (!t.need || [].concat(t.need).every(k => tr.has(k))) && !(t.noWith && G.heroes.some(h => t.noWith.includes(h.def.id)));
+    const eligible = TREASURES.filter(t => (!t.need || [].concat(t.need).every(k => tr.has(k))) && !(t.noWith && G.heroes.some(h => t.noWith.includes(h.def.id))));
+    const available = eligible.filter(t => t.stack || !G.treasures.includes(t));
     const luck = G.luck || 0;
     const ws = { c: Math.max(20, 58 - luck * 12), r: 28 + luck * 5, e: 11 + luck * 4, l: 3 + luck * 2.5 };
+    if (!advanced) {
+      const redistribute = 1 + (ws.e + ws.l) * .67 / (ws.c + ws.r);
+      ws.c *= redistribute; ws.r *= redistribute; ws.e *= .33; ws.l *= .33;
+    }
     const res = [];
     for (let k = 0; k < n; k++) {
-      const tot = ws.c + ws.r + ws.e + ws.l; let r = Math.random() * tot, rar = 'c';
-      for (const key of ['l', 'e', 'r', 'c']) { r -= ws[key]; if (r <= 0) { rar = key; break; } }
-      let pool = TREASURES.filter(t => t.rar === rar && ok(t) && !res.includes(t));
-      if (!pool.length) pool = TREASURES.filter(t => ok(t) && !res.includes(t));
+      const rarities = advanced ? (k === 0 ? ['l', 'e'] : ['l', 'e', 'r']) : ['l', 'e', 'r', 'c'];
+      let r = Math.random() * rarities.reduce((sum, key) => sum + ws[key], 0);
+      const rar = rarities.find(key => (r -= ws[key]) < 0) || rarities[rarities.length - 1];
+      const unused = t => !res.includes(t);
+      let pool = available.filter(t => t.rar === rar && unused(t));
+      if (!pool.length) {
+        const fallback = advanced ? rarities : ['r', 'c'];
+        pool = available.filter(t => fallback.includes(t.rar) && unused(t));
+        if (advanced && !pool.length) pool = eligible.filter(t => fallback.includes(t.rar) && unused(t));
+      }
       if (!pool.length) break;
       res.push(pick(pool));
     }
@@ -10924,18 +10971,19 @@ const UI = (() => {
     m.querySelector('.mtap').hidden = false;
     m.onclick = null; setTimeout(() => { if (!done) m.onclick = fin; }, 900);
   }
-  function chest() {
+  function chest(advanced) {
     G.state = 'chest'; Input.cancel();
-    const list = rollTreasures(3).map(t => ({ type: 'tre', t }));
+    if (advanced) G.openedAdvancedChest = true;
+    const list = rollTreasures(3, advanced).map(t => ({ type: 'tre', t }));
     if (list.length && list.every(c => c.t.rar === 'c')) inc('plainChest'); else G.ast.plainChest = 0;
     while (list.length < 3) list.push({ type: list.length % 2 ? 'heal' : 'power' });
-    chestShow(list);
+    chestShow(list, advanced);
   }
-  function chestShow(list, noGamble) {
+  function chestShow(list, advanced, noGamble) {
     G.state = 'chest';
     show('modal');
     const m = $('modal');
-    m.querySelector('.mt').textContent = '宝箱'; m.querySelector('.ms').textContent = '选择一件宝物';
+    m.querySelector('.mt').textContent = advanced ? '高级宝箱' : '宝箱'; m.querySelector('.ms').textContent = '选择一件宝物';
     m.querySelector('.micon').hidden = false; m.querySelector('.micon').src = ART.chestUrl || (ART.chestUrl = scaleUp(ART.chestOpen, 6).toDataURL());
     const box = m.querySelector('.cards'); box.innerHTML = '';
     m.querySelector('.reroll').hidden = true;
@@ -10959,13 +11007,13 @@ const UI = (() => {
       gb.hidden = !can; gb.disabled = false; gb.textContent = '赌一把：50% 全部升一档，否则一无所获';
       gb.onclick = () => { if (picked) return; picked = true; Snd.play('click');
         if (Math.random() < .5) { const up = { c: 'r', r: 'e', e: 'l', l: 'l' }; const nl = list.map(c => { if (c.type !== 'tre') return c; const pool = TREASURES.filter(t => t.rar === up[c.t.rar] && !G.treasures.includes(t) && !list.some(x => x.t === t)); return pool.length ? { type: 'tre', t: pick(pool) } : c; });
-          addLabel(G.squad.x, G.squad.y - 30, '赌赢了！', '#ffd84a', 16); Achv.give('gambleW'); if ((G.gw = (G.gw || 0) + 1) >= 3) Achv.give('gamble3'); Snd.play('evo'); hideAll(); chestShow(nl, true); }
+          addLabel(G.squad.x, G.squad.y - 30, '赌赢了！', '#ffd84a', 16); Achv.give('gambleW'); if ((G.gw = (G.gw || 0) + 1) >= 3) Achv.give('gamble3'); Snd.play('evo'); hideAll(); chestShow(nl, advanced, true); }
         else { G.gw = 0; Achv.give('gambleL'); addLabel(G.squad.x, G.squad.y - 30, '赌输了…', '#ff7a6a', 16); Snd.play('hurt'); hideAll(); G.state = 'play'; grace(); } };
       if ($('skipBtn')) $('skipBtn').hidden = true; }
     { let tb = $('takeAllBtn'); const rr0 = m.querySelector('.reroll'); if (!tb) { tb = el('button', 'reroll adbtn'); tb.id = 'takeAllBtn'; tb.type = 'button'; rr0.after(tb); }
       const tre = list.filter(c => c.type === 'tre');
-      tb.hidden = tre.length < 2 || G.bot; tb.innerHTML = adBtnHTML('全拿走', G.adTake); tb.disabled = G.adTake <= 0;
-      tb.onclick = () => { if (picked || G.adTake <= 0) return; Snd.play('click'); picked = true;
+      tb.hidden = tre.length < 2 || (Records.d.runs === 1 && !G.openedAdvancedChest); tb.innerHTML = adBtnHTML('全拿走', G.adTake); tb.disabled = G.adTake <= 0;
+      tb.onclick = () => { if (tb.hidden || picked || G.adTake <= 0) return; Snd.play('click'); picked = true;
         Ads.show(() => { G.adTake--; hideAll(); list.forEach(pickIt); Snd.play('evo'); G.state = 'play'; grace(); }); }; }
   }
 
@@ -11136,7 +11184,7 @@ const UI = (() => {
     const sk = h.skills.map((s, i) => {
       const k = !!Codex.d.skills[s.id], tag = i === 0 ? '本命' : s.hidden ? '隐藏' : s.kind === 'passive' ? '天赋' : '技能';
       let html = `<li><em>${tag}</em><b>${k ? sicHTML(s) + esc(s.name) + elChip(s) : '？？？'}</b>`;
-      if (k) html += `<p>${esc(s.lv[0][0])}</p>` + (s.hidden ? `<p class="lvl">出现条件：${esc(s.condTxt)}</p>` : '');
+      if (k) html += `<p>${esc(s.lv[0][0])}</p>` + (s.hidden && s.condTxt ? `<p class="lvl">出现条件：${esc(s.condTxt)}</p>` : '');
       if (s.evo) html += Codex.d.evo[s.id] ? `<p class="ev">进化「${esc(s.evo.name)}」：${esc(s.evo.desc)}</p>` : `<p class="evq">进化：？？？</p>`;
       return html + '</li>';
     }).join('');
