@@ -5203,7 +5203,7 @@ function drawMotif(key, col, wx, wy, sc, rot, al) {
 const MOTIF_MAP = {"ganesha1": "rock", "kuafu1": "star", "niumowang2": "sand", "dianmu3": "mirror", "perseus1": "eye", "thoth3": "scroll", "xingtian3": "shield", "hermes2": "drop", "jigong2": "cup", "nz2": "wind", "skadi2": "snow", "xihe3": "flame", "an3": "leaf", "fengbo1": "wind", "ganesha2": "star", "hades2": "skull", "hel2": "ghost", "honghaier1": "flame", "jigong1": "tornado", "niumowang3": "feather", "osiris1": "ankh", "tengu3": "rock", "valkyrie1": "rune", "zk3": "scythe", "artemis3": "moon", "maui1": "rock", "nz1": "chakram", "th1": "bolt", "thoth1": "star", "tsukuyomi2": "moon", "vishnu1": "eye", "xihe2": "sun", "ares2": "star", "bajie2": "rock", "cuchulainn2": "sword", "fujin2": "wind", "izanagi3": "drop", "leigong1": "drum", "maui3": "sand", "pangu2": "rock", "th3": "bolt", "xingtian2": "tornado", "dionysus3": "cup", "hephaestus2": "flame", "honghaier3": "torch", "houtu1": "rock", "jigong3": "gourd", "laojun1": "gourd", "pele1": "sun", "perun1": "bolt", "set1": "sand", "shaseng2": "moon", "xiwangmu1": "flower", "achilles1": "thorn", "am1": "mirror", "baldr1": "spear", "dianmu1": "bolt", "el1": "eye", "gonggong1": "wave", "heimdall2": "drop", "hy3": "bow", "lvdongbin2": "sword", "shiva2": "eye", "susanoo2": "sword", "takemikazuchi3": "vajra", "xihe1": "sun", "achilles2": "shield", "aphrodite3": "drop", "ares1": "spear", "bajie1": "rock", "bajie3": "star", "baldr3": "sword", "bastet1": "paw", "bastet3": "wind", "el3": "sword", "freya3": "cup", "freyr3": "wave", "garuda1": "feather", "guanyin2": "flower", "hel1": "claw", "hc1": "sand", "houtu3": "tornado", "isis2": "ankh", "izanagi1": "halberd", "jiangziya3": "flame", "kali1": "flame", "niumowang1": "shield", "nw3": "sun", "osiris2": "drop", "pangu1": "axe", "susanoo1": "sword", "takemikazuchi1": "bolt", "tangseng3": "lotus", "tyr1": "sword", "tyr2": "moon", "vainamoinen3": "coin", "vishnu3": "bolt", "wk1": "star", "xingtian1": "axe", "yushi2": "drop", "agni_h1": "flame", "amaterasu_h1": "chakram", "anubis_h1": "wheel", "baisuzhen_h1": "serpent", "chiyou_h1": "axe", "dianmu_h1": "bolt", "fengbo_h1": "wind", "fujin_h1": "tornado", "goumang_h1": "chakram", "hecate1": "torch", "inanna_h1": "star", "jiangziya1": "vajra", "marduk3": "drum", "perseus_h1": "mirror", "quetzalcoatl_h1": "feather", "ra_h1": "sun", "taiyi_h1": "chakram", "takemikazuchi_h1": "sword", "tangseng_h1": "lotus", "thor_h1": "hammer", "zs1": "bolt", "aoguang_h1": "wave", "aphrodite2": "serpent", "apollo2": "note", "baisuzhen1": "drop", "baldr2": "star", "hades_h1": "ghost", "hecate_h1": "flame", "heimdall1": "bell", "hel_h1": "skull", "hephaestus_h1": "torch", "horus_h1": "eye", "houyi_h1": "sun", "inari3": "bell", "isis_h1": "feather", "jiangziya_h1": "bolt", "jigong_h1": "cup", "kuafu_h1": "wheel", "leigong3": "drum", "marduk_h1": "wind", "pangu_h1": "rock", "pele2": "sand", "set_h1": "sand", "shiva1": "tornado", "taiyi3": "crown", "tangseng2": "note", "vishnu2": "note", "yushi_h1": "lotus", "zeus_h1": "vajra", "agni2": "flame", "am2": "sun", "aoguang1": "gem", "apollo_h1": "bow", "ares_h1": "spear", "artemis_h1": "arrow", "ce2": "snow", "change_h1": "snow", "chiyou1": "weapons5", "chiyou2": "cloud", "dianmu2": "rune", "dionysus1": "cup", "dionysus2": "leaf", "fengbo3": "tornado", "fujin1": "wind", "fuxi2": "scroll", "ganesha_h1": "fang", "garuda3": "wind", "gonggong2": "wave", "goumang2": "flower", "hanuman3": "flame", "hecate3": "moon", "heimdall_h1": "bell", "hermes_h1": "shield", "honghaier2": "sun", "inari2": "torch", "indra_h1": "vajra", "isis3": "rune", "izanagi2": "drop", "jiuweihu2": "torch", "kali2": "skull", "kuafu3": "lotus", "laojun_h1": "mirror", "lijing1": "coin", "lijing_h1": "coin", "loki2": "serpent", "lvdongbin3": "sword", "marduk2": "wave", "nz3": "star", "niumowang_h1": "shield", "od2": "feather", "od3": "chakram", "osiris3": "chain", "pele3": "rock", "perun_h1": "bolt", "ps2": "wave", "quetzalcoatl1": "eye", "quetzalcoatl3": "wind", "set2": "shield", "shaseng1": "sand", "shaseng3": "ghost", "shiva3": "serpent", "skadi_h1": "moon", "susanoo3": "feather", "susanoo_h1": "sword", "taiyi1": "star", "tezcatlipoca1": "ghost", "tsukuyomi1": "star", "vainamoinen2": "wave", "vainamoinen_h1": "note", "wukong_h1": "shield", "xuannv2": "claw", "zhongkui_h1": "ghost", "zhurong2": "flame", "agni3": "flame", "aoguang3": "serpent", "artemis2": "fang", "at3": "feather", "baisuzhen2": "wave", "bastet2": "paw", "ce3": "gem", "chiyou3": "star", "cuchulainn3": "fang", "el2": "fang", "freya1": "claw", "freyr1": "sword", "freyr2": "shield", "ganesha3": "rock", "gilgamesh2": "wind", "hades1": "sun", "hanuman2": "tornado", "hecate2": "ghost", "hephaestus1": "moon", "hephaestus3": "sand", "hc3": "bolt", "hermes3": "serpent", "horus1": "feather", "houtu2": "drop", "inanna3": "snow", "inari1": "fox", "indra2": "chain", "jingwei2": "eye", "loki1": "torch", "nw2": "leaf", "pangu3": "flower", "perseus2": "spear", "perun2": "vajra", "perun3": "drum", "ra3": "mirror", "set3": "sand", "tezcatlipoca2": "fang", "valkyrie3": "feather", "wk2": "axe", "xiwangmu3": "feather", "xuannv1": "halberd", "achilles3": "flame", "an2": "sand", "ares3": "star", "athena_h1": "shield", "baisuzhen3": "sword", "freya_h1": "paw", "freyr_h1": "leaf", "fuxi_h1": "rune", "garuda_h1": "feather", "gilgamesh_h1": "coin", "gonggong_h1": "wave", "goumang3": "sun", "guanyin_h1": "drop", "hades3": "torch", "heimdall3": "eye", "hel3": "ghost", "hercules_h1": "rock", "horus3": "mirror", "houtu_h1": "wind", "inanna1": "heart", "inanna2": "scythe", "jingwei_h1": "rock", "jiuweihu_h1": "fox", "kali3": "tornado", "kuafu2": "moon", "laojun2": "scroll", "leigong_h1": "bolt", "maui2": "wheel", "nezha_h1": "wind", "nuwa_h1": "snow", "odin_h1": "spear", "pele_h1": "flame", "poseidon_h1": "serpent", "ra2": "sun", "rama_h1": "bow", "tangseng1": "lotus", "tengu_h1": "wind", "thoth_h1": "flower", "tyr_h1": "gem", "xihe_h1": "axe", "xiwangmu2": "snow", "zhurong3": "flame", "aoguang2": "drop", "aphrodite_h1": "heart", "apollo3": "bow", "at2": "spear", "bajie_h1": "rock", "bastet_h1": "paw", "cuchulainn_h1": "halberd", "dionysus_h1": "flower", "fujin3": "wind", "gonggong3": "sand", "hanuman1": "claw", "horus2": "trident", "hy2": "sun", "inari_h1": "leaf", "indra3": "bolt", "izanagi_h1": "wave", "jiangziya2": "scroll", "jingwei1": "rock", "kali_h1": "flame", "leigong2": "vajra", "lijing2": "snow", "loki_h1": "tornado", "lvdongbin_h1": "wheel", "maui_h1": "shield", "osiris_h1": "ghost", "perseus3": "sword", "quetzalcoatl2": "star", "ra1": "sun", "rama2": "lotus", "shiva_h1": "trident", "skadi3": "snow", "taiyi2": "star", "takemikazuchi2": "drum", "tengu1": "sword", "tezcatlipoca_h1": "mirror", "th2": "bolt", "thoth2": "moon", "tsukuyomi3": "crown", "valkyrie_h1": "axe", "vishnu_h1": "eye", "wk3": "serpent", "xuannv3": "rune", "yushi1": "drop", "zs2": "cloud", "zk2": "skull", "zhurong_h1": "torch", "achilles_h1": "flame", "agni1": "torch", "am3": "gem", "an1": "ghost", "aphrodite1": "bow", "apollo1": "sun", "artemis1": "paw", "at1": "shield", "baldr_h1": "wind", "ce1": "moon", "cuchulainn1": "spear", "erlang_h1": "eye", "fengbo2": "feather", "freya2": "feather", "fuxi1": "rune", "fuxi3": "chain", "garuda2": "feather", "gilgamesh1": "coin", "gilgamesh3": "chain", "goumang1": "leaf", "guanyin1": "drop", "guanyin3": "star", "hanuman_h1": "bolt", "hc2": "rock", "hermes1": "wave", "honghaier_h1": "flame", "hy1": "wheel", "indra1": "vajra", "isis1": "feather", "jingwei3": "feather", "jiuweihu1": "heart", "jiuweihu3": "tornado", "laojun3": "vajra", "lijing3": "chain", "loki3": "sword", "lvdongbin1": "claw", "marduk1": "wind", "nw1": "sand", "od1": "halberd", "ps1": "trident", "ps3": "wave", "rama1": "arrow", "rama3": "bow", "shaseng_h1": "sand", "skadi1": "snow", "tengu2": "feather", "tezcatlipoca3": "rock", "tsukuyomi_h1": "moon", "tyr3": "fang", "vainamoinen1": "note", "valkyrie2": "spear", "xingtian_h1": "axe", "xiwangmu_h1": "crown", "xuannv_h1": "scroll", "yushi3": "serpent", "zs3": "drum", "zk1": "sword", "zhurong1": "flame"};
 
 /* ================= 世界状态与核心规则 ================= */
-const RUN_BOSS_T = 300, BOSS_TIMES = [120, 240, RUN_BOSS_T], ENDLESS_BOSS_INTERVAL = 60, SUMMON_TIMES = [60, 180], BASE_HP = 120, HERO_SPEED = 54;
+const RUN_BOSS_T = 300, BOSS_TIMES = [120, 240, RUN_BOSS_T], ENDLESS_BOSS_INTERVAL = 60, SUMMON_TIMES = [90, 180], BASE_HP = 120, HERO_SPEED = 54 * 1.2, ENEMY_SPEED_SCALE = 1.15;
 let G = null;
 
 function MODS0() {
@@ -5399,7 +5399,14 @@ function applyStatus(e, st, amp) {
   if (st.mark) e.st.markT = Math.max(e.st.markT, 5 + m.markDur);
   if (st.frz && !e.boss) { const d = st.frz * m.frzDur * (e.elite ? .5 : 1) * Math.min(amp, 1.5); if (d > e.st.frzT) e.st.frzT = d; }
   if (st.charm && !e.boss && !(e.elite && ascX('nocharm')) && !(e.charmT > 0) && Math.random() < Math.min(.85, .5 + Math.max(0, st.charm - 3) * .1)) { e.charmT = 1e9; e.ctg = null; } // 倒戈是永久的
-  if (st.slow) { e.st.slowT = 2.2; e.st.slow = Math.max(e.st.slow || 0, st.slow * (e.boss ? .4 : 1)); }
+  if (st.slow > 0) {
+    const activeSlow = e.st.slowT > 0 ? e.st.slow : 0;
+    e.st.slow = Math.max(activeSlow, clamp(st.slow, .5, .75));
+    e.st.slowT = 2.2;
+  }
+}
+function enemySlowFactor(e) {
+  return e.st.slowT > 0 ? 1 - e.st.slow : 1;
 }
 function hurtEnemy(e, base, o) {
   if (e.dead || base <= 0 || e.hidden || e.phased) return 0;
@@ -5549,12 +5556,18 @@ function spawnEnemy(type, x, y, opt) {
   opt = opt || {};
   const def = ENEMIES[type] || BOSSES[type], boss = !!BOSSES[type], elite = !!opt.elite;
   const sizeScale = boss ? bossSizeScale(opt) : 1;
-  const hpS = 1 + G.t / RUN_BOSS_T * (4 + (G.asc || 0));
+  const hpProgress = G.t / RUN_BOSS_T;
+  const initialHp = G.asc ? ascF('hp') : .5;
+  const hpAtFiveMinutes = 5 + (G.asc || 0);
+  const initialWeight = Math.max(0, 1 - hpProgress);
+  const hpS = 1 + hpProgress * (hpAtFiveMinutes - 1) + (initialHp - 1) * initialWeight;
+  const bossHpScale = lerp(initialHp, hpAtFiveMinutes / 5, Math.min(1, hpProgress));
+  const bossDifficultyScale = boss && (G.asc || 0) <= 1 ? .5 : 1;
   const lateHp = Math.max(0, G.t - 360) / 30;
   const es = G.endless ? Math.max(0, G.t - G.endlessT - 60) : 0;
   const endlessHp = 1 + es / 22 + es * es / 2600;
   let hp;
-  if (boss) hp = def.hp * (1 + es / 60) * 2.2 * ascF('bhp');
+  if (boss) hp = def.hp * (1 + es / 60) * 2.2 * bossHpScale * bossDifficultyScale;
   else if (elite) hp = 1000 * hpS * endlessHp * (1 + lateHp);
   else hp = def.hp * (hpS + lateHp) * endlessHp;
   const EK = endlessK(G.t); hp *= EK;
@@ -5564,8 +5577,8 @@ function spawnEnemy(type, x, y, opt) {
     frame: 0, ft: Math.random(), flash: 0, atkT: 0, shootT: rr(1, 2.5), fuse: 0, callCd: 0, vuln: 0, vulnT: 0, dead: false, phase: 0, aT: 2, mode: 'walk',
     st: { burn: 0, burnT: 0, burnTick: .5, shockT: 0, markT: 0, frzT: 0, slowT: 0, slow: 0 }
   };
-  e.spd *= ascF('spd') * Math.min(1.5, 1 + (EK - 1) * .04);
-  e.dmg *= ascF('dmg') * (1 + (EK - 1) * .5);
+  e.spd *= ENEMY_SPEED_SCALE * ascF('spd') * Math.min(1.5, 1 + (EK - 1) * .04);
+  e.dmg *= bossDifficultyScale * ascF('dmg') * (1 + (EK - 1) * .5);
   if ((elite || boss) && ascX('enrage')) { e.enraged = 1; e.spd *= 1.3; e.dmg *= 1.3; }
   initAffix(e, opt);
   G.enemies.push(e);
@@ -5736,7 +5749,9 @@ function lagStep(o, f, dt) {
 function dropEnemyXp(e, value, baseChance) {
   const t = G.t;
   const chanceScale = t >= 60 ? .2 : t >= 40 ? .4 : t >= 20 ? .6 : 1;
-  if (value > 0 && (e.elite || Math.random() < baseChance * chanceScale)) dropGem(e.x, e.y, value);
+  const normalModeScale = !G.asc && !G.endless ? 2 : 1;
+  const chance = Math.min(1, baseChance * chanceScale * normalModeScale);
+  if (value > 0 && (e.elite || Math.random() < chance)) dropGem(e.x, e.y, value);
 }
 function dropGem(x, y, v) {
   if (G.pickups.length > 380) { // 合并到最近的宝石，避免满地都是
@@ -6742,7 +6757,7 @@ function updateEnemies(dt) {
     if (e.aggro && !e.boss && !e.mimic) {
       const ct = e.aggro, cdd = d2(e.x, e.y, ct.x, ct.y);
       {
-        const d = Math.sqrt(cdd) || 1, slow = st.slowT > 0 ? 1 - st.slow : 1;
+        const d = Math.sqrt(cdd) || 1, slow = enemySlowFactor(e);
         if (d > e.r + ct.r) { e.x += (ct.x - e.x) / d * e.spd * slow * dt; e.y += (ct.y - e.y) / d * e.spd * slow * dt; }
         e.atkT -= dt;
         if (d <= e.r + ct.r + 2 && e.atkT <= 0) { e.atkT = 1; ct.hp -= e.dmg * dmgS * 1.5; ct.flash = .08; if (ct.hp <= 0) { ct.dead = true; dropGem(ct.x, ct.y, ct.xp); fx({ k: 'ring', x: ct.x, y: ct.y, r0: 2, r1: 10, dur: .3, col: '#ff6aa8', w: 1 }); } }
@@ -6753,8 +6768,7 @@ function updateEnemies(dt) {
     if (e.mimic) { mimicTick(e, dt, th); continue; }
     // 远离太多则回收到前方
     if (!e.boss && dist > far) { const p = spawnRingPoint(); const hw = VW / 2 + 14, hh = VH / 2 + 14, dx = p.x - G.cam.x, dy = p.y - G.cam.y, s = Math.max(Math.abs(dx) / hw, Math.abs(dy) / hh, .001); e.x = G.cam.x + dx / s; e.y = G.cam.y + dy / s; continue; }
-    const slow = st.slowT > 0 ? 1 - st.slow : 1;
-    let spd = e.spd * slow;
+    let spd = e.spd * enemySlowFactor(e);
     if (e.boss) { bossAI(e, dt, th, dist); if (G.obsN) obsPush(e, dt); continue; }
     if (G.civN && preyTick(e, dt, dist)) { if (G.obsN) obsPush(e, dt); continue; }
     affixTick(e, dt, th, dist);
@@ -6828,7 +6842,8 @@ function bossAI(e, dt, th, dist) {
     return;
   }
   if (e.mode === 'dash') {
-    e.tt -= dt; e.x += Math.cos(e.da) * 190 * dt; e.y += Math.sin(e.da) * 190 * dt;
+    const step = 190 * enemySlowFactor(e) * dt;
+    e.tt -= dt; e.x += Math.cos(e.da) * step; e.y += Math.sin(e.da) * step;
     for (let i = 0; i < 2; i++) part(e.x + rr(-e.r, e.r), e.y + e.r * .6, rr(-20, 20), rr(-20, 0), .4, e.def.art.dark, 2, 30);
     if (dist < e.r + 6 && !e.dashHit) { e.dashHit = true; hurtSquad(e.dmg, 'bossdash', e.def.name + '的冲撞'); }
     if (e.tt <= 0) { if (e.dashQ > 0) { e.dashQ--; e.mode = 'tele'; e.tt = .45; e.dashHit = false; e.da = Math.atan2(th.y - e.y, th.x - e.x); fx({ k: 'teleLine', x: e.x, y: e.y, a: e.da, len: 170, w: e.r * 1.2, dur: .45 }); } else e.mode = 'walk'; }
@@ -6837,7 +6852,7 @@ function bossAI(e, dt, th, dist) {
   if (e.hidden) { e.ut -= dt; return; }
   if (e.pullT > 0) { e.pullT -= dt; const a = Math.atan2(e.y - G.squad.y, e.x - G.squad.x); G.squad.x += Math.cos(a) * 42 * dt; G.squad.y += Math.sin(a) * 42 * dt; if (Math.random() < .6) { const r = rr(60, 120), b = Math.random() * TAU; part(e.x + Math.cos(b) * r, e.y + Math.sin(b) * r, -Math.cos(b) * r * 1.5, -Math.sin(b) * r * 1.5, .5, '#c88aff', 1, 0, true); } }
   const a = Math.atan2(th.y - e.y, th.x - e.x);
-  const spd = e.spd * (ph2 ? 1.25 : 1) * (e.st.slowT > 0 ? 1 - e.st.slow : 1);
+  const spd = e.spd * (ph2 ? 1.25 : 1) * enemySlowFactor(e);
   if (dist > Math.max(40, e.r)) { e.x += Math.cos(a) * spd * dt; e.y += Math.sin(a) * spd * dt; }
   e.atkT -= dt; if (dist < e.r + 6 && e.atkT <= 0) { e.atkT = .8; hurtSquad(e.dmg, 'boss', e.def.name); }
   if (e.aT > 0) return;
@@ -6886,26 +6901,33 @@ const EVENTS = [
   { t: 290, f: () => { UI.toast('大地在震动……'); Snd.play('warn'); G.shake = .4; } },
   { t: RUN_BOSS_T, f: () => bossSpawn('boss2', true) },
 ];
+function spawnEndlessBoss() {
+  const pool = Object.values(ROSTER).map(r => r.boss2);
+  const id = Math.random() < .5 ? RS('boss2') : pick(pool);
+  const e = spawnAtEdge(id, { endlessBoss: true });
+  e.maxHp = e.hp *= 1 + (G.t - RUN_BOSS_T) / 120;
+  G.boss = e; UI.bossBar(e); Snd.play('roar'); Music.play('boss');
+}
 function director(dt) {
   const t = G.t;
+  for (const [f, iv] of [['b120', 120], ['b60', 60]]) {
+    const wave = Math.floor(t / iv) * iv;
+    if (ascX(f) && wave > 0 && t - dt < wave) {
+      if (G.endless) spawnEndlessBoss();
+      else bossSpawn('boss1');
+    }
+  }
   for (const ev of EVENTS) if (t >= ev.t && !G.evDone[ev.t]) { G.evDone[ev.t] = 1; ev.f(); }
   if (G.endless && t >= G.nextEndlessBoss) {
     G.nextEndlessBoss += ENDLESS_BOSS_INTERVAL;
-    const pool = Object.values(ROSTER).map(r => r.boss2);
-    const id = Math.random() < .5 ? RS('boss2') : pick(pool);
-    const e = spawnAtEdge(id, { endlessBoss: true });
-    e.maxHp = e.hp *= 1 + (t - RUN_BOSS_T) / 120;
-    G.boss = e; UI.bossBar(e); Snd.play('roar'); Music.play('boss');
+    spawnEndlessBoss();
   }
   const es = G.endless ? Math.max(0, t - G.endlessT - 60) : 0;
   if (G.endless && es > 0 && Math.floor(t / 25) !== Math.floor((t - dt) / 25)) eliteSpawn(pick(['grunt', 'tank', 'ranged', 'sp1', 'sp2', 'brute', 'x']), false);
   if (G.endless && t >= 540 && Math.floor((t - 540) / 60) !== Math.floor((t - dt - 540) / 60)) { const n = Math.floor((t - 540) / 60); if (n === 0) { UI.banner('外星援军抵达', ''); G.shake = .8; Snd.play('roar'); } else UI.toast('外星援军抵达'); }
-  const rate = 3 * (2 / 1.35 + Math.min(t, 300) * .03 + es * .09) * ascF('cnt') * 1.35 * Math.min(3, 1 + (endlessK(t) - 1) * .25);
+  const spawnScale = G.asc || G.endless ? 3 : 1.5;
+  const rate = spawnScale * (2 / 1.35 + Math.min(t, 300) * .03 + es * .09) * ascF('cnt') * 1.35 * Math.min(3, 1 + (endlessK(t) - 1) * .25);
   for (const [f, iv] of [['e30', 30], ['e15', 15]]) if (ascX(f) && t > iv && Math.floor(t / iv) !== Math.floor((t - dt) / iv)) { G.e15n = (G.e15n || 0) + 1; eliteSpawn(pick(['grunt', 'tank', 'ranged', 'sp2', 'x']), false, G.e15n <= 2 ? { ban: ['haste'] } : null); } // 前两次不会是迅捷
-  for (const [f, iv] of [['b120', 120], ['b60', 60]]) {
-    const wave = Math.floor(t / iv) * iv;
-    if (!G.endless && ascX(f) && wave > 0 && t - dt < wave && !BOSS_TIMES.includes(wave) && Math.abs(wave - RUN_BOSS_T) > 20) bossSpawn('boss1');
-  }
   const cap = 360 + (es > 0 ? 100 : 0);
   G.spawnAcc += rate * dt * (G.boss ? .6 : 1);
   while (G.spawnAcc >= 1) {
@@ -7104,16 +7126,17 @@ function zoneExtra(z, dt) {
 }
 // 敌人倒戈
 function charmTick(e, dt) {
+  const spd = e.spd * enemySlowFactor(e);
   let t = e.ctg;
   if (!t || t.dead || t.charmT > 0) { t = nearestEnemy(e.x, e.y, 120); e.ctg = t; }
   if (!t) {
     const sq = G.squad, dd = Math.sqrt(d2(e.x, e.y, sq.x, sq.y)) || 1;
     if (dd > Math.max(VW, VH) * 1.4) { e.dead = true; return; }
-    if (dd > 46) { e.x += (sq.x - e.x) / dd * e.spd * 1.2 * dt; e.y += (sq.y - e.y) / dd * e.spd * 1.2 * dt; }
+    if (dd > 46) { e.x += (sq.x - e.x) / dd * spd * 1.2 * dt; e.y += (sq.y - e.y) / dd * spd * 1.2 * dt; }
     return;
   }
   const d = Math.sqrt(d2(e.x, e.y, t.x, t.y)) || 1;
-  if (d > e.r + t.r) { e.x += (t.x - e.x) / d * e.spd * 1.3 * dt; e.y += (t.y - e.y) / d * e.spd * 1.3 * dt; }
+  if (d > e.r + t.r) { e.x += (t.x - e.x) / d * spd * 1.3 * dt; e.y += (t.y - e.y) / d * spd * 1.3 * dt; }
   else { e.atkT -= dt; if (e.atkT <= 0) { e.atkT = .6; hurtEnemy(t, Math.max(6, e.dmg * 2) * scaleT() ** .5, { src: 'charm', noReact: true }); if (!t.dead) t.aggro = e; } } // 被倒戈者打到的敌人会锁定它
 }
 // 召唤物：俯冲型、炮台型
@@ -7246,12 +7269,13 @@ function updateTerrain(dt) {
       if (pr.cd <= 0) {
         pr.cd = .3;
         query(pr.x, pr.y, pr.r, e => {
+          if (pr.k === 'water') applyStatus(e, { slow: .5 });
+          else if (pr.k === 'mud' || pr.k === 'sand') applyStatus(e, { slow: .6 });
           if (e.boss) return;
           if (pr.k === 'lava') { e.lavaT = G.t + .6; applyStatus(e, { burn: 1 }); hurtEnemy(e, 3 * sc ** .5, { tags: ['fire'], isDot: true, src: 'terrain', noReact: true }); }
-          else if (pr.k === 'water') { e.wetT = G.t + 1.5; applyStatus(e, { slow: .45 }); }
+          else if (pr.k === 'water' || pr.k === 'mud') e.wetT = G.t + 1.5;
           else if (pr.k === 'ice') { e.iceT = G.t + .6; e.chillT = G.t + 1.5; }
-          else if (pr.k === 'mud') { applyStatus(e, { slow: .6 }); e.wetT = G.t + 1.5; }
-          else if (pr.k === 'sand') { applyStatus(e, { slow: .6 }); const a = Math.atan2(pr.y - e.y, pr.x - e.x); e.x += Math.cos(a) * 9; e.y += Math.sin(a) * 9; }
+          else if (pr.k === 'sand') { const a = Math.atan2(pr.y - e.y, pr.x - e.x); e.x += Math.cos(a) * 9; e.y += Math.sin(a) * 9; }
         });
       }
       continue;
@@ -7429,13 +7453,13 @@ function behTick(e, dt, th, dist) {
   switch (b) {
     case 'dash': {
       if (e.mode === 'tele') { e.tt -= dt; if (e.tt <= 0) { e.mode = 'dash'; e.tt = .45; } return true; }
-      if (e.mode === 'dash') { e.tt -= dt; e.x += Math.cos(e.da) * e.spd * 4 * dt; e.y += Math.sin(e.da) * e.spd * 4 * dt; if (Math.random() < .5) part(e.x, e.y + e.r * .5, rr(-10, 10), rr(-10, 0), .3, e.def.art.dark, 1, 20); if (e.tt <= 0) e.mode = 'walk'; return true; }
+      if (e.mode === 'dash') { const step = e.spd * 4 * enemySlowFactor(e) * dt; e.tt -= dt; e.x += Math.cos(e.da) * step; e.y += Math.sin(e.da) * step; if (Math.random() < .5) part(e.x, e.y + e.r * .5, rr(-10, 10), rr(-10, 0), .3, e.def.art.dark, 1, 20); if (e.tt <= 0) e.mode = 'walk'; return true; }
       if (e.bt <= 0 && dist < 120 && onScreen(e)) { e.bt = rr(2.8, 4.2); e.mode = 'tele'; e.tt = .5; e.da = Math.atan2(th.y - e.y, th.x - e.x); return true; }
       return false;
     }
     case 'leap': {
       if (e.jump) {
-        const j = e.jump; j.t += dt; const k = Math.min(1, j.t / j.dur);
+        const j = e.jump; j.t += dt * enemySlowFactor(e); const k = Math.min(1, j.t / j.dur);
         e.x = lerp(j.sx, j.tx, k); e.y = lerp(j.sy, j.ty, k); e.hop = Math.sin(k * Math.PI) * 22;
         if (k >= 1) { e.jump = null; e.hop = 0; fx({ k: 'ring', x: e.x, y: e.y, r0: 2, r1: 16, dur: .25, col: e.def.art.light, w: 1 }); G.shake = Math.max(G.shake, .12); if (G.heroes.some(h => d2(h.x, h.y, e.x, e.y) < 15 * 15)) hurtSquad(e.dmg * .8, e.type, e.def.name); }
         return true;
@@ -7454,7 +7478,7 @@ function behTick(e, dt, th, dist) {
       return false;
     case 'burrow': {
       if (e.hidden) {
-        e.ut -= dt; const sp = e.spd * 2.2;
+        e.ut -= dt; const sp = e.spd * 2.2 * enemySlowFactor(e);
         if (dist > 3) { e.x += (th.x - e.x) / dist * sp * dt; e.y += (th.y - e.y) / dist * sp * dt; }
         if (Math.random() < .4) part(e.x + rr(-3, 3), e.y, rr(-8, 8), -12, .3, '#a08050', 1, 40);
         if (e.ut <= 0 || dist < 8) { e.hidden = false; e.bt = rr(2, 3); explosion(e.x, e.y, 12, '#c8a060', 'smallBoom'); if (G.heroes.some(h => d2(h.x, h.y, e.x, e.y) < 13 * 13)) hurtSquad(e.dmg, e.type, e.def.name); }
@@ -8433,7 +8457,7 @@ function preyTick(e, dt, dist) {
   let tg = null, bd = 55 * 55;
   for (const o of G.enemies) { if (!o.civ || o.dead) continue; const d = d2(o.x, o.y, e.x, e.y); if (d < bd) { bd = d; tg = o; } }
   if (!tg || Math.sqrt(bd) > dist * .8) return false;
-  const d = Math.sqrt(bd) || 1, slow = e.st.slowT > 0 ? 1 - e.st.slow : 1;
+  const d = Math.sqrt(bd) || 1, slow = enemySlowFactor(e);
   e.x += (tg.x - e.x) / d * e.spd * 1.15 * slow * dt; e.y += (tg.y - e.y) / d * e.spd * 1.15 * slow * dt; e.flip = tg.x < e.x;
   if (d < e.r + 4) {
     hurtEnemy(tg, 1e6, { src: 'eaten', noReact: true, knock: 0 });
@@ -8565,7 +8589,7 @@ const SHRINE_EVENTS = [
   { id: 'mimic', name: '宝箱怪', d: '打倒逃跑的宝箱怪', col: '#ffd84a', run() {
     const sq = G.squad, a = Math.random() * TAU;
     const e = spawnEnemy(RS('grunt'), sq.x + Math.cos(a) * 70, sq.y + Math.sin(a) * 70);
-    e.mimic = 1; e.maxHp = e.hp = 60 * scaleT(); e.dmg = 0; e.spd = 40; e.r = 7; e.mimicT = 14; e.xp = 0; } },
+    e.mimic = 1; e.maxHp = e.hp = 60 * scaleT(); e.dmg = 0; e.spd = 40 * ENEMY_SPEED_SCALE; e.r = 7; e.mimicT = 14; e.xp = 0; } },
   { id: 'gold', name: '黄金虫潮', d: '击败金色虫群获得大量经验', col: '#ffe25a', run() {
     const R = Math.max(VW, VH) * .5; for (let i = 0; i < 18; i++) { const a = i / 18 * TAU, e = spawnEnemy(RS('swarm'), G.squad.x + Math.cos(a) * R, G.squad.y + Math.sin(a) * R); e.gold = 1; e.xp *= 8; } } },
   { id: 'curse', name: '诅咒', d: '敌人伤害提高，坚持 30 秒获得宝箱', col: '#c86aff', run() {
@@ -8587,7 +8611,8 @@ function mimicTick(e, dt, th) {
   e.mimicT -= dt;
   if (e.mimicT <= 0) { e.dead = true; addLabel(e.x, e.y - 12, '逃走了', '#ffd84a', 12); return; }
   const a = Math.atan2(e.y - th.y, e.x - th.x) + Math.sin(G.t * 2 + e.id) * .7;
-  e.x += Math.cos(a) * e.spd * dt; e.y += Math.sin(a) * e.spd * dt;
+  const step = e.spd * enemySlowFactor(e) * dt;
+  e.x += Math.cos(a) * step; e.y += Math.sin(a) * step;
   e.hop = Math.abs(Math.sin(G.t * 10)) * 3;
 }
 
@@ -8896,7 +8921,7 @@ function trEnemyTick(e, dt) {
   if (e.airT > G.t) e.hop = Math.sin((e.airT - G.t) / .5 * Math.PI) * 10; else if (e.airT) { e.airT = 0; e.hop = 0; }
   if (e.dead) return true;
   if (e.stunT > G.t) return true;
-  if (e.fearT > G.t) { const sq = G.squad, a = Math.atan2(e.y - sq.y, e.x - sq.x); e.x += Math.cos(a) * e.spd * dt; e.y += Math.sin(a) * e.spd * dt; return true; }
+  if (e.fearT > G.t) { const sq = G.squad, a = Math.atan2(e.y - sq.y, e.x - sq.x), step = e.spd * enemySlowFactor(e) * dt; e.x += Math.cos(a) * step; e.y += Math.sin(a) * step; return true; }
   return false;
 }
 
@@ -9600,17 +9625,21 @@ const TREE = [
   { id: 's_all', row: 29, col: 'r', n: '神威', ic: 'sword2', k: 'dmg', v: .12, cost: 910, d: '全部伤害 +12%' },
 ];
 const OLD_COST = { early: [30, 70, 130], fate: [40, 90, 170], first: [80, 180], late: [60, 140], bond: [50, 120], reroll: [20, 45, 80], hp: [25, 55, 100], luck: [30, 70, 140], xp: [30, 70, 130], gift: [60, 150], magnet: [20, 50], speed: [30, 70, 130] };
-// 以原价两倍为基准，平滑普通节点的跨层价格，保留传奇节点溢价。
-const baseTemplePrices = new Map();
+// 按行拟合基准价，用节点原价的平方根分配同一行的价格差。
+const templeRowWeights = [];
 for (const node of TREE) {
-  const rowPrice = (65 + .95 * node.row ** 2) * (node.sm ? .75 : 1);
-  const price = node.leg ? node.cost * 2 : 2 * (.8 * node.cost + .2 * rowPrice);
-  const prereqPrice = baseTemplePrices.get(node.req) || 0;
-  const basePrice = Math.max(Math.round(price / 5) * 5, prereqPrice + 10);
-  baseTemplePrices.set(node.id, basePrice);
-  // 前两行沿用现价，从第三行起每深入一行，涨幅增加 5 个百分点。
-  const growth = 1 + Math.max(0, node.row - 1) * .05;
-  node.cost = Math.round(basePrice * growth / 5) * 5;
+  const row = templeRowWeights[node.row] ??= { total: 0, count: 0 };
+  row.total += Math.sqrt(node.cost);
+  row.count++;
+}
+const templePrices = new Map();
+for (const node of TREE) {
+  const { total, count } = templeRowWeights[node.row];
+  const rowPrice = 30 + 45 * node.row + 2.75 * node.row ** 2;
+  const price = rowPrice * Math.sqrt(node.cost) * count / total;
+  const prereqPrice = templePrices.get(node.req) || 0;
+  node.cost = Math.max(Math.round(price / 10) * 10, prereqPrice + 10);
+  templePrices.set(node.id, node.cost);
 }
 const Meta = {
   d: (() => {
@@ -9641,13 +9670,13 @@ function summonDelayRule(slot, seconds, additional = false) {
 }
 const ASC = [ // 每一级都在此前基础上叠加
   { n: ['可能会有虫巢从天而降'], f: {}, x: 'hive' },
-  { n: ['首领生命 +10%'], f: { bhp: .1 } },
+  { n: ['敌人初始生命 +10%'], f: { hp: .1 } },
   { n: ['每 30 秒额外出现一个精英'], f: {}, x: 'e30' },
   { n: ['敌人攻击 +10%'], f: { dmg: .1 } },
   { n: ['敌人移动速度 +10%'], f: { spd: .1 } },
   { n: ['蟠桃回复 -15%'], f: { peach: -.15 } },
   { n: ['敌人数量 +20%'], f: { cnt: .2 } },
-  { n: ['首领生命 +20%'], f: { bhp: .2 } },
+  { n: ['敌人初始生命 +20%'], f: { hp: .2 } },
   { n: ['宝箱掉率 -15%'], f: { chest: -.15 } },
   { n: ['负面地形更频繁出现'], f: {}, x: 'terrain' },
   { n: ['敌人攻击 +20%'], f: { dmg: .2 } },
@@ -9658,7 +9687,7 @@ const ASC = [ // 每一级都在此前基础上叠加
   { n: ['敌人移动速度 +40%'], f: { spd: .4 } },
   { n: ['每 120 秒额外出现一个首领'], f: {}, x: 'b120' },
   { n: ['蟠桃回复 -25%'], f: { peach: -.25 } },
-  { n: ['敌人攻击 +10%', '首领生命 +10%'], f: { dmg: .1, bhp: .1 } },
+  { n: ['敌人攻击 +10%', '敌人初始生命 +10%'], f: { dmg: .1, hp: .1 } },
   { n: ['陨石雨不断落下'], f: {}, x: 'meteor' },
   { n: ['宝箱掉率 -25%'], f: { chest: -.25 } },
   { n: ['精英不会倒戈'], f: {}, x: 'nocharm' },
@@ -9667,7 +9696,7 @@ const ASC = [ // 每一级都在此前基础上叠加
   { n: ['敌人攻击和移动速度 +20%'], f: { dmg: .2, spd: .2 } },
   { n: ['蟠桃回复 -35%'], f: { peach: -.35 } },
   summonDelayRule(2, 60, true),
-  { n: ['敌人数量 +20%', '首领生命 +20%'], f: { cnt: .2, bhp: .2 } },
+  { n: ['敌人数量 +20%', '敌人初始生命 +20%'], f: { cnt: .2, hp: .2 } },
   { n: ['宝箱掉率 -35%'], f: { chest: -.35 } },
   { n: ['精英和首领双倍出现'], f: {}, x: 'double' },
 ];
@@ -10558,7 +10587,7 @@ const UI = (() => {
     box.hidden = mx < 1; if (mx < 1) return;
     const v = ascPick();
     $('ascV').textContent = v ? '神格 ' + v : '普通';
-    $('ascD').innerHTML = v ? `<span class="adn">${esc((v > 1 ? '在此前基础上，' : '') + ASC[v - 1].n.join(' · '))}</span><span class="adc">5 分钟小怪生命 ×${5 + v} · 香火 +${Math.round(v * 20 / 3)}%</span>` : '';
+    $('ascD').innerHTML = v ? `<span class="adn">${esc((v > 1 ? '在此前基础上，' : '') + ASC[v - 1].n.join(' · '))}</span><span class="adc">香火 +${Math.round(v * 20 / 3)}%</span>` : '';
     $('ascL').disabled = v <= 0; $('ascR').disabled = v >= mx;
     { const g = !!Store.get('ascGuide', 0) && v < mx; $('ascR').classList.toggle('guide', g); $('ascR').classList.toggle('gtxt', g && !Store.get('ascGuided', 0)); }
   }
