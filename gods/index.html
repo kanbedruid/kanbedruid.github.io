@@ -395,11 +395,19 @@ html.tap-ios-safe #hud #bPause{position:fixed;top:calc(var(--safe-top) + 58px);r
 .tdock .ib.up::after{top:-10px;right:-12px}
 #setM{position:fixed;inset:0;z-index:41;background:rgba(10,6,18,.75);display:grid;place-items:center;padding:16px}
 #bEndless.daily-continue::after{display:none}
-#dailyEntry{display:grid;justify-items:center;gap:4px}
-#bDaily{padding:7px 18px;min-height:36px}
-#dailyGuide{display:grid;justify-items:center;font-size:12px;font-weight:900;color:#b9e7ff;text-align:center;line-height:1;animation:dailyFloat .8s ease-in-out infinite;pointer-events:none}
+#titleActions{display:grid;width:min(320px,84vw,100%)}
+#titleActions #bStart{width:100%;min-width:0}
+#titleActions.with-daily{grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:8px}
+#titleActions.with-daily .btn{height:48px;box-sizing:border-box;white-space:nowrap}
+#titleActions.with-daily #bStart{padding:0 6px;font-size:17px}
+#titleActions.with-daily #bStart .cost{margin-left:6px;font-size:15px}
+#dailyEntry{display:grid;position:relative;min-width:0}
+#bDaily{padding:0 3px;font-size:clamp(12px,3.6vw,15px);letter-spacing:0}
+#titleActions.guided{margin-top:20px}
+#titleActions.guided #bDaily{animation:rewardWiggle 2.4s -1.9s ease-in-out infinite}
+#dailyGuide{position:absolute;bottom:calc(100% + 4px);left:50%;transform:translateX(-50%);display:grid;justify-items:center;font-size:clamp(11px,3.5vw,12px);font-weight:900;color:#b9e7ff;text-align:center;white-space:nowrap;line-height:1;animation:dailyFloat .8s ease-in-out infinite;pointer-events:none}
 #dailyGuide::after{content:'';border:5px solid transparent;border-top:6px solid #b9e7ff;transform:translateY(3px);height:0;filter:drop-shadow(0 2px 0 #000)}
-@keyframes dailyFloat{50%{transform:translateY(-5px)}}
+@keyframes dailyFloat{50%{transform:translate(-50%,-5px)}}
 @keyframes rewardWiggle{0%,82%,100%{transform:rotate(0)}86%,94%{transform:rotate(-4deg)}90%,98%{transform:rotate(4deg)}}
 .daily-reward .ready{animation:rewardWiggle 2.4s ease-in-out infinite}
 .daily-reward .claimed{opacity:1}
@@ -407,7 +415,7 @@ html.tap-ios-safe #hud #bPause{position:fixed;top:calc(var(--safe-top) + 58px);r
 #achCoinP{position:fixed;left:max(12px,var(--safe-left));top:calc(var(--safe-top) + 53px);z-index:1}
 #dailyCoinP{justify-self:start}
 .coin-fly{position:fixed;z-index:301;pointer-events:none;color:#ffe388;font-weight:900;font-size:18px;text-shadow:0 2px #522b11,0 0 5px #ffac45;transform:translate(-50%,-50%)}
-@media(prefers-reduced-motion:reduce){#dailyGuide,.daily-reward .ready,#bAch.up img,#bAch.up::after{animation:none}}
+@media(prefers-reduced-motion:reduce){#dailyGuide,#titleActions.guided #bDaily,.daily-reward .ready,#bAch.up img,#bAch.up::after{animation:none}}
 #stModal{z-index:43}
 #pause:has(#pauseDaily:not([hidden])){justify-content:safe center}
 #pauseDaily{width:min(100%,420px);display:grid;gap:5px}
@@ -535,8 +543,10 @@ html.tap-ios-safe #hud #bPause{position:fixed;top:calc(var(--safe-top) + 58px);r
   </div>
   <div class="tbot">
     <div id="ascRow" hidden><button class="ascb" id="ascL" type="button" aria-label="降低神格">◀</button><b id="ascV">普通</b><button class="ascb" id="ascR" type="button" aria-label="提高神格">▶</button><small id="ascD"></small></div>
-    <button class="btn bigstart" id="bStart" type="button">开始征战<i class="cost"><svg viewBox="0 0 10 14" aria-hidden="true"><path d="M6 0 0 8h4l-1 6 7-9H6z" fill="#ffe25a" stroke="#000" stroke-width="1"/></svg>5</i></button>
-    <div id="dailyEntry" hidden><div id="dailyGuide" hidden>每日挑战已解锁！</div><button class="btn alt small" id="bDaily" type="button" hidden>每日挑战</button></div>
+    <div id="titleActions">
+      <button class="btn bigstart" id="bStart" type="button">开始征战<i class="cost"><svg viewBox="0 0 10 14" aria-hidden="true"><path d="M6 0 0 8h4l-1 6 7-9H6z" fill="#ffe25a" stroke="#000" stroke-width="1"/></svg>5</i></button>
+      <div id="dailyEntry" hidden><div id="dailyGuide" hidden>每日挑战已解锁！</div><button class="btn alt small" id="bDaily" type="button" hidden>每日挑战！</button></div>
+    </div>
     <div class="ticons tdock"><button class="ib" id="bCodex" type="button"><img id="icCx" alt=""><span>图鉴</span><small id="cxT"></small></button><button class="ib" id="bTemple" type="button"><img id="icTm" alt=""><span>神殿</span></button><button class="ib" id="bAch" type="button"><img id="icAc" alt=""><span>成就</span><small id="achT"></small></button></div>
   </div>
   <div id="dailyModal" hidden><div class="tmc" role="dialog" aria-modal="true" aria-labelledby="dailyTitle">
@@ -6260,7 +6270,6 @@ function bossDown(e, o) {
     if (G.daily && G.squad.hp > 0) { dailyMark(0); dailyMark(1); if (G.t >= 600) dailyMark(2); }
     G.won = true; G.slowT = 1.6;
     if (normalRunCleared()) { G.pendingLv = 0; G.pendingChests.length = 0; }
-    if (G.daily) G.daily.completed = G.t >= 600 && G.squad.hp > 0;
     G.timers.push({ t: 1.6, fn: () => {
       if (!bossCoin.dead) {
         bossCoin.dead = true;
@@ -8094,7 +8103,7 @@ function update(dt) {
   weatherTick(dt); ascMeteorTick(dt); ascHiveTick(dt); envTick(dt);
   if (G.crossOn) { bondTick(dt); V2.tick(dt); }
   updatePickups(dt);
-  if (dailyTick(dt)) return;
+  dailyTick();
   if (!G.themeShown && G.t > .8) { G.themeShown = true; UI.banner(THEME.name, THEME.sub); }
   if (!G.won || G.endless) director(dt);
   updateFx(dt);
@@ -12248,11 +12257,11 @@ function dailyDeath(e) {
     if (dailyRule(49) && Math.random() < .03) dropChest(e.x, e.y, false, 5);
   }
 }
-function dailyTick(dt) {
+function dailyTick() {
   const d = G.daily, sq = G.squad;
-  if (!d || sq.hp <= 0 || sq.deadT > 0 || G.state !== 'play') return false;
+  if (!d || sq.hp <= 0 || sq.deadT > 0 || G.state !== 'play') return;
   if (G.t >= 120) dailyMark(0);
-  if (G.t >= 600 && G.won && G.endless) { dailyMark(2); d.completed = true; UI.victory(); return true; }
+  if (G.t >= 600 && G.won && G.endless) dailyMark(2);
   if (dailyRule(4) && G.t >= d.nextHive) {
     d.nextHive = G.t + 3;
     const [x, y] = hivePt(); hiveStrike(x, y, false, 15);
@@ -12262,7 +12271,6 @@ function dailyTick(dt) {
     G.evDone[BOSS_TIMES[0]] = 1;
     landBossHive(nextBoss(false), { patrol: true });
   }
-  return false;
 }
 
 function dailySelection(day = dailyDay()) {
@@ -12756,10 +12764,13 @@ for (const a of ACH) if (PCT_FIX[a.id] == null && a.pct != null && a.pct === Mat
 for (const a of ACH) { if (PCT_FIX[a.id] != null || a.pct < 2) continue; let h = 7; for (const ch of a.id) h = (h * 131 + ch.charCodeAt(0)) >>> 0; if (h % 100 < 15) a.pct = Math.round(a.pct); a.pct = Math.round(a.pct * 10) / 10; }
 const ACH_OWNERSHIP_BOOST = {
   legTre: 20, wx3: 20, boss5: 20, peach5: 20, obs200: 20, entry100: 20, hit1k: 20,
-  theme9: 20, clutch: 20, fullhp: 20, charm50: 20, charm20: 20, yaoyorozu: 20,
+  theme9: 20, clutch: 40, fullhp: 40, charm50: 20, charm20: 20, yaoyorozu: 20,
   hid5: 20, homeHid: 20, veda: 20, affix8: 20, revive: 20, minionBoss: 20, elec100: 20,
   tre8: 10, gourd3: 10, meteorK: 10, tank: 10, dodge20: 10, spender: 10,
   monoEl: 10, win3: 10, kill2k: 10, boss18: 10, rainbow: 10,
+  obs1000: 20, frz50: 20, ult10: 20, bomb20: 20, burn100: 20, crowd250: 20,
+  terr100: 20, crit10: 20, legTre2: 20, firstTry: 20, bond3: 20, wet100: 20,
+  kill4k: 20, ultHid: 20, hid2: 20, lv40: 20,
 };
 const ACH_REWARDS = { c: 5, r: 25, e: 50, l: 100 };
 for (const a of ACH) {
@@ -13255,8 +13266,12 @@ const UI = (() => {
     show('title');
     const r = Records.d;
     $('coinT').textContent = Meta.d.coin;
-    $('dailyEntry').hidden = $('bDaily').hidden = r.ascMax < 3;
-    $('dailyGuide').hidden = r.ascMax < 3 || !!(Meta.d.dailyEntrySeen || Meta.d.dailyChallenge?.reached);
+    const dailyOpen = r.ascMax >= 3;
+    const guideDaily = dailyOpen && !(Meta.d.dailyEntrySeen || Meta.d.dailyChallenge?.reached);
+    $('dailyEntry').hidden = $('bDaily').hidden = !dailyOpen;
+    $('dailyGuide').hidden = !guideDaily;
+    $('titleActions').classList.toggle('with-daily', dailyOpen);
+    $('titleActions').classList.toggle('guided', guideDaily);
     $('cxT').textContent = Codex.count() + '/' + HEROES.length;
     { const ic = (sub, el) => { const K = IK.ctx(); IK.S[sub](K, el); return scaleUp(IK.toCanvas(K), 2).toDataURL(); };
       if (!$('icCx').src) { $('icCx').src = ic('book', ['#081e4a', '#1650b0', '#2e8cf0', '#8cd0ff', '#f0fbff']); $('icTm').src = ic('pagoda', ['#4a0e06', '#b02a14', '#f0661e', '#ffc040', '#fff2b0']); $('icAc').src = ic('cup', ['#3a2606', '#a07410', '#f0c418', '#fff27a', '#ffffff']); } }
@@ -13693,6 +13708,7 @@ const UI = (() => {
     m.querySelector('.mt').textContent = '天赐'; m.querySelector('.ms').textContent = '神殿赐予你一件宝物';
     showChestIcon(m);
     m.querySelector('.reroll').hidden = true;
+    if ($('takeAllBtn')) $('takeAllBtn').hidden = true;
     const box = m.querySelector('.cards'); box.innerHTML = '';
     const b = el('div', 'card tre reveal r' + t.rar); b.innerHTML = treHTML(t);
     box.appendChild(b); Snd.play('chest'); setTimeout(() => Snd.play('evo'), 450);
@@ -13902,7 +13918,7 @@ const UI = (() => {
     const earn = G.coinRun || 0; Meta.save();
     show('result');
     const R = $('result');
-    R.querySelector('.rt').textContent = G.daily?.completed ? '每日挑战完成！' : win ? '守住了！' : '防线失守';
+    R.querySelector('.rt').textContent = win ? '守住了！' : '防线失守';
     R.querySelector('.rt').className = 'rt ' + (win ? 'win' : 'lose');
     R.querySelector('.rs').textContent = (G.daily ? '每日挑战 · ' : G.asc ? `神格 ${G.asc} · ` : '') + (win ? (G.endless ? '无尽征战暂告一段' : (G.finalName || '最终首领') + '已被击败') : '致命一击来自：' + (G.lastWho || '敌人'));
     $('rcoin').textContent = earn; $('rasc').textContent = ascAdd ? `神格加成 +${ascAdd}` : '';
@@ -13925,7 +13941,7 @@ const UI = (() => {
     totFold(); Records.save(); Achv.end(win);
     $('bEndless').hidden = !win || !canContinueEndless();
     $('bEndless').classList.toggle('daily-continue', !!G.daily);
-    $('bEndless').textContent = G.daily ? '继续挑战 10 分钟' : '继续无尽征战';
+    $('bEndless').textContent = G.daily ? '继续每日挑战' : '继续无尽征战';
     $('bAgain').hidden = win && !G.daily;
     $('bAgain').querySelector('.cost').hidden = !!G.daily;
     $('againLabel').textContent = G.daily ? '每日挑战' : '再来一局';
@@ -13947,7 +13963,7 @@ const UI = (() => {
     no.onclick = () => { if (done) return; done = true; no.hidden = true; hideAll(); G.state = 'play'; squadDie(); };
     rb.addEventListener('click', () => { no.hidden = true; }, { once: true });
   }
-  function canContinueEndless() { return !!G && G.won && !G.endless && (G.asc >= 1 || G.daily) && !G.daily?.completed; }
+  function canContinueEndless() { return !!G && G.won && !G.endless && (G.asc >= 1 || G.daily); }
   function endless() {
     if (!canContinueEndless()) return;
     hideAll(); G.endless = true; G.won = true; G.endlessT = G.t; G.nextEndlessBoss = G.t + ENDLESS_BOSS_INTERVAL; G.state = 'play'; grace(); Music.play('battle'); toast('无尽征战：一分钟后敌人会越来越猛烈');
@@ -14462,6 +14478,7 @@ $('bDaily').onclick = () => {
     Meta.save();
   }
   $('dailyGuide').hidden = true;
+  $('titleActions').classList.remove('guided');
   Snd.play('click'); openDaily();
 };
 $('dailyClose').onclick = () => { $('dailyModal').hidden = true; };
